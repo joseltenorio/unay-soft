@@ -53,3 +53,22 @@ body {
   font-weight: 500;
   transition: color 0.2s;
 }
+
+/* Footer styles */
+.footer {
+  background: #111;
+  color: #aaa;
+  padding: 20px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.footer__links { display: flex; gap: 24px; }
+
+.footer__links a {
+  color: #aaa;
+  text-decoration: none;
+  transition: color 0.2s;
+}
