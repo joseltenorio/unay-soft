@@ -4,8 +4,17 @@
   padding: 0;
 }
 
+:root {
+  --text-dark:      #1a1a1a;
+  --text-mid:       #444;
+  --white:          #ffffff;
+  --radius-pill:    50px;
+}
+
 body {
   font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  background: var(--white);
+  color: var(--text-dark);
   line-height: 1.6;
 }
 
@@ -16,14 +25,31 @@ body {
   justify-content: space-between;
   padding: 0 48px;
   height: 64px;
+  background: #000000;
   border-bottom: 1px solid #222;
   position: sticky;
   top: 0;
   z-index: 100;
 }
 
+.navbar__logo {
+  font-weight: 800;
+  font-size: 25px;
+  color: var(--white);
+  text-decoration: none;
+  letter-spacing: 0.1px;
+}
+
 .navbar__links {
   display: flex;
   gap: 32px;
   list-style: none;
+}
+
+.navbar__links a {
+  text-decoration: none;
+  color: #ccc;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s;
 }
