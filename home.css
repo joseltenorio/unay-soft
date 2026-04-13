@@ -5,5 +5,25 @@
 }
 
 body {
-  font-family: sans-serif;
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  line-height: 1.6;
+}
+
+/* Navbar styles */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  height: 64px;
+  border-bottom: 1px solid #222;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar__links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
 }
