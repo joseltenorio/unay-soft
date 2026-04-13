@@ -18,6 +18,39 @@ body {
   line-height: 1.6;
 }
 
+/* Button styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  text-decoration: none;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: var(--text-mid);
+  font-size: 14px;
+  color: white;
+  border-radius: var(--radius-pill);
+}
+
+.btn-sm {
+  padding: 8px 20px;
+  border-radius: var(--radius-pill);
+  background: var(--white) !important;
+  color: #000 !important;
+  font-size: 14px;
+  box-shadow: none !important;
+}
+
 /* Navbar styles */
 .navbar {
   display: flex;
@@ -52,6 +85,19 @@ body {
   font-size: 14px;
   font-weight: 500;
   transition: color 0.2s;
+}
+
+.navbar__auth {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.nav-btn-link {
+  color: var(--white);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 /* Footer styles */
