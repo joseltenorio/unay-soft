@@ -243,6 +243,37 @@ body {
 .steps__cta { text-align: center; }
 
 /* Demo styles */
+.demo {
+  padding: 96px 48px;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.demo h2 {
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.demo__sub {
+  font-size: 14px;
+  color: var(--text-soft);
+  margin-bottom: 40px;
+}
+
+.demo__card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 40px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: var(--shadow-soft);
+}
+
 .form-group { margin-bottom: 20px; }
 
 .form-group label {
@@ -252,6 +283,8 @@ body {
   color: var(--text-dark);
   margin-bottom: 6px;
 }
+
+.required { color: #e53; }
 
 .form-group input {
   width: 100%;
@@ -279,6 +312,41 @@ body {
   font-size: 15px;
   border-radius: 10px;
   margin-top: 4px;
+}
+
+.demo__note {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-soft);
+  margin-top: 12px;
+}
+
+.demo__trust {
+  display: flex;
+  gap: 24px;
+  margin-top: 28px;
+  justify-content: center;
+}
+
+.demo__trust-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-mid);
+}
+
+.demo__trust-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white !important;
+  font-size: 9px;
 }
 
 /* Footer styles */
