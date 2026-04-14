@@ -179,6 +179,38 @@ body {
   margin: 0 auto 48px;
 }
 
+.step-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 32px 24px;
+  cursor: default;
+}
+
+.step-card__icon {
+  width: 44px;
+  height: 44px;
+  background: var(--gray-light) !important;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  font-size: 20px;
+}
+
+.step-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.step-card p {
+  font-size: 14px;
+  color: var(--text-soft);
+  line-height: 1.6;
+}
+
 /* Footer styles */
 .footer {
   background: #111;
