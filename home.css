@@ -5,12 +5,17 @@
 }
 
 :root {
+  --primary:        #1a1a1a;
+  --primary-hover:  #333333;
+  --gray-light:     #f4f4f4;
   --text-dark:      #1a1a1a;
   --text-mid:       #444;
-  --white:          #ffffff;
+  --text-soft:      #777;
+  --border:         #e5e5e5;
   --bg:             #f9f7f5;
-  --gray-light:     #f4f4f4;
+  --white:          #ffffff;
   --radius-pill:    50px;
+  --shadow-soft:    0 4px 12px rgba(0,0,0,0.05);
 }
 
 body {
@@ -44,6 +49,14 @@ body {
   border-radius: var(--radius-pill);
 }
 
+.btn-primary:hover {
+  background: var(--primary-hover);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.btn-primary:active { transform: translateY(0); }
+
+
 .btn-sm {
   padding: 8px 20px;
   border-radius: var(--radius-pill);
@@ -51,6 +64,12 @@ body {
   color: #000 !important;
   font-size: 14px;
   box-shadow: none !important;
+}
+
+.btn-lg {
+  padding: 14px 36px;
+  font-size: 15px;
+  border-radius: 10px;
 }
 
 /* Navbar styles */
@@ -184,7 +203,13 @@ body {
   border: 1.5px solid var(--border);
   border-radius: 12px;
   padding: 32px 24px;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   cursor: default;
+}
+
+.step-card:hover {
+  box-shadow: 0 8px 24px rgba(65, 65, 65, 0.12);
+  transform: translateY(-4px);
 }
 
 .step-card__icon {
@@ -210,6 +235,8 @@ body {
   color: var(--text-soft);
   line-height: 1.6;
 }
+
+.steps__cta { text-align: center; }
 
 /* Footer styles */
 .footer {
