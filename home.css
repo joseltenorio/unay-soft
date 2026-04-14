@@ -8,6 +8,8 @@
   --text-dark:      #1a1a1a;
   --text-mid:       #444;
   --white:          #ffffff;
+  --bg:             #f9f7f5;
+  --gray-light:     #f4f4f4;
   --radius-pill:    50px;
 }
 
@@ -98,6 +100,43 @@ body {
   text-decoration: none;
   font-size: 14px;
   font-weight: 600;
+}
+
+/* Hero section styles */
+.hero {
+  background: var(--bg) url('./assets/hero-restaurant-bg.jpg') center/cover no-repeat;
+  padding: 72px 48px 80px;
+  display: flex;
+  align-items: center;
+  gap: 64px;
+  min-height: calc(100vh - 64px);
+  position: relative;
+}
+
+.hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.52);
+  z-index: 0;
+}
+
+.hero__content {
+  flex: 1;
+  max-width: 480px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero__title {
+  color: var(--gray-light);
+  margin-bottom: 20px;
+}
+
+.hero__subtitle {
+  font-size: 16px;
+  color: var(--bg);
+  margin-bottom: 32px;
+  max-width: 750px;
 }
 
 /* Footer styles */
