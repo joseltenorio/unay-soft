@@ -128,6 +128,9 @@ body {
 }
 
 .hero__title {
+  font-size: clamp(36px, 5vw, 45px);
+  font-weight: 800;
+  line-height: 1.15;
   color: var(--gray-light);
   margin-bottom: 20px;
 }
@@ -137,6 +140,13 @@ body {
   color: var(--bg);
   margin-bottom: 32px;
   max-width: 750px;
+}
+
+.hero__cta-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 32px;
 }
 
 /* Footer styles */
