@@ -271,6 +271,67 @@ body {
   gap: 32px;
 }
 
+.btn-black {
+  background: #000;
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.btn-black:hover { background: #222; }
+
+.link-animated {
+  text-decoration: none;
+  color: #555;
+  font-size: 15px;
+  font-weight: 100;
+  position: relative;
+  padding-bottom: 4px;
+  display: inline-block;
+}
+
+.link-animated::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%; height: 2px;
+  background: #e2e2e2;
+}
+
+.link-animated::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0; height: 2px;
+  background: #000;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.link-animated:hover::after { width: 100%; }
+
+.account-access__image-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.account-img {
+  width: 100%;
+  max-width: 550px;
+  height: auto;
+  border-radius: 12px;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.05));
+}
+
 /* Demo styles */
 .demo {
   padding: 96px 48px;
