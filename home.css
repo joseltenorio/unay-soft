@@ -242,6 +242,7 @@ body {
 
 .steps__cta { text-align: center; }
 
+/* Account Access styles */
 .account-access {
   display: flex;
   align-items: center;
@@ -456,4 +457,21 @@ body {
   color: #aaa;
   text-decoration: none;
   transition: color 0.2s;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .hero { flex-direction: column; padding: 48px 24px; min-height: auto; }
+  .steps__grid { grid-template-columns: repeat(2, 1fr); }
+  .pricing__grid { grid-template-columns: 1fr; max-width: 420px; }
+  .navbar { padding: 0 24px; }
+  .navbar__links { display: none; }
+  .steps, .pricing, .demo { padding: 64px 24px; }
+  .account-access { flex-direction: column; padding: 60px 24px; }
+}
+
+@media (max-width: 600px) {
+  .steps__grid { grid-template-columns: 1fr; }
+  .footer { flex-direction: column; gap: 12px; text-align: center; }
+  .demo__trust { flex-direction: column; align-items: center; }
 }
