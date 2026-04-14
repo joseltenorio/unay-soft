@@ -108,6 +108,8 @@ body {
   transition: color 0.2s;
 }
 
+.navbar__links a:hover { color: var(--white); }
+
 .navbar__auth {
   display: flex;
   align-items: center;
@@ -120,6 +122,8 @@ body {
   font-size: 14px;
   font-weight: 600;
 }
+
+.nav-btn-link:hover { opacity: 0.8; }
 
 /* Hero section styles */
 .hero {
