@@ -242,6 +242,35 @@ body {
 
 .steps__cta { text-align: center; }
 
+.account-access {
+  display: flex;
+  align-items: center;
+  padding: 80px 10%;
+  gap: 60px;
+  background: #fff;
+}
+
+.account-access__content { flex: 1; }
+
+.account-access__title {
+  font-size: 36px;
+  line-height: 1.2;
+  margin-bottom: 24px;
+}
+
+.account-access__desc {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 32px;
+  max-width: 450px;
+}
+
+.account-access__actions {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
 /* Demo styles */
 .demo {
   padding: 96px 48px;
