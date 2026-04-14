@@ -242,6 +242,25 @@ body {
 
 .steps__cta { text-align: center; }
 
+/* Demo styles */
+.form-group { margin-bottom: 20px; }
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+}
+
+.demo__submit {
+  width: 100%;
+  padding: 14px;
+  font-size: 15px;
+  border-radius: 10px;
+  margin-top: 4px;
+}
+
 /* Footer styles */
 .footer {
   background: #111;
