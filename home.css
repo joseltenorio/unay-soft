@@ -7,6 +7,7 @@ html {
   margin: 0;
   padding: 0;
 }
+
 :root {
   --primary:        #1a1a1a;
   --primary-hover:  #333333;
@@ -74,6 +75,23 @@ body {
   font-size: 15px;
   border-radius: 10px;
 }
+
+.btn-black {
+  background: #000;
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.btn-black:hover { background: #222; }
 
 /* Navbar styles */
 .navbar {
@@ -274,23 +292,6 @@ body {
   align-items: center;
   gap: 32px;
 }
-
-.btn-black {
-  background: #000;
-  color: #fff;
-  padding: 14px 28px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-family: inherit;
-  font-size: 14px;
-  cursor: pointer;
-  border: none;
-  display: inline-flex;
-  align-items: center;
-  transition: background 0.2s;
-}
-
-.btn-black:hover { background: #222; }
 
 .link-animated {
   text-decoration: none;
