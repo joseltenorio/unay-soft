@@ -1,0 +1,1 @@
+export default function Steps() { return <section>Steps Skeleton</section>; }

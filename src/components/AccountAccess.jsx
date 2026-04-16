@@ -1,0 +1,1 @@
+export default function AccountAccess() { return <section>AccountAccess Skeleton</section>; }
