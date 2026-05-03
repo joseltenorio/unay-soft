@@ -6,7 +6,7 @@
   position: relative;
   isolation: isolate;
 
-  min-height: calc(100vh - var(--navbar-height));
+  min-height: var(--hero-height, calc(100vh - var(--navbar-height)));
   overflow: hidden;
 
   background-image: var(--hero-background);
@@ -53,7 +53,7 @@
 }
 
 .hero__container {
-  min-height: calc(100vh - var(--navbar-height));
+  min-height: var(--hero-height, calc(100vh - var(--navbar-height)));
 
   display: flex;
   align-items: flex-start;
