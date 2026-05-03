@@ -1,0 +1,38 @@
+/* src/components/layout/Footer/Footer.css 
+   Styles for the Footer component
+*/
+.footer {
+  background: #111111;
+  color: #aaaaaa;
+  padding: 20px 0;
+  font-size: 13px;
+}
+
+.footer__container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer__links {
+  display: flex;
+  gap: 24px;
+}
+
+.footer__links a {
+  color: #aaaaaa;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer__links a:hover {
+  color: var(--white);
+}
+
+@media (max-width: 600px) {
+  .footer__container {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+}

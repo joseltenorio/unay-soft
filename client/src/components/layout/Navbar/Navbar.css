@@ -1,0 +1,85 @@
+/* src/components/layout/Navbar/Navbar.css 
+   Styles for the Navbar component
+*/
+.navbar {
+  height: 64px;
+  background: #000000;
+  border-bottom: 1px solid #222222;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar__container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.navbar__logo {
+  font-weight: 800;
+  font-size: 25px;
+  color: var(--white);
+  text-decoration: none;
+  letter-spacing: 0.1px;
+}
+
+.navbar__links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+
+.navbar__links a {
+  text-decoration: none;
+  color: #cccccc;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.navbar__links a:hover {
+  color: var(--white);
+}
+
+.navbar__auth {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.nav-btn-link {
+  color: var(--white);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.nav-btn-link:hover {
+  opacity: 0.8;
+}
+
+@media (max-width: 900px) {
+  .navbar__links {
+    display: none;
+  }
+
+  .navbar__auth {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .navbar__container {
+    padding: 0 16px;
+  }
+
+  .navbar__logo {
+    font-size: 22px;
+  }
+
+  .nav-btn-link {
+    display: none;
+  }
+}
