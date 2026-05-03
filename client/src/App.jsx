@@ -1,21 +1,8 @@
-import Navbar from './components/layout/Navbar/Navbar'
-import Hero from './components/sections/Hero/Hero'
-import Steps from './components/common/Steps/Steps'
-import AccountAccess from './components/sections/AccountAccess/AccountAccess'
-import Demo from './components/sections/Demo/Demo'
-import Footer from './components/layout/Footer/Footer'
+// src/App.jsx
+import Home from './pages/Home/Home'
 
 function App() {
-  return (
-    <>
-      <Navbar />
-      <Hero />
-      <Steps />
-      <AccountAccess />
-      <Demo />
-      <Footer />
-    </>
-  )
+  return <Home />
 }
 
 export default App

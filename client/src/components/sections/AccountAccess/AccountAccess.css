@@ -1,0 +1,113 @@
+/* src/components/sections/AccountAccess/AccountAccess.css
+   Styles for the AccountAccess component
+*/
+.account-access {
+  padding: 80px 0;
+  background: var(--white);
+}
+
+.account-access__container {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+}
+
+.account-access__content {
+  flex: 1;
+}
+
+.account-access__title {
+  font-size: 36px;
+  line-height: 1.2;
+  margin-bottom: 24px;
+}
+
+.account-access__desc {
+  font-size: 16px;
+  color: #555555;
+  margin-bottom: 32px;
+  max-width: 450px;
+}
+
+.account-access__actions {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.account-access__image-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.account-img {
+  width: 100%;
+  max-width: 550px;
+  height: auto;
+  border-radius: 12px;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.05));
+}
+
+.link-animated {
+  text-decoration: none;
+  color: #555555;
+  font-size: 15px;
+  font-weight: 400;
+  position: relative;
+  padding-bottom: 4px;
+  display: inline-block;
+}
+
+.link-animated::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #e2e2e2;
+}
+
+.link-animated::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #000000;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.link-animated:hover::after {
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .account-access__container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .account-access__image-container {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .account-access {
+    padding: 72px 0;
+  }
+
+  .account-access__title {
+    font-size: 30px;
+  }
+
+  .account-access__actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+}

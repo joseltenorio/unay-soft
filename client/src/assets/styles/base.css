@@ -1,0 +1,44 @@
+/* src/assets/styles/base.css 
+   Base styles and CSS variables for the application
+*/
+html {
+  scroll-behavior: smooth;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --primary: #1a1a1a;
+  --primary-hover: #333333;
+  --gray-light: #f4f4f4;
+  --text-dark: #1a1a1a;
+  --text-mid: #444444;
+  --text-soft: #777777;
+  --border: #e5e5e5;
+  --bg: #f9f7f5;
+  --white: #ffffff;
+  --radius-pill: 50px;
+  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+body {
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  background: var(--white);
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input {
+  font-family: inherit;
+}
