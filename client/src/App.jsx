@@ -1,9 +1,9 @@
-import Navbar from './components/Navbar'
-import Hero from './components/Hero'
-import Steps from './components/Steps'
-import AccountAccess from './components/AccountAccess'
-import Demo from './components/Demo'
-import Footer from './components/Footer'
+import Navbar from './components/layout/Navbar/Navbar'
+import Hero from './components/sections/Hero/Hero'
+import Steps from './components/common/Steps/Steps'
+import AccountAccess from './components/sections/AccountAccess/AccountAccess'
+import Demo from './components/sections/Demo/Demo'
+import Footer from './components/layout/Footer/Footer'
 
 function App() {
   return (
