@@ -1,6 +1,8 @@
 // src/pages/Home/Home.jsx
 
 import Navbar from "../../components/layout/Navbar/Navbar"
+import Footer from "../../components/layout/Footer/Footer"
+
 import Hero from "../../components/sections/Hero/Hero"
 import Modules from "../../components/sections/Modules/Modules"
 import Access from "../../components/sections/Access/Access"
@@ -17,6 +19,8 @@ export default function Home() {
         <Modules />
         <Access />
       </main>
+
+      <Footer />
     </>
   )
 }
