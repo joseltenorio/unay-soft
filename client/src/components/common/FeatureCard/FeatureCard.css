@@ -1,0 +1,111 @@
+/* src/components/common/FeatureCard/FeatureCard.css
+   Reusable feature card component
+*/
+
+.feature-card {
+  min-height: 286px;
+  padding: 32px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 38px;
+
+  background: var(--color-brand-feature);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+
+  box-shadow:
+    0 10px 22px rgba(3, 25, 38, 0.12),
+    0 2px 6px rgba(3, 25, 38, 0.08);
+
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base),
+    border-color var(--transition-base),
+    background-color var(--transition-base);
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--color-brand-accent);
+  box-shadow:
+    0 18px 34px rgba(3, 25, 38, 0.18),
+    0 4px 10px rgba(3, 25, 38, 0.08);
+}
+
+.feature-card__icon-wrapper {
+  width: 58px;
+  height: 58px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--color-surface-muted);
+  border-radius: 15px;
+
+  transition:
+    background-color var(--transition-base),
+    transform var(--transition-base);
+}
+
+.feature-card:hover .feature-card__icon-wrapper {
+  background: rgba(119, 172, 162, 0.16);
+  transform: scale(1.04);
+}
+
+.feature-card__icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.feature-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.feature-card__title {
+  color: var(--color-text-primary);
+
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.feature-card__description {
+  color: var(--color-text-muted);
+
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* Tablet */
+@media (max-width: 820px) {
+  .feature-card {
+    min-height: 250px;
+    padding: 28px;
+    gap: 30px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 520px) {
+  .feature-card {
+    min-height: auto;
+    padding: 24px;
+    gap: 24px;
+  }
+
+  .feature-card__title {
+    font-size: 17px;
+  }
+
+  .feature-card__description {
+    font-size: 15px;
+  }
+}
