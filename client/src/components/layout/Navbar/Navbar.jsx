@@ -1,42 +1,50 @@
 // src/components/layout/Navbar/Navbar.jsx
-import './Navbar.css'
+
+import "./Navbar.css"
+import logoUmari from "../../../assets/icons/logo-umari.svg"
+
+const navLinks = [
+  {
+    label: "Inicio",
+    href: "#inicio",
+  },
+  {
+    label: "Módulos",
+    href: "#modulos",
+  },
+  {
+    label: "Guía de Uso",
+    href: "#guia",
+  },
+]
 
 export default function Navbar() {
   return (
-    <nav className="navbar">
-      <div className="container navbar__container">
-        <a href="#hero" className="navbar__logo">
-          UnaySoft
+    <header className="navbar">
+      <div className="navbar__container container">
+        <a className="navbar__brand" href="#inicio" aria-label="Ir al inicio de Umari">
+          <img src={logoUmari} alt="Umarí" className="navbar__logo" />
+          <span className="navbar__brand-name">Umarí</span>
         </a>
 
-        <ul className="navbar__links">
-          <li>
-            <a href="#hero">Inicio</a>
-          </li>
-          <li>
-            <a href="#steps">Funcionalidades</a>
-          </li>
-          <li>
-            <a href="#demo">Precios</a>
-          </li>
-          <li>
-            <a href="#account-access">Acerca de</a>
-          </li>
-          <li>
-            <a href="#demo">FAQ</a>
-          </li>
-        </ul>
+        <nav className="navbar__nav" aria-label="Navegación principal">
+          {navLinks.map((link) => (
+            <a className="navbar__link" href={link.href} key={link.label}>
+              {link.label}
+            </a>
+          ))}
+        </nav>
 
-        <div className="navbar__auth">
-          <a href="#" className="nav-btn-link">
-            Iniciar sesión
+        <div className="navbar__actions">
+          <a className="navbar__support" href="#soporte">
+            Soporte Técnico
           </a>
 
-          <a href="#demo" className="btn btn-primary btn-sm">
-            Empezar ahora
+          <a className="btn btn-cream navbar__staff-button" href="/login">
+            Portal Staff
           </a>
         </div>
       </div>
-    </nav>
+    </header>
   )
 }

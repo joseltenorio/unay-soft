@@ -1,6 +1,7 @@
-/* src/index.css 
+/* src/index.css
    Main CSS file that imports all other styles
 */
-@import url('./assets/styles/base.css');
-@import url('./assets/styles/buttons.css');
-@import url('./assets/styles/utilities.css');
+
+@import url("./assets/styles/base.css");
+@import url("./assets/styles/buttons.css");
+@import url("./assets/styles/utilities.css");

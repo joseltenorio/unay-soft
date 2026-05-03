@@ -1,6 +1,27 @@
-/* src/pages/Home/Home.css 
+/* src/pages/Home/Home.css
    Styles for the Home page
 */
+
 .home {
   min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.home__placeholder {
+  min-height: 640px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(3, 25, 38, 0.1),
+      rgba(244, 233, 205, 1)
+    );
+
+  display: flex;
+  align-items: center;
+}
+
+.home__placeholder p {
+  color: var(--color-text-muted);
+  font-weight: 700;
 }
