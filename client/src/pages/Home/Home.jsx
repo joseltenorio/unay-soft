@@ -1,6 +1,8 @@
 // src/pages/Home/Home.jsx
 
 import Navbar from "../../components/layout/Navbar/Navbar"
+import Hero from "../../components/sections/Hero/Hero"
+
 import "./Home.css"
 
 export default function Home() {
@@ -8,10 +10,16 @@ export default function Home() {
     <>
       <Navbar />
 
-      <main className="home" id="inicio">
-        <section className="home__placeholder">
+      <main className="home">
+        <Hero />
+
+        <section className="home__modules-preview" id="modulos">
           <div className="container">
-            <p>Hero pendiente</p>
+            <div className="home__section-heading">
+              <p>
+                Sections pendiente
+              </p>
+            </div>
           </div>
         </section>
       </main>

@@ -1,33 +1,33 @@
 // src/components/sections/Hero/Hero.jsx
-import heroRestaurantBg from '../../../assets/images/hero-restaurant-bg.jpg'
-import './Hero.css'
+
+import heroBackground from "../../../assets/images/hero-background.jpg"
+import "./Hero.css"
 
 export default function Hero() {
   return (
     <section
       className="hero"
-      id="hero"
-      style={{ backgroundImage: `url(${heroRestaurantBg})` }}
+      id="inicio"
+      style={{ "--hero-background": `url(${heroBackground})` }}
     >
-      <div className="hero__overlay"></div>
+      <div className="hero__overlay" aria-hidden="true" />
 
-      <div className="container hero__container">
-        <div className="hero__content hero__content--centered">
-          <h1 className="hero__title">
-            Domina cada detalle de tu restaurante con inteligencia real.
-          </h1>
+      <div className="hero__container container">
+        <div className="hero__content">
+          <div className="hero__text-group">
+            <h1 className="hero__title">
+              La tecnología a la medida de la frescura de Umarí.
+            </h1>
 
-          <p className="hero__subtitle">
-            Transformamos tu esfuerzo diario en rentabilidad.
-            <br />
-            No solo gestionamos pedidos, optimizamos tu éxito financiero.
-          </p>
-
-          <div className="hero__cta-group">
-            <a href="#demo" className="btn btn-primary btn-lg">
-              Solicítalo ahora
-            </a>
+            <p className="hero__description">
+              Bienvenido a la columna vertebral de nuestra operación.
+              Digitalizamos la cadena de valor de nuestra cocina.
+            </p>
           </div>
+
+          <a className="btn btn-accent hero__button" href="/login">
+            Acceso al Portal
+          </a>
         </div>
       </div>
     </section>
