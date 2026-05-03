@@ -1,9 +1,27 @@
-/* src/assets/styles/utilities.css 
-   Utility classes for layout and spacing
+/* src/assets/styles/utilities.css
+   Utility classes for layout
 */
+
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-  width: 100%;
+  width: min(100% - 48px, var(--container-width));
+  margin-inline: auto;
+}
+
+.section {
+  padding-block: 96px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .container {
+    width: min(100% - 32px, var(--container-width));
+  }
 }

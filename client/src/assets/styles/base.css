@@ -1,6 +1,7 @@
-/* src/assets/styles/base.css 
-   Base styles and CSS variables for the application
+/* src/assets/styles/base.css
+   Base styles and design tokens for Umari
 */
+
 html {
   scroll-behavior: smooth;
 }
@@ -14,31 +15,98 @@ html {
 }
 
 :root {
-  --primary: #1a1a1a;
-  --primary-hover: #333333;
-  --gray-light: #f4f4f4;
-  --text-dark: #1a1a1a;
-  --text-mid: #444444;
-  --text-soft: #777777;
-  --border: #e5e5e5;
-  --bg: #f9f7f5;
-  --white: #ffffff;
-  --radius-pill: 50px;
-  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.05);
+  /* Brand */
+  --color-brand-primary: #031926;
+  --color-brand-primary-light: #0d222e;
+  --color-brand-primary-dark: #020e15;
+
+  --color-brand-main: #468189;
+  --color-brand-main-hover: #345f65;
+
+  --color-brand-accent: #77aca2;
+  --color-brand-feature: #fcf9f2;
+
+  /* UI / Surfaces */
+  --color-bg: #f4e9cd;
+  --color-bg-soft: #fcf9f2;
+  --color-bg-highlight: #f5dea3;
+
+  --color-surface: #ffffff;
+  --color-surface-muted: #efefef;
+  --color-border: #9dbebb;
+
+  /* Text */
+  --color-text-primary: #031926;
+  --color-text-secondary: #468189;
+  --color-text-muted: #777777;
+  --color-text-on-dark: #f4e9cd;
+  --color-text-white: #ffffff;
+
+  /* Feedback */
+  --color-success: #4b9c73;
+  --color-error: #c8524d;
+  --color-warning: #d99c3b;
+
+  /* Interactive */
+  --color-primary-hover: #122d3d;
+
+  /* Layout */
+  --container-width: 1200px;
+  --navbar-height: 72px;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-soft: 0 8px 24px rgba(3, 25, 38, 0.08);
+  --shadow-card: 0 12px 32px rgba(3, 25, 38, 0.12);
+  --shadow-navbar: 0 10px 30px rgba(2, 14, 21, 0.18);
+  --shadow-button: 0 8px 20px rgba(3, 25, 38, 0.18);
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-base: 0.3s ease;
 }
 
 body {
-  font-family: 'DM Sans', 'Segoe UI', sans-serif;
-  background: var(--white);
-  color: var(--text-dark);
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
   line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
   color: inherit;
+  text-decoration: none;
 }
 
 button,
-input {
+input,
+textarea,
+select {
   font-family: inherit;
+}
+
+button {
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+img,
+picture,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+::selection {
+  background: var(--color-brand-accent);
+  color: var(--color-brand-primary);
 }
