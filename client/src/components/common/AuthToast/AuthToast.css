@@ -1,0 +1,139 @@
+/* src/components/common/AuthToast/AuthToast.css
+   Styles for the AuthToast component
+*/
+
+.auth-toast {
+  position: fixed;
+  top: 28px;
+  right: 28px;
+  z-index: 1000;
+
+  width: min(calc(100% - 40px), 430px);
+  min-height: 92px;
+
+  display: grid;
+  grid-template-columns: 12px 56px 1fr auto;
+  align-items: center;
+  gap: 18px;
+
+  overflow: hidden;
+
+  background: var(--color-surface);
+  border-radius: 6px;
+  box-shadow:
+    0 18px 44px rgba(3, 25, 38, 0.2),
+    0 4px 12px rgba(3, 25, 38, 0.12);
+
+  animation: authToastIn 0.28s ease both;
+}
+
+.auth-toast__bar {
+  width: 100%;
+  height: 100%;
+}
+
+.auth-toast--success .auth-toast__bar {
+  background: #46d66d;
+}
+
+.auth-toast--error .auth-toast__bar {
+  background: #ff3f69;
+}
+
+.auth-toast__icon {
+  width: 42px;
+  height: 42px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  color: var(--color-text-white);
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.auth-toast--success .auth-toast__icon {
+  background: #46d66d;
+}
+
+.auth-toast--error .auth-toast__icon {
+  background: #ff3f69;
+}
+
+.auth-toast__content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.auth-toast__content strong {
+  color: var(--color-text-primary);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.auth-toast__content span {
+  color: var(--color-text-muted);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.auth-toast__close {
+  width: 34px;
+  height: 34px;
+  margin-right: 10px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  color: var(--color-text-muted);
+  font-size: 22px;
+
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.auth-toast__close:hover {
+  background: var(--color-surface-muted);
+  color: var(--color-text-primary);
+}
+
+@keyframes authToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) translateX(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) translateX(0);
+  }
+}
+
+@media (max-width: 520px) {
+  .auth-toast {
+    top: 16px;
+    right: 50%;
+    transform: translateX(50%);
+
+    grid-template-columns: 10px 48px 1fr auto;
+    gap: 14px;
+  }
+
+  .auth-toast__content strong {
+    font-size: 17px;
+  }
+
+  .auth-toast__content span {
+    font-size: 13px;
+  }
+}
