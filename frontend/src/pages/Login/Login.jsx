@@ -134,7 +134,7 @@ export default function Login() {
             </Link>
           </div>
 
-          <button className="btn btn-primary login-form__submit" type="submit">
+          <button className="auth-submit-button login-form__submit" type="submit">
             Ingresar
           </button>
 
