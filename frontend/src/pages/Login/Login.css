@@ -1,0 +1,247 @@
+/* src/pages/Login/Login.css */
+
+.login-form {
+  width: 100%;
+}
+
+.login-form__header {
+  margin-bottom: 40px;
+}
+
+.login-form__header h1 {
+  max-width: 520px;
+
+  color: var(--color-text-primary);
+
+  font-size: clamp(34px, 3vw, 45px);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+
+.login-form__header strong {
+  font-weight: 800;
+}
+
+.login-form__group {
+  margin-top: 26px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.login-form__group label {
+  color: var(--color-text-primary);
+
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.login-form__group input {
+  width: 100%;
+  height: 44px;
+  padding: 0 16px;
+
+  border: 1px solid transparent;
+  border-radius: 4px;
+
+  background: var(--color-surface-muted);
+  color: var(--color-text-primary);
+
+  font-size: 17px;
+  font-weight: 500;
+  outline: none;
+
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.login-form__group input::placeholder {
+  color: rgba(119, 119, 119, 0.75);
+}
+
+.login-form__group input:focus {
+  background: var(--color-surface);
+  border-color: var(--color-brand-accent);
+  box-shadow: 0 0 0 4px rgba(119, 172, 162, 0.16);
+}
+
+.login-form__password {
+  position: relative;
+}
+
+.login-form__password input {
+  padding-right: 48px;
+}
+
+.login-form__password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+
+  width: 28px;
+  height: 28px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--color-text-muted);
+  transform: translateY(-50%);
+
+  font-size: 13px;
+
+  transition: color var(--transition-fast);
+}
+
+.login-form__password-toggle:hover {
+  color: var(--color-text-primary);
+}
+
+.login-form__options {
+  margin-top: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.login-form__remember {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  color: var(--color-text-primary);
+
+  font-size: 14px;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+.login-form__remember input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.login-form__remember span {
+  position: relative;
+
+  width: 48px;
+  height: 26px;
+
+  display: inline-flex;
+
+  border-radius: var(--radius-pill);
+  background: #d1d1d1;
+
+  transition: background-color var(--transition-fast);
+}
+
+.login-form__remember span::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+
+  width: 20px;
+  height: 20px;
+
+  border-radius: 50%;
+  background: var(--color-surface);
+
+  transition: transform var(--transition-fast);
+}
+
+.login-form__remember input:checked + span {
+  background: var(--color-brand-main);
+}
+
+.login-form__remember input:checked + span::after {
+  transform: translateX(22px);
+}
+
+.login-form__forgot {
+  color: var(--color-brand-main);
+
+  font-size: 14px;
+  font-weight: 700;
+
+  transition:
+    color var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+.login-form__forgot:hover {
+  color: var(--color-brand-main-hover);
+}
+
+.login-form__submit {
+  width: 100%;
+  min-height: 56px;
+  margin-top: 40px;
+
+  border-radius: 5px;
+
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.login-form__help {
+  margin-top: 38px;
+
+  color: var(--color-text-primary);
+
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.login-form__copyright {
+  margin-top: 54px;
+
+  color: var(--color-text-muted);
+
+  text-align: right;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+@media (max-width: 520px) {
+  .login-form__header {
+    margin-bottom: 32px;
+  }
+
+  .login-form__header h1 {
+    font-size: 32px;
+  }
+
+  .login-form__group label {
+    font-size: 17px;
+  }
+
+  .login-form__group input {
+    font-size: 15px;
+  }
+
+  .login-form__options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .login-form__submit {
+    font-size: 18px;
+  }
+
+  .login-form__copyright {
+    text-align: left;
+  }
+}
