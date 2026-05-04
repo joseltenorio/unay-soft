@@ -64,13 +64,13 @@ export default function RestorePassword() {
           </header>
 
           <div className="restore-form__group">
-            <label htmlFor="restore-email">Email</label>
+            <label htmlFor="restore-email">Correo</label>
             <input
               id="restore-email"
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="Ingresa tu usuario"
+              placeholder="Ingresa tu correo"
               autoComplete="email"
             />
           </div>

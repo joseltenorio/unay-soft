@@ -89,7 +89,7 @@ export default function Login() {
               type="text"
               value={identifier}
               onChange={(event) => setIdentifier(event.target.value)}
-              placeholder="Ingresa tu usuario"
+              placeholder="Ingresa tu correo o usuario"
               autoComplete="username"
             />
           </div>
