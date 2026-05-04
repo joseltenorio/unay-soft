@@ -168,7 +168,7 @@
 }
 
 .login-form__forgot {
-  color: var(--color-brand-main);
+  color: color-mix(in srgb, var(--color-brand-main), transparent 20%);
 
   font-size: 14px;
   font-weight: 700;
@@ -183,22 +183,12 @@
 }
 
 .login-form__submit {
-  width: 100%;
-  min-height: 56px;
   margin-top: 40px;
-
-  border-radius: 5px;
-
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: 0.01em;
 }
 
 .login-form__help {
   margin-top: 38px;
-
-  color: var(--color-text-primary);
-
+  color: color-mix(in srgb, var(--color-text-muted), transparent 15%);
   font-size: 13px;
   font-weight: 500;
   line-height: 1.45;
@@ -206,9 +196,7 @@
 
 .login-form__copyright {
   margin-top: 54px;
-
-  color: var(--color-text-muted);
-
+  color: color-mix(in srgb, var(--color-text-muted), transparent 30%);
   text-align: right;
   font-size: 14px;
   font-weight: 500;

@@ -75,7 +75,7 @@ export default function RestorePassword() {
             />
           </div>
 
-          <button className="btn btn-primary restore-form__submit" type="submit">
+          <button className="auth-submit-button restore-form__submit" type="submit">
             Enviar código
           </button>
 
