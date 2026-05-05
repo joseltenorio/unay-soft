@@ -8,6 +8,26 @@ El sistema está orientado a cubrir necesidades reales de una operación gastron
 
 Proyecto en desarrollo.
 
+Actualmente el proyecto cuenta con:
+
+- Frontend desarrollado con React y Vite.
+- Páginas principales de presentación, login y recuperación de contraseña.
+- Estructura inicial del dashboard.
+- Base de datos modelada en PostgreSQL/Supabase.
+- Scripts SQL para creación, carga inicial y validación de datos.
+- Backend inicial desarrollado con Node.js y Express.
+- Conexión del backend con Supabase/PostgreSQL mediante variables de entorno.
+
+Pendiente de implementación:
+
+- Login funcional con bcrypt y JWT.
+- Middleware de autenticación.
+- Middleware de permisos por rol.
+- Endpoints protegidos.
+- Pruebas en Postman o Insomnia.
+- Documentación de endpoints y credenciales demo.
+- Video explicativo de base de datos y módulo de seguridad.
+
 ## Tecnologías principales
 
 ### Frontend
@@ -20,22 +40,21 @@ Proyecto en desarrollo.
 
 ### Backend
 
-Uso de Node.js
-Se encuentra pendiente de implementación.
-
-Se contempla desarrollar:
-
-- Autenticación de usuarios.
-- Gestión de sesiones.
-- Recuperación de contraseña.
-- Control de roles.
-- Gestión de módulos del sistema.
-- Conexión con base de datos.
-- Validaciones del lado del servidor.
+- Node.js
+- Express
+- PostgreSQL
+- Supabase
+- dotenv
+- cors
+- pg
+- bcryptjs
+- jsonwebtoken
+- nodemon
 
 ### Base de datos
 
-Uso de PostgreSQL y Supabase.
+- PostgreSQL
+- Supabase
 
 La base de datos inicial del proyecto ya se encuentra definida mediante scripts SQL ubicados en la carpeta `database/`.
 
@@ -114,6 +133,24 @@ unay-soft/
 │  ├─ package-lock.json
 │  └─ vite.config.js
 ├─ backend/
+│  ├─ src/
+│  │  ├─ config/
+│  │  │  └─ database.js
+│  │  ├─ controllers/
+│  │  │  └─ auth.controller.js
+│  │  ├─ middlewares/
+│  │  │  ├─ auth.middleware.js
+│  │  │  └─ permission.middleware.js
+│  │  ├─ routes/
+│  │  │  └─ auth.routes.js
+│  │  ├─ services/
+│  │  │  └─ auth.service.js
+│  │  ├─ utils/
+│  │  │  └─ jwt.js
+│  │  └─ server.js
+│  ├─ .env.example
+│  ├─ package.json
+│  └─ package-lock.json
 ├─ database/
 │  ├─ schema.sql
 │  ├─ seed.sql
@@ -122,6 +159,69 @@ unay-soft/
 ├─ design/
 ├─ .gitignore
 └─ README.md
+```
+
+## Requisitos previos
+
+Antes de ejecutar el proyecto, se recomienda tener instalado:
+
+- Node.js
+- npm
+- Git
+- Una cuenta o proyecto activo en Supabase
+- Postman o Insomnia para probar el backend
+
+Versiones recomendadas:
+
+- Node.js 18 o superior
+- npm 9 o superior
+
+Para verificar las versiones instaladas:
+
+```txt
+node -v
+npm -v
+git --version
+```
+
+## Instalación
+
+Clonar el repositorio:
+
+```txt
+git clone URL_DEL_REPOSITORIO
+```
+
+Ingresar a la carpeta del proyecto:
+
+```txt
+cd unay-soft
+```
+
+## Instalación y ejecución del frontend
+
+Ingresar a la carpeta del frontend:
+
+```txt
+cd frontend
+```
+
+Instalar dependencias:
+
+```txt
+npm install
+```
+
+Ejecutar el servidor de desarrollo:
+
+```txt
+npm run dev
+```
+
+Abrir el proyecto en el navegador usando la URL indicada por Vite, normalmente:
+
+```txt
+http://localhost:5173
 ```
 
 ## Instalación y ejecución
@@ -150,6 +250,47 @@ Abrir el proyecto en el navegador usando la URL indicada por Vite, normalmente:
 ```txt
 localhost:5173
 ```
+
+## Instalación del backend
+
+Desde la raíz del proyecto, ingresar a la carpeta del backend:
+
+```txt
+cd backend
+```
+
+Instalar dependencias:
+
+```txt
+npm install
+```
+
+IMPORTANTE:
+Colocar el archivo .env dentro de la carpeta backend/.
+
+Ejecutar el backend en modo desarrollo:
+
+```txt
+npm run dev
+```
+
+## Scripts SQL
+
+Los scripts de base de datos se encuentran en la carpeta:
+
+database/
+
+Orden recomendado de ejecución en Supabase SQL Editor:
+
+1. schema.sql
+2. seed.sql
+3. validation.sql
+
+Descripción:
+
+- schema.sql: crea la estructura completa de la base de datos.
+- seed.sql: inserta la información inicial necesaria.
+- validation.sql: permite verificar que la data y las relaciones principales estén correctamente cargadas.
 
 ## Convención de commits
 
