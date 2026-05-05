@@ -26,6 +26,14 @@ async function login(req, res) {
   }
 }
 
+async function me(req, res) {
+  return res.status(200).json({
+    message: "Usuario autenticado correctamente.",
+    user: req.user,
+  })
+}
+
 module.exports = {
   login,
+  me,
 }

@@ -2,18 +2,27 @@
 
 const express = require("express")
 
-const { login } = require("../controllers/auth.controller")
+const { login, me } = require("../controllers/auth.controller")
 const { authenticateToken } = require("../middlewares/auth.middleware")
+const { authorizePermission } = require("../middlewares/permission.middleware")
 
 const router = express.Router()
 
 router.post("/login", login)
 
-router.get("/me", authenticateToken, (req, res) => {
-  res.status(200).json({
-    message: "Usuario autenticado correctamente.",
-    user: req.user,
-  })
-})
+router.get("/me", authenticateToken, me)
+
+router.get(
+  "/admin-check",
+  authenticateToken,
+  authorizePermission("security.ver"),
+  (req, res) => {
+    res.status(200).json({
+      message: "Acceso permitido al recurso protegido por permiso.",
+      requiredPermission: "security.ver",
+      user: req.user,
+    })
+  },
+)
 
 module.exports = router
