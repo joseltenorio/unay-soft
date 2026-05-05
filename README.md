@@ -36,18 +36,34 @@ Se contempla desarrollar:
 ### Base de datos
 
 Uso de PostgreSQL y Supabase.
-La base de datos aún se encuentra pendiente de implementación.
 
-Se contempla almacenar información relacionada con:
+La base de datos inicial del proyecto ya se encuentra definida mediante scripts SQL ubicados en la carpeta `database/`.
 
+Archivos principales:
+
+- `schema.sql`: contiene la creación de tablas, claves primarias, claves foráneas, constraints, checks, índices y triggers de actualización automática.
+- `seed.sql`: contiene data maestra e inicial válida para el caso de estudio.
+- `validation.sql`: contiene consultas de apoyo para verificar registros, usuarios, roles, permisos, productos, órdenes y relaciones principales.
+
+La base de datos contempla información relacionada con:
+
+- Establecimiento.
 - Usuarios.
-- Roles y permisos.
-- Ventas.
-- Pedidos.
+- Roles.
+- Módulos.
+- Permisos.
+- Sesiones.
+- Recuperación de contraseña.
+- Auditoría.
+- Zonas y mesas.
+- Categorías y productos.
+- Variantes y adicionales.
+- Órdenes y comandas.
+- Pagos.
+- Caja.
+- Códigos QR.
 - Inventario.
-- Cocina / KDS.
-- Indicadores de negocio.
-- Configuraciones del sistema.
+- Insumos y movimientos.
 
 ## Estructura del proyecto
 
@@ -99,6 +115,9 @@ unay-soft/
 │  └─ vite.config.js
 ├─ backend/
 ├─ database/
+│  ├─ schema.sql
+│  ├─ seed.sql
+│  └─ validation.sql
 ├─ docs/
 ├─ design/
 ├─ .gitignore
