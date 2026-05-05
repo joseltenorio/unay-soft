@@ -1,0 +1,87 @@
+-- =========================================================
+-- Umarí OS - Database Validation Queries
+-- PostgreSQL / Supabase
+-- =========================================================
+
+-- Conteo general de registros por tabla principal
+select 'establecimiento' as tabla, count(*) as registros from establecimiento
+union all
+select 'rol', count(*) from rol
+union all
+select 'usuario', count(*) from usuario
+union all
+select 'modulo', count(*) from modulo
+union all
+select 'permiso', count(*) from permiso
+union all
+select 'rol_permiso', count(*) from rol_permiso
+union all
+select 'zona', count(*) from zona
+union all
+select 'mesa', count(*) from mesa
+union all
+select 'categoria', count(*) from categoria
+union all
+select 'producto', count(*) from producto
+union all
+select 'orden', count(*) from orden
+union all
+select 'item_orden', count(*) from item_orden
+union all
+select 'pago', count(*) from pago
+union all
+select 'insumo', count(*) from insumo
+union all
+select 'producto_insumo', count(*) from producto_insumo
+union all
+select 'movimiento_inventario', count(*) from movimiento_inventario;
+
+-- Usuarios con roles
+select
+  u.nombres,
+  u.apellidos,
+  u.email,
+  u.username,
+  r.nombre as rol,
+  e.nombre_comercial as establecimiento
+from usuario u
+join rol r on r.id_rol = u.id_rol
+join establecimiento e on e.id_establecimiento = u.id_establecimiento
+order by r.nombre, u.nombres;
+
+-- Roles con permisos asignados
+select
+  r.nombre as rol,
+  m.nombre as modulo,
+  p.accion,
+  p.codigo as permiso
+from rol_permiso rp
+join rol r on r.id_rol = rp.id_rol
+join permiso p on p.id_permiso = rp.id_permiso
+join modulo m on m.id_modulo = p.id_modulo
+order by r.nombre, m.orden_display, p.accion;
+
+-- Productos por categoría
+select
+  c.nombre as categoria,
+  p.nombre as producto,
+  p.precio_base,
+  p.disponibilidad
+from producto p
+join categoria c on c.id_categoria = p.id_categoria
+order by c.orden_display, p.nombre;
+
+-- Órdenes con usuario, mesa y total
+select
+  o.numero_orden,
+  o.estado,
+  o.tipo_servicio,
+  u.nombres || ' ' || u.apellidos as usuario,
+  m.numero as mesa,
+  o.subtotal,
+  o.igv,
+  o.total
+from orden o
+left join mesa m on m.id_mesa = o.id_mesa
+join usuario u on u.id_usuario = o.id_usuario
+order by o.created_at desc;
