@@ -2,7 +2,7 @@
 
 const { pool } = require("../config/database")
 
-async function getUsers() {
+async function getUsers(idEstablecimiento) {
   const query = `
     select
       u.id_usuario,
@@ -19,10 +19,11 @@ async function getUsers() {
     from usuario u
     inner join rol r on r.id_rol = u.id_rol
     inner join establecimiento e on e.id_establecimiento = u.id_establecimiento
+    where u.id_establecimiento = $1
     order by u.created_at asc;
   `
 
-  const { rows } = await pool.query(query)
+  const { rows } = await pool.query(query, [idEstablecimiento])
 
   return rows
 }
