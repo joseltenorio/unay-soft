@@ -4,7 +4,7 @@ const { getUsers } = require("../services/user.service")
 
 async function listUsers(req, res) {
   try {
-    const users = await getUsers()
+    const users = await getUsers(req.user.id_establecimiento)
 
     return res.status(200).json({
       message: "Usuarios obtenidos correctamente.",
