@@ -198,6 +198,190 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "Login - Cajero",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"identifier\": \"caja@umari.pe\",\r\n  \"password\": \"Caja123\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login - Mesero",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"identifier\": \"mozo@umari.pe\",\r\n  \"password\": \"Mozo123\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cajero - Caja Permitido",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzMzMzMzMzMtMzMzMy0zMzMzLTMzMzMtMzMzMzMzMzMzMzMzIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjMzMzMzMzMtMzMzMy0zMzMzLTMzMzMtMzMzMzMzMzMzMzMzIiwicm9sIjoiQ2FqZXJvIiwiaWF0IjoxNzc3OTg3ODU0LCJleHAiOjE3Nzc5OTUwNTR9.v6_DOy52X1Dcc-XxBXM_TS6zby05XRbPxC68385ekOY",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/demo/cashier-area",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "demo",
+            "cashier-area"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Mesero - Caja Denegado",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzQ0NDQ0NDQtNDQ0NC00NDQ0LTQ0NDQtNDQ0NDQ0NDQ0NDQ0IiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjQ0NDQ0NDQtNDQ0NC00NDQ0LTQ0NDQtNDQ0NDQ0NDQ0NDQ0Iiwicm9sIjoiTW96byIsImlhdCI6MTc3Nzk4NzkzMSwiZXhwIjoxNzc3OTk1MTMxfQ.fAT_mHQepdLeeOTGfvSmYX2FIjxmOrqGk0ZSBoGsKG8",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/demo/cashier-area",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "demo",
+            "cashier-area"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Mesero - POS Permitido",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzQ0NDQ0NDQtNDQ0NC00NDQ0LTQ0NDQtNDQ0NDQ0NDQ0NDQ0IiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjQ0NDQ0NDQtNDQ0NC00NDQ0LTQ0NDQtNDQ0NDQ0NDQ0NDQ0Iiwicm9sIjoiTW96byIsImlhdCI6MTc3Nzk4ODA2NSwiZXhwIjoxNzc3OTk1MjY1fQ.2ifiaM_IAwhrse3iaOpaK_WOtVhB4agoXLEdpoldobQ",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/demo/waiter-area",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "demo",
+            "waiter-area"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cajero - POS Denegado",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzMzMzMzMzMtMzMzMy0zMzMzLTMzMzMtMzMzMzMzMzMzMzMzIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjMzMzMzMzMtMzMzMy0zMzMzLTMzMzMtMzMzMzMzMzMzMzMzIiwicm9sIjoiQ2FqZXJvIiwiaWF0IjoxNzc3OTg4MTI0LCJleHAiOjE3Nzc5OTUzMjR9.wrjcK0ER0Mxf9MYLr4IB543yK8MFYebUaZX5aLzO8QE",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/demo/waiter-area",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "api",
+            "demo",
+            "waiter-area"
+          ]
+        }
+      },
+      "response": []
     }
   ]
 }
