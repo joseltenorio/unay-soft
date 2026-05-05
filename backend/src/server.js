@@ -6,6 +6,7 @@ require("dotenv").config()
 
 const { testConnection } = require("./config/database")
 const authRoutes = require("./routes/auth.routes")
+const userRoutes = require("./routes/user.routes")
 
 const app = express()
 
@@ -32,8 +33,9 @@ app.get("/api/health", (req, res) => {
   })
 })
 
-// Rutas de autenticación
+// Rutas principales
 app.use("/api/auth", authRoutes)
+app.use("/api/users", userRoutes)
 
 // Manejo de rutas no encontradas
 app.use((req, res) => {
