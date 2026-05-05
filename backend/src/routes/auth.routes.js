@@ -1,12 +1,10 @@
+// backend/src/routes/auth.routes.js
+
 const express = require("express")
+const { login } = require("../controllers/auth.controller")
 
 const router = express.Router()
 
-router.get("/status", (req, res) => {
-  res.json({
-    message: "Auth module active",
-    status: "OK",
-  })
-})
+router.post("/login", login)
 
 module.exports = router
