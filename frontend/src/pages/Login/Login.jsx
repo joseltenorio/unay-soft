@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
+import { loginRequest } from "../../services/authService"
 
 import AuthLayout from "../../components/layout/AuthLayout/AuthLayout"
 import AuthToast from "../../components/common/AuthToast/AuthToast"
@@ -27,7 +28,7 @@ export default function Login() {
     return () => window.clearTimeout(timer)
   }, [toast])
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
 
     if (!identifier.trim()) {
@@ -48,15 +49,29 @@ export default function Login() {
       return
     }
 
-    setToast({
-      type: "success",
-      title: "Realizado con éxito",
-      message: "Usted se ha logeado con éxito.",
-    })
+    try {
+      await loginRequest({
+        identifier: identifier.trim(),
+        password,
+        remember,
+      })
 
-    window.setTimeout(() => {
-      navigate("/dashboard")
-    }, 900)
+      setToast({
+        type: "success",
+        title: "Login exitoso",
+        message: "Bienvenido a Umarí OS.",
+      })
+
+      window.setTimeout(() => {
+        navigate("/dashboard")
+      }, 700)
+    } catch (error) {
+      setToast({
+        type: "error",
+        title: "Acceso denegado",
+        message: error.message,
+      })
+    }
   }
 
   return (
