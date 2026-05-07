@@ -7,7 +7,6 @@ import {
   getAuthenticatedUser,
   getToken,
   logout,
-  updateCurrentUser,
 } from "../services/authService"
 
 import "./ProtectedRoute.css"
@@ -27,8 +26,7 @@ export default function ProtectedRoute({ children }) {
       }
 
       try {
-        const user = await getAuthenticatedUser()
-        updateCurrentUser(user)
+        await getAuthenticatedUser()
         setStatus("authenticated")
       } catch {
         logout()
