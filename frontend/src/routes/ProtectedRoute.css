@@ -1,0 +1,32 @@
+/* src/routes/ProtectedRoute.css */
+
+.protected-route-status {
+  min-height: 100vh;
+
+  display: grid;
+  place-items: center;
+
+  background:
+    radial-gradient(
+      circle at top,
+      rgba(119, 172, 162, 0.16) 0%,
+      rgba(119, 172, 162, 0) 36%
+    ),
+    var(--color-brand-primary);
+
+  color: var(--color-text-on-dark);
+}
+
+.protected-route-status__message {
+  padding: 18px 24px;
+
+  border: 1px solid rgba(244, 233, 205, 0.14);
+  border-radius: var(--radius-pill);
+
+  background: rgba(244, 233, 205, 0.08);
+
+  color: var(--color-text-on-dark);
+
+  font-size: 15px;
+  font-weight: 700;
+}
