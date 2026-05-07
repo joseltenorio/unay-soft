@@ -1,6 +1,7 @@
 // backend/src/controllers/auth.controller.js
 
 const { loginUser } = require("../services/auth.service")
+const { getUserPermissions } = require("../services/permission.service")
 
 async function login(req, res) {
   try {
@@ -27,10 +28,21 @@ async function login(req, res) {
 }
 
 async function me(req, res) {
-  return res.status(200).json({
-    message: "Usuario autenticado correctamente.",
-    user: req.user,
-  })
+  try {
+    const access = await getUserPermissions(req.user.id_usuario)
+
+    return res.status(200).json({
+      message: "Usuario autenticado correctamente.",
+      user: req.user,
+      permissions: access.permissions,
+      modules: access.modules,
+    })
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error al obtener la sesión del usuario.",
+      error: error.message,
+    })
+  }
 }
 
 module.exports = {

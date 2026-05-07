@@ -54,9 +54,13 @@ async function loginUser(identifier, password) {
     id_usuario: user.id_usuario,
     id_establecimiento: user.id_establecimiento,
     id_rol: user.id_rol,
+    nombres: user.nombres,
+    apellidos: user.apellidos,
+    email: user.email,
+    username: user.username,
     rol: user.rol,
   })
-
+  
   await pool.query(
     `
       update usuario

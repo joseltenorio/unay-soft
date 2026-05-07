@@ -1,6 +1,13 @@
+// frontend/src/pages/Dashboard/Dashboard.jsx
+
 import { useNavigate } from "react-router-dom"
 
-import { getCurrentUser, logout } from "../../services/authService"
+import {
+  getCurrentModules,
+  getCurrentPermissions,
+  getCurrentUser,
+  logout,
+} from "../../services/authService"
 
 const roleMessages = {
   Administrador: "Bienvenido administrador. Tienes acceso completo al sistema.",
@@ -12,7 +19,10 @@ const roleMessages = {
 
 export default function Dashboard() {
   const navigate = useNavigate()
+
   const user = getCurrentUser()
+  const permissions = getCurrentPermissions()
+  const modules = getCurrentModules()
 
   const message =
     roleMessages[user?.rol] ||
@@ -31,17 +41,63 @@ export default function Dashboard() {
 
       <hr />
 
-      <p>
-        <strong>Usuario:</strong> {user?.nombres} {user?.apellidos}
-      </p>
+      <section>
+        <h2>Datos del usuario</h2>
 
-      <p>
-        <strong>Correo:</strong> {user?.email || "No disponible"}
-      </p>
+        <p>
+          <strong>Usuario:</strong> {user?.nombres || "No disponible"}{" "}
+          {user?.apellidos || ""}
+        </p>
 
-      <p>
-        <strong>Rol:</strong> {user?.rol || "No disponible"}
-      </p>
+        <p>
+          <strong>Correo:</strong> {user?.email || "No disponible"}
+        </p>
+
+        <p>
+          <strong>Rol:</strong> {user?.rol || "No disponible"}
+        </p>
+      </section>
+
+      <hr />
+
+      <section>
+        <h2>Permisos</h2>
+
+        <p>
+          <strong>Total de permisos:</strong> {permissions.length}
+        </p>
+
+        {permissions.length > 0 ? (
+          <ul>
+            {permissions.map((permission) => (
+              <li key={permission}>{permission}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>No hay permisos cargados para este usuario.</p>
+        )}
+      </section>
+
+      <hr />
+
+      <section>
+        <h2>Módulos disponibles</h2>
+
+        {modules.length > 0 ? (
+          <ul>
+            {modules.map((module) => (
+              <li key={module.codigo}>
+                <strong>{module.nombre}</strong>{" "}
+                <span>({module.codigo})</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No hay módulos disponibles para este usuario.</p>
+        )}
+      </section>
+
+      <hr />
 
       <button type="button" onClick={handleLogout}>
         Cerrar sesión
