@@ -1,6 +1,6 @@
 // src/services/authService.js
 
-import { apiRequest } from "./api"
+import { apiPrivateRequest, apiRequest } from "./api"
 
 const TOKEN_KEY = "umari_token"
 const USER_KEY = "umari_user"
@@ -23,12 +23,17 @@ export async function loginRequest({ identifier, password, remember }) {
   storage.setItem(TOKEN_KEY, data.token)
   storage.setItem(USER_KEY, JSON.stringify(data.user))
 
-  // Limpiamos el otro storage para evitar sesiones duplicadas
   const otherStorage = remember ? sessionStorage : localStorage
   otherStorage.removeItem(TOKEN_KEY)
   otherStorage.removeItem(USER_KEY)
 
   return data
+}
+
+export async function getAuthenticatedUser() {
+  const data = await apiPrivateRequest("/auth/me")
+
+  return data.user
 }
 
 export function getToken() {
@@ -40,6 +45,13 @@ export function getCurrentUser() {
     localStorage.getItem(USER_KEY) || sessionStorage.getItem(USER_KEY)
 
   return user ? JSON.parse(user) : null
+}
+
+export function updateCurrentUser(user) {
+  const hasLocalSession = Boolean(localStorage.getItem(TOKEN_KEY))
+  const storage = hasLocalSession ? localStorage : sessionStorage
+
+  storage.setItem(USER_KEY, JSON.stringify(user))
 }
 
 export function logout() {

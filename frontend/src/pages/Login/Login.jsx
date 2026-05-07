@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { loginRequest } from "../../services/authService"
+import { getToken, loginRequest } from "../../services/authService"
 
 import AuthLayout from "../../components/layout/AuthLayout/AuthLayout"
 import AuthToast from "../../components/common/AuthToast/AuthToast"
@@ -17,6 +17,12 @@ export default function Login() {
   const [remember, setRemember] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [toast, setToast] = useState(null)
+
+  useEffect(() => {
+    if (getToken()) {
+      navigate("/dashboard", { replace: true })
+    }
+  }, [navigate])
 
   useEffect(() => {
     if (!toast) return
