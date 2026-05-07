@@ -1,6 +1,6 @@
-// frontend/src/pages/Dashboard/Dashboard.jsx
+// src/pages/Dashboard/Dashboard.jsx 
 
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 import {
   getCurrentModules,
@@ -8,13 +8,18 @@ import {
   getCurrentUser,
   logout,
 } from "../../services/authService"
+import { hasPermission } from "../../utils/permission"
 
-const roleMessages = {
-  Administrador: "Bienvenido administrador. Tienes acceso completo al sistema.",
-  Gerente: "Bienvenido gerente. Puedes supervisar operaciones y reportes.",
-  Cajero: "Bienvenido cajero. Puedes gestionar caja y pagos.",
-  Mozo: "Bienvenido mozo. Puedes gestionar atención en salón.",
-  Cocina: "Bienvenido cocina. Puedes revisar pedidos pendientes.",
+import "./Dashboard.css"
+
+const moduleFallbackMessages = {
+  dashboard: "Panel principal de indicadores operativos.",
+  pos: "Gestión de salón, pedidos y atención de mesas.",
+  kds: "Monitor de cocina y control de preparación.",
+  inventory: "Control de insumos, stock y movimientos.",
+  cashier: "Caja, pagos, apertura y cierre operativo.",
+  bi: "Reportes, métricas y análisis del negocio.",
+  security: "Usuarios, roles y permisos del sistema.",
 }
 
 export default function Dashboard() {
@@ -24,9 +29,7 @@ export default function Dashboard() {
   const permissions = getCurrentPermissions()
   const modules = getCurrentModules()
 
-  const message =
-    roleMessages[user?.rol] ||
-    `Bienvenido. Tu rol actual es: ${user?.rol || "sin rol asignado"}.`
+  const canViewDashboard = hasPermission(permissions, "dashboard.ver")
 
   function handleLogout() {
     logout()
@@ -34,74 +37,86 @@ export default function Dashboard() {
   }
 
   return (
-    <main style={{ padding: "32px" }}>
-      <h1>Dashboard de prueba</h1>
+    <main className="dashboard">
+      <section className="dashboard__shell">
+        <header className="dashboard__header">
+          <div>
+            <p className="dashboard__eyebrow">Umarí OS</p>
+            <h1>Panel de trabajo</h1>
+          </div>
 
-      <p>{message}</p>
+          <button
+            className="dashboard__logout"
+            type="button"
+            onClick={handleLogout}
+          >
+            Cerrar sesión
+          </button>
+        </header>
 
-      <hr />
+        <section className="dashboard__card">
+          <div className="dashboard__user">
+            <span className="dashboard__avatar" aria-hidden="true">
+              {user?.nombres?.charAt(0) || "U"}
+            </span>
 
-      <section>
-        <h2>Datos del usuario</h2>
+            <div>
+              <p className="dashboard__name">
+                {user?.nombres || "Usuario"} {user?.apellidos || ""}
+              </p>
+              <span className="dashboard__role">{user?.rol || "Sin rol"}</span>
+            </div>
+          </div>
 
-        <p>
-          <strong>Usuario:</strong> {user?.nombres || "No disponible"}{" "}
-          {user?.apellidos || ""}
-        </p>
+          <p className="dashboard__message">
+            {canViewDashboard
+              ? "Estos son los módulos disponibles según tus permisos actuales."
+              : "Tu usuario inició sesión, pero no tiene permiso para visualizar el dashboard."}
+          </p>
 
-        <p>
-          <strong>Correo:</strong> {user?.email || "No disponible"}
-        </p>
+          <div className="dashboard__meta">
+            <div>
+              <span>Correo</span>
+              <strong>{user?.email || "No disponible"}</strong>
+            </div>
 
-        <p>
-          <strong>Rol:</strong> {user?.rol || "No disponible"}
-        </p>
+            <div>
+              <span>Usuario</span>
+              <strong>{user?.username || "No disponible"}</strong>
+            </div>
+
+            <div>
+              <span>Permisos activos</span>
+              <strong>{permissions.length}</strong>
+            </div>
+          </div>
+
+          <div className="dashboard__actions">
+            <Link className="dashboard__action-link" to="/dashboard/permissions-demo">
+              Probar permisos del usuario
+            </Link>
+          </div>
+
+          <section className="dashboard__modules" aria-label="Módulos disponibles">
+            {modules.length > 0 ? (
+              modules.map((module) => (
+                <article className="dashboard__module-card" key={module.codigo}>
+                  <span className="dashboard__module-code">{module.codigo}</span>
+                  <h2>{module.nombre}</h2>
+                  <p>
+                    {moduleFallbackMessages[module.codigo] ||
+                      "Módulo disponible para tu usuario."}
+                  </p>
+                </article>
+              ))
+            ) : (
+              <article className="dashboard__module-empty">
+                No hay módulos disponibles para este usuario.
+              </article>
+            )}
+          </section>
+        </section>
       </section>
-
-      <hr />
-
-      <section>
-        <h2>Permisos</h2>
-
-        <p>
-          <strong>Total de permisos:</strong> {permissions.length}
-        </p>
-
-        {permissions.length > 0 ? (
-          <ul>
-            {permissions.map((permission) => (
-              <li key={permission}>{permission}</li>
-            ))}
-          </ul>
-        ) : (
-          <p>No hay permisos cargados para este usuario.</p>
-        )}
-      </section>
-
-      <hr />
-
-      <section>
-        <h2>Módulos disponibles</h2>
-
-        {modules.length > 0 ? (
-          <ul>
-            {modules.map((module) => (
-              <li key={module.codigo}>
-                <strong>{module.nombre}</strong>{" "}
-                <span>({module.codigo})</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No hay módulos disponibles para este usuario.</p>
-        )}
-      </section>
-
-      <hr />
-
-      <button type="button" onClick={handleLogout}>
-        Cerrar sesión
-      </button>
     </main>
   )
 }
