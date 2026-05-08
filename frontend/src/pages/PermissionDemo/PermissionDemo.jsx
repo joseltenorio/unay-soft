@@ -24,8 +24,8 @@ export default function PermissionDemo() {
             </p>
           </div>
 
-          <Link className="permission-demo__back" to="/dashboard">
-            Volver al dashboard
+          <Link className="permission-demo__back" to="/app">
+            Volver al panel de trabajo
           </Link>
         </header>
 

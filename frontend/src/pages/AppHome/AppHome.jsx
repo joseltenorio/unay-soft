@@ -1,5 +1,4 @@
-// src/pages/Dashboard/Dashboard.jsx 
-
+// src/pages/AppHome/AppHome.jsx
 import { Link, useNavigate } from "react-router-dom"
 
 import {
@@ -8,12 +7,11 @@ import {
   getCurrentUser,
   logout,
 } from "../../services/authService"
-import { hasPermission } from "../../utils/permission"
 
-import "./Dashboard.css"
+import "./AppHome.css"
 
 const moduleFallbackMessages = {
-  dashboard: "Panel principal de indicadores operativos.",
+  app: "Inicio interno del sistema con módulos disponibles según permisos.",
   pos: "Gestión de salón, pedidos y atención de mesas.",
   kds: "Monitor de cocina y control de preparación.",
   inventory: "Control de insumos, stock y movimientos.",
@@ -22,14 +20,18 @@ const moduleFallbackMessages = {
   security: "Usuarios, roles y permisos del sistema.",
 }
 
-export default function Dashboard() {
+export default function AppHome() {
   const navigate = useNavigate()
 
   const user = getCurrentUser()
   const permissions = getCurrentPermissions()
   const modules = getCurrentModules()
 
-  const canViewDashboard = hasPermission(permissions, "dashboard.ver")
+  const visibleModules = modules.filter((module) =>
+    ["pos", "kds", "inventory", "cashier", "bi", "security"].includes(
+      module.codigo,
+    ),
+  )
 
   function handleLogout() {
     logout()
@@ -37,44 +39,38 @@ export default function Dashboard() {
   }
 
   return (
-    <main className="dashboard">
-      <section className="dashboard__shell">
-        <header className="dashboard__header">
+    <main className="app-home">
+      <section className="app-home__shell">
+        <header className="app-home__header">
           <div>
-            <p className="dashboard__eyebrow">Umarí OS</p>
+            <p className="app-home__eyebrow">Umarí OS</p>
             <h1>Panel de trabajo</h1>
           </div>
 
-          <button
-            className="dashboard__logout"
-            type="button"
-            onClick={handleLogout}
-          >
+          <button className="app-home__logout" type="button" onClick={handleLogout}>
             Cerrar sesión
           </button>
         </header>
 
-        <section className="dashboard__card">
-          <div className="dashboard__user">
-            <span className="dashboard__avatar" aria-hidden="true">
+        <section className="app-home__card">
+          <div className="app-home__user">
+            <span className="app-home__avatar" aria-hidden="true">
               {user?.nombres?.charAt(0) || "U"}
             </span>
 
             <div>
-              <p className="dashboard__name">
+              <p className="app-home__name">
                 {user?.nombres || "Usuario"} {user?.apellidos || ""}
               </p>
-              <span className="dashboard__role">{user?.rol || "Sin rol"}</span>
+              <span className="app-home__role">{user?.rol || "Sin rol"}</span>
             </div>
           </div>
 
-          <p className="dashboard__message">
-            {canViewDashboard
-              ? "Estos son los módulos disponibles según tus permisos actuales."
-              : "Tu usuario inició sesión, pero no tiene permiso para visualizar el dashboard."}
+          <p className="app-home__message">
+            Estos son los módulos disponibles según tu perfil y permisos actuales.
           </p>
 
-          <div className="dashboard__meta">
+          <div className="app-home__meta">
             <div>
               <span>Correo</span>
               <strong>{user?.email || "No disponible"}</strong>
@@ -91,17 +87,17 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="dashboard__actions">
-            <Link className="dashboard__action-link" to="/dashboard/permissions-demo">
+          <div className="app-home__actions">
+            <Link className="app-home__action-link" to="/app/permissions-demo">
               Probar permisos del usuario
             </Link>
           </div>
 
-          <section className="dashboard__modules" aria-label="Módulos disponibles">
-            {modules.length > 0 ? (
-              modules.map((module) => (
-                <article className="dashboard__module-card" key={module.codigo}>
-                  <span className="dashboard__module-code">{module.codigo}</span>
+          <section className="app-home__modules" aria-label="Módulos disponibles">
+            {visibleModules.length > 0 ? (
+              visibleModules.map((module) => (
+                <article className="app-home__module-card" key={module.codigo}>
+                  <span className="app-home__module-code">{module.codigo}</span>
                   <h2>{module.nombre}</h2>
                   <p>
                     {moduleFallbackMessages[module.codigo] ||
@@ -110,7 +106,7 @@ export default function Dashboard() {
                 </article>
               ))
             ) : (
-              <article className="dashboard__module-empty">
+              <article className="app-home__module-empty">
                 No hay módulos disponibles para este usuario.
               </article>
             )}

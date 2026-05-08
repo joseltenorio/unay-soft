@@ -20,7 +20,7 @@ export default function Login() {
 
   useEffect(() => {
     if (getToken()) {
-      navigate("/dashboard", { replace: true })
+      navigate("/app", { replace: true })
     }
   }, [navigate])
 
@@ -69,7 +69,7 @@ export default function Login() {
       })
 
       window.setTimeout(() => {
-        navigate("/dashboard")
+        navigate("/app")
       }, 700)
     } catch (error) {
       setToast({
