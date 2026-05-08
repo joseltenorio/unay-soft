@@ -1,4 +1,4 @@
-// frontend/src/services/permission.js
+// frontend/src/utils/permission.js
 
 export function hasPermission(permissions, requiredPermission) {
   return permissions.includes(requiredPermission)

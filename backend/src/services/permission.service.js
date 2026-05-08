@@ -1,4 +1,4 @@
-// src/services/permision.service.js
+// src/services/permission.service.js
 
 const { pool } = require("../config/database")
 
