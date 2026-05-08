@@ -1,0 +1,214 @@
+/*  src/pages/modules/ModulePlaceholder/ModulePlaceholder.css
+    Styles for the ModulePlaceholder page  
+*/
+.module-placeholder {
+  min-height: 100vh;
+  padding: 48px;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(119, 172, 162, 0.2) 0%,
+      rgba(119, 172, 162, 0) 34%
+    ),
+    linear-gradient(
+      135deg,
+      var(--color-brand-primary) 0%,
+      var(--color-brand-primary-light) 48%,
+      var(--color-brand-primary-dark) 100%
+    );
+
+  color: var(--color-text-on-dark);
+}
+
+.module-placeholder__shell {
+  width: min(100%, 1080px);
+  margin-inline: auto;
+}
+
+.module-placeholder__header {
+  margin-bottom: 32px;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.module-placeholder__eyebrow {
+  margin-bottom: 10px;
+
+  color: var(--color-brand-accent);
+
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.module-placeholder__header h1 {
+  color: var(--color-text-on-dark);
+
+  font-size: clamp(36px, 5vw, 58px);
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+}
+
+.module-placeholder__header p {
+  max-width: 680px;
+  margin-top: 16px;
+
+  color: rgba(244, 233, 205, 0.76);
+
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.module-placeholder__back {
+  min-height: 44px;
+  padding: 0 20px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(244, 233, 205, 0.2);
+  border-radius: var(--radius-pill);
+
+  background: rgba(244, 233, 205, 0.08);
+  color: var(--color-text-on-dark);
+
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+
+  transition:
+    background-color var(--transition-fast),
+    transform var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.module-placeholder__back:hover {
+  background: rgba(244, 233, 205, 0.14);
+  border-color: rgba(119, 172, 162, 0.52);
+  transform: translateY(-1px);
+}
+
+.module-placeholder__card {
+  padding: clamp(28px, 5vw, 52px);
+
+  border: 1px solid rgba(244, 233, 205, 0.14);
+  border-radius: var(--radius-xl);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.13) 0%,
+      rgba(255, 255, 255, 0.07) 100%
+    );
+
+  box-shadow:
+    0 28px 80px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.module-placeholder__status {
+  width: fit-content;
+  padding: 7px 12px;
+
+  display: inline-flex;
+
+  border-radius: var(--radius-pill);
+
+  background: rgba(119, 172, 162, 0.18);
+  color: var(--color-brand-accent);
+
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.module-placeholder__card h2 {
+  max-width: 720px;
+  margin-top: 24px;
+
+  color: var(--color-text-on-dark);
+
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 900;
+  line-height: 1.14;
+  letter-spacing: -0.03em;
+}
+
+.module-placeholder__card p {
+  max-width: 760px;
+  margin-top: 18px;
+
+  color: rgba(244, 233, 205, 0.76);
+
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.65;
+}
+
+.module-placeholder__meta {
+  margin-top: 42px;
+
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.module-placeholder__meta div {
+  min-height: 112px;
+  padding: 20px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+
+  border: 1px solid rgba(244, 233, 205, 0.12);
+  border-radius: var(--radius-md);
+
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.module-placeholder__meta span {
+  color: rgba(244, 233, 205, 0.62);
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.module-placeholder__meta strong {
+  color: var(--color-text-on-dark);
+
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 820px) {
+  .module-placeholder {
+    padding: 32px;
+  }
+
+  .module-placeholder__header {
+    flex-direction: column;
+  }
+
+  .module-placeholder__meta {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .module-placeholder {
+    padding: 24px;
+  }
+}

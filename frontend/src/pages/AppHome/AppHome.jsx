@@ -1,4 +1,5 @@
 // src/pages/AppHome/AppHome.jsx
+
 import { Link, useNavigate } from "react-router-dom"
 
 import {
@@ -18,6 +19,19 @@ const moduleFallbackMessages = {
   cashier: "Caja, pagos, apertura y cierre operativo.",
   bi: "Reportes, métricas y análisis del negocio.",
   security: "Usuarios, roles y permisos del sistema.",
+}
+
+const moduleRoutes = {
+  pos: "/app/pos",
+  kds: "/app/kds",
+  inventory: "/app/inventory",
+  cashier: "/app/cashier",
+  bi: "/app/bi",
+  security: "/app/security",
+}
+
+function getModuleRoute(module) {
+  return moduleRoutes[module?.codigo] || "/app"
 }
 
 export default function AppHome() {
@@ -47,7 +61,11 @@ export default function AppHome() {
             <h1>Panel de trabajo</h1>
           </div>
 
-          <button className="app-home__logout" type="button" onClick={handleLogout}>
+          <button
+            className="app-home__logout"
+            type="button"
+            onClick={handleLogout}
+          >
             Cerrar sesión
           </button>
         </header>
@@ -62,7 +80,10 @@ export default function AppHome() {
               <p className="app-home__name">
                 {user?.nombres || "Usuario"} {user?.apellidos || ""}
               </p>
-              <span className="app-home__role">{user?.rol || "Sin rol"}</span>
+
+              <span className="app-home__role">
+                {user?.rol || "Sin rol"}
+              </span>
             </div>
           </div>
 
@@ -93,17 +114,32 @@ export default function AppHome() {
             </Link>
           </div>
 
-          <section className="app-home__modules" aria-label="Módulos disponibles">
+          <section
+            className="app-home__modules"
+            aria-label="Módulos disponibles"
+          >
             {visibleModules.length > 0 ? (
               visibleModules.map((module) => (
-                <article className="app-home__module-card" key={module.codigo}>
-                  <span className="app-home__module-code">{module.codigo}</span>
+                <Link
+                  className="app-home__module-card"
+                  key={module.codigo}
+                  to={getModuleRoute(module)}
+                >
+                  <span className="app-home__module-code">
+                    {module.codigo}
+                  </span>
+
                   <h2>{module.nombre}</h2>
+
                   <p>
                     {moduleFallbackMessages[module.codigo] ||
                       "Módulo disponible para tu usuario."}
                   </p>
-                </article>
+
+                  <span className="app-home__module-action">
+                    Abrir módulo
+                  </span>
+                </Link>
               ))
             ) : (
               <article className="app-home__module-empty">
