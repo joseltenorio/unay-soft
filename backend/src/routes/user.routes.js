@@ -2,7 +2,7 @@
 
 const express = require("express")
 
-const { listUsers } = require("../controllers/user.controller")
+const { listUsers, registerUser } = require("../controllers/user.controller")
 const { authenticateToken } = require("../middlewares/auth.middleware")
 const { authorizePermission } = require("../middlewares/permission.middleware")
 
@@ -13,6 +13,13 @@ router.get(
   authenticateToken,
   authorizePermission("security.gestionar_usuarios"),
   listUsers,
+)
+
+router.post(
+  "/",
+  authenticateToken,
+  authorizePermission("security.gestionar_usuarios"),
+  registerUser,
 )
 
 module.exports = router
