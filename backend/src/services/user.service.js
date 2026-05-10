@@ -259,8 +259,61 @@ async function updateUser(idEstablecimiento, idUsuario, userData) {
   return rows[0]
 }
 
+async function updateUserStatus(idEstablecimiento, authenticatedUserId, idUsuario, estado) {
+  if (authenticatedUserId === idUsuario && estado === false) {
+    const error = new Error("No puede desactivar su propio usuario.")
+    error.statusCode = 400
+    throw error
+  }
+
+  const userQuery = `
+    select id_usuario
+    from usuario
+    where id_usuario = $1
+      and id_establecimiento = $2
+    limit 1;
+  `
+
+  const userResult = await pool.query(userQuery, [idUsuario, idEstablecimiento])
+
+  if (userResult.rows.length === 0) {
+    const error = new Error("El usuario no existe o no pertenece al establecimiento.")
+    error.statusCode = 404
+    throw error
+  }
+
+  const updateQuery = `
+    update usuario
+    set estado = $1
+    where id_usuario = $2
+      and id_establecimiento = $3
+    returning
+      id_usuario,
+      id_establecimiento,
+      id_rol,
+      nombres,
+      apellidos,
+      email,
+      username,
+      celular,
+      estado,
+      ultimo_acceso_at,
+      created_at,
+      updated_at;
+  `
+
+  const { rows } = await pool.query(updateQuery, [
+    Boolean(estado),
+    idUsuario,
+    idEstablecimiento,
+  ])
+
+  return rows[0]
+}
+
 module.exports = {
   getUsers,
   createUser,
   updateUser,
+  updateUserStatus,
 }

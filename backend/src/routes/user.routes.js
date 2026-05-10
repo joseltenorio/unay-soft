@@ -6,6 +6,7 @@ const {
   listUsers,
   registerUser,
   editUser,
+  changeUserStatus,
 } = require("../controllers/user.controller")
 
 const { authenticateToken } = require("../middlewares/auth.middleware")
@@ -32,6 +33,13 @@ router.put(
   authenticateToken,
   authorizePermission("security.gestionar_usuarios"),
   editUser,
+)
+
+router.patch(
+  "/:id/status",
+  authenticateToken,
+  authorizePermission("security.gestionar_usuarios"),
+  changeUserStatus,
 )
 
 module.exports = router

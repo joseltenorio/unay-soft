@@ -4,6 +4,7 @@ const {
   createUser,
   getUsers,
   updateUser,
+  updateUserStatus,
 } = require("../services/user.service")
 
 async function listUsers(req, res) {
@@ -112,8 +113,40 @@ async function editUser(req, res) {
   }
 }
 
+async function changeUserStatus(req, res) {
+  try {
+    const { id } = req.params
+    const { estado } = req.body
+
+    if (typeof estado !== "boolean") {
+      return res.status(400).json({
+        message: "Debe enviar el estado del usuario como true o false.",
+      })
+    }
+
+    const updatedUser = await updateUserStatus(
+      req.user.id_establecimiento,
+      req.user.id_usuario,
+      id,
+      estado,
+    )
+
+    return res.status(200).json({
+      message: estado
+        ? "Usuario activado correctamente."
+        : "Usuario desactivado correctamente.",
+      user: updatedUser,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al actualizar estado del usuario.",
+    })
+  }
+}
+
 module.exports = {
   listUsers,
   registerUser,
   editUser,
+  changeUserStatus,
 }
