@@ -1,6 +1,10 @@
 // backend/src/controllers/user.controller.js
 
-const { createUser, getUsers } = require("../services/user.service")
+const {
+  createUser,
+  getUsers,
+  updateUser,
+} = require("../services/user.service")
 
 async function listUsers(req, res) {
   try {
@@ -67,7 +71,49 @@ async function registerUser(req, res) {
   }
 }
 
+async function editUser(req, res) {
+  try {
+    const { id } = req.params
+
+    const {
+      nombres,
+      apellidos,
+      email,
+      username,
+      celular,
+      id_rol,
+      estado,
+    } = req.body
+
+    if (!nombres || !apellidos || !email || !username || !id_rol) {
+      return res.status(400).json({
+        message: "Debe ingresar nombres, apellidos, correo, usuario y rol.",
+      })
+    }
+
+    const updatedUser = await updateUser(req.user.id_establecimiento, id, {
+      nombres,
+      apellidos,
+      email,
+      username,
+      celular,
+      id_rol,
+      estado,
+    })
+
+    return res.status(200).json({
+      message: "Usuario actualizado correctamente.",
+      user: updatedUser,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al actualizar usuario.",
+    })
+  }
+}
+
 module.exports = {
   listUsers,
   registerUser,
+  editUser,
 }
