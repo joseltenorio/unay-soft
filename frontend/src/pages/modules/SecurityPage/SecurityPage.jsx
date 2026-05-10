@@ -3,7 +3,14 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 
-import { getUsers } from "../../../services/userService"
+import { getRoles } from "../../../services/roleService"
+import {
+  createUser,
+  getUsers,
+  updateUser,
+  updateUserStatus,
+} from "../../../services/userService"
+import UserForm from "./UserForm"
 
 import "./SecurityPage.css"
 
@@ -20,40 +27,116 @@ function formatDate(value) {
 
 export default function SecurityPage() {
   const [users, setUsers] = useState([])
+  const [roles, setRoles] = useState([])
+
   const [status, setStatus] = useState("loading")
   const [errorMessage, setErrorMessage] = useState("")
 
-  useEffect(() => {
-    async function loadUsers() {
-      try {
-        setStatus("loading")
-        setErrorMessage("")
+  const [formMode, setFormMode] = useState(null)
+  const [selectedUser, setSelectedUser] = useState(null)
+  const [formError, setFormError] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-        const usersData = await getUsers()
+  async function loadSecurityData() {
+    try {
+      setStatus("loading")
+      setErrorMessage("")
 
-        setUsers(usersData)
-        setStatus("success")
-      } catch (error) {
-        setStatus("error")
-        setErrorMessage(
-          error.message || "No se pudieron cargar los usuarios del sistema.",
-        )
-      }
+      const [usersData, rolesData] = await Promise.all([getUsers(), getRoles()])
+
+      setUsers(usersData)
+      setRoles(rolesData)
+      setStatus("success")
+    } catch (error) {
+      setStatus("error")
+      setErrorMessage(
+        error.message || "No se pudo cargar la información de seguridad.",
+      )
     }
+  }
 
-    loadUsers()
+  useEffect(() => {
+    loadSecurityData()
   }, [])
 
   const summary = useMemo(() => {
     const activeUsers = users.filter((user) => user.estado).length
-    const roles = new Set(users.map((user) => user.rol).filter(Boolean))
+    const inactiveUsers = users.length - activeUsers
+    const foundRoles = new Set(users.map((user) => user.rol).filter(Boolean))
 
     return {
       totalUsers: users.length,
       activeUsers,
-      totalRoles: roles.size,
+      inactiveUsers,
+      totalRoles: foundRoles.size,
     }
   }, [users])
+
+  function handleOpenCreateForm() {
+    setFormMode("create")
+    setSelectedUser(null)
+    setFormError("")
+  }
+
+  function handleOpenEditForm(user) {
+    setFormMode("edit")
+    setSelectedUser(user)
+    setFormError("")
+  }
+
+  function handleCloseForm() {
+    setFormMode(null)
+    setSelectedUser(null)
+    setFormError("")
+    setIsSubmitting(false)
+  }
+
+  async function handleSubmitUser(payload) {
+    try {
+      setIsSubmitting(true)
+      setFormError("")
+
+      if (formMode === "edit" && selectedUser) {
+        await updateUser(selectedUser.id_usuario, payload)
+      } else {
+        await createUser(payload)
+      }
+
+      await loadSecurityData()
+      handleCloseForm()
+    } catch (error) {
+      setFormError(error.message || "No se pudo guardar el usuario.")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  async function handleToggleStatus(user) {
+    const nextStatus = !user.estado
+    const actionLabel = nextStatus ? "activar" : "desactivar"
+
+    const confirmed = window.confirm(
+      `¿Deseas ${actionLabel} al usuario ${user.nombres} ${user.apellidos}?`,
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    try {
+      setErrorMessage("")
+
+      await updateUserStatus(user.id_usuario, nextStatus)
+      await loadSecurityData()
+    } catch (error) {
+      setStatus("error")
+      setErrorMessage(
+        error.message || "No se pudo actualizar el estado del usuario.",
+      )
+    }
+  }
+
+  const isFormOpen = Boolean(formMode)
 
   return (
     <main className="security-page">
@@ -63,8 +146,8 @@ export default function SecurityPage() {
             <p className="security-page__eyebrow">Seguridad</p>
             <h1>Mantenimiento de usuarios</h1>
             <p>
-              Consulta los usuarios registrados, sus roles, estado de acceso y
-              último ingreso al sistema.
+              Administra usuarios internos, roles asignados, estado de acceso y
+              datos principales del personal autorizado.
             </p>
           </div>
 
@@ -85,7 +168,12 @@ export default function SecurityPage() {
           </article>
 
           <article>
-            <span>Roles registrados</span>
+            <span>Usuarios inactivos</span>
+            <strong>{summary.inactiveUsers}</strong>
+          </article>
+
+          <article>
+            <span>Roles encontrados</span>
             <strong>{summary.totalRoles}</strong>
           </article>
         </section>
@@ -95,20 +183,36 @@ export default function SecurityPage() {
             <div>
               <h2>Usuarios del sistema</h2>
               <p>
-                Esta vista está disponible solo para usuarios con permisos de
-                gestión de seguridad.
+                Esta vista está disponible para usuarios con permiso de gestión
+                de seguridad.
               </p>
             </div>
 
-            <button className="security-page__new-button" type="button" disabled>
+            <button
+              className="security-page__new-button"
+              type="button"
+              onClick={handleOpenCreateForm}
+              disabled={status === "loading"}
+            >
               + Nuevo usuario
             </button>
           </div>
 
+          {isFormOpen && (
+            <UserForm
+              key={selectedUser?.id_usuario || "create"}
+              mode={formMode}
+              roles={roles}
+              initialUser={selectedUser}
+              isSubmitting={isSubmitting}
+              errorMessage={formError}
+              onCancel={handleCloseForm}
+              onSubmit={handleSubmitUser}
+            />
+          )}
+
           {status === "loading" && (
-            <div className="security-page__state">
-              Cargando usuarios...
-            </div>
+            <div className="security-page__state">Cargando usuarios...</div>
           )}
 
           {status === "error" && (
@@ -134,6 +238,7 @@ export default function SecurityPage() {
                     <th>Rol</th>
                     <th>Estado</th>
                     <th>Último acceso</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
 
@@ -164,6 +269,30 @@ export default function SecurityPage() {
                       </td>
 
                       <td>{formatDate(user.ultimo_acceso_at)}</td>
+
+                      <td>
+                        <div className="security-page__actions">
+                          <button
+                            className="security-page__action-button"
+                            type="button"
+                            onClick={() => handleOpenEditForm(user)}
+                          >
+                            Editar
+                          </button>
+
+                          <button
+                            className={
+                              user.estado
+                                ? "security-page__action-button security-page__action-button--danger"
+                                : "security-page__action-button security-page__action-button--success"
+                            }
+                            type="button"
+                            onClick={() => handleToggleStatus(user)}
+                          >
+                            {user.estado ? "Desactivar" : "Activar"}
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
