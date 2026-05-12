@@ -2,386 +2,600 @@
   "info": {
     "_postman_id": "a5e711cc-b091-4037-928d-3e7c606a6ea7",
     "name": "Umari OS API",
-    "description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+    "description": "### Welcome to Postman! This is your first collection.\n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests  \n• Test your API in real-world scenarios  \n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "54524212",
     "_collection_link": "https://go.postman.co/collection/54524212-a5e711cc-b091-4037-928d-3e7c606a6ea7?source=collection_link"
   },
   "item": [
     {
-      "name": "Health Check",
-      "event": [
+      "name": "Health",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status code is 200\", function () {",
-              "    pm.response.to.have.status(200);",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:3000/api/health",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3000",
-          "path": [
-            "api",
-            "health"
-          ]
-        },
-        "description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
-      },
-      "response": []
-    },
-    {
-      "name": "Login - Admin",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"identifier\": \"admin@umari.pe\",\r\n  \"password\": \"Admin123\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:3000/api/auth/login",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3000",
-          "path": [
-            "api",
-            "auth",
-            "login"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Auth - Me",
-      "request": {
-        "auth": {
-          "type": "bearer",
-          "bearer": [
+          "name": "Health Check",
+          "event": [
             {
-              "key": "token",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwicm9sIjoiQWRtaW5pc3RyYWRvciIsImlhdCI6MTc3Nzk2NjgzNiwiZXhwIjoxNzc3OTc0MDM2fQ.NhKqSoxctnWVwBqFOv3krmGXMvEgysFR5cNg8S6v40M",
-              "type": "string"
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
             }
-          ]
-        },
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:3000/api/auth/me",
-          "protocol": "http",
-          "host": [
-            "localhost"
           ],
-          "port": "3000",
-          "path": [
-            "api",
-            "auth",
-            "me"
-          ]
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/health",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "health"
+              ]
+            },
+            "description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+          },
+          "response": []
         }
-      },
-      "response": []
+      ]
     },
     {
-      "name": "Permission - Admin Check",
-      "request": {
-        "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwicm9sIjoiQWRtaW5pc3RyYWRvciIsImlhdCI6MTc3Nzk2NzIxNywiZXhwIjoxNzc3OTc0NDE3fQ.P9QZLc8Qyn831C4CstivmE_u4i8grX6tQNLBCjUg3-k",
-              "type": "string"
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login - Admin",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"identifier\": \"admin@umari.pe\",\r\n  \"password\": \"Admin123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
             }
-          ]
+          },
+          "response": []
         },
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:3000/api/auth/admin-check",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3000",
-          "path": [
-            "api",
-            "auth",
-            "admin-check"
-          ]
+        {
+          "name": "Auth - Me",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwicm9sIjoiQWRtaW5pc3RyYWRvciIsImlhdCI6MTc3Nzk2NjgzNiwiZXhwIjoxNzc3OTc0MDM2fQ.NhKqSoxctnWVwBqFOv3krmGXMvEgysFR5cNg8S6v40M",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/auth/me",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Cajero",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"identifier\": \"caja@umari.pe\",\r\n  \"password\": \"Caja123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - User",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"identifier\": \"mozo@umari.pe\",\r\n  \"password\": \"Mozo123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Mesero",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"identifier\": \"mozo@umari.pe\",\r\n  \"password\": \"Mozo123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
         }
-      },
-      "response": []
+      ]
     },
     {
-      "name": "Login - User",
-      "request": {
-        "auth": {
-          "type": "noauth"
-        },
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"identifier\": \"mozo@umari.pe\",\r\n  \"password\": \"Mozo123\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+      "name": "Authorization / Profiles",
+      "item": [
+        {
+          "name": "Permission - Admin Check",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwicm9sIjoiQWRtaW5pc3RyYWRvciIsImlhdCI6MTc3Nzk2NzIxNywiZXhwIjoxNzc3OTc0NDE3fQ.P9QZLc8Qyn831C4CstivmE_u4i8grX6tQNLBCjUg3-k",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/auth/admin-check",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "auth",
+                "admin-check"
+              ]
             }
-          }
+          },
+          "response": []
         },
-        "url": {
-          "raw": "http://localhost:3000/api/auth/login",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3000",
-          "path": [
-            "api",
-            "auth",
-            "login"
-          ]
+        {
+          "name": "Cajero - Caja Permitido",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzMzMzMzMzMtMzMzMy0zMzMzLTMzMzMtMzMzMzMzMzMzMzMzIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjMzMzMzMzMtMzMzMy0zMzMzLTMzMzMtMzMzMzMzMzMzMzMzIiwicm9sIjoiQ2FqZXJvIiwiaWF0IjoxNzc3OTg3ODU0LCJleHAiOjE3Nzc5OTUwNTR9.v6_DOy52X1Dcc-XxBXM_TS6zby05XRbPxC68385ekOY",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/demo/cashier-area",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "demo",
+                "cashier-area"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cajero - POS Denegado",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzMzMzMzMzMtMzMzMy0zMzMzLTMzMzMtMzMzMzMzMzMzMzMzIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjMzMzMzMzMtMzMzMy0zMzMzLTMzMzMtMzMzMzMzMzMzMzMzIiwicm9sIjoiQ2FqZXJvIiwiaWF0IjoxNzc3OTg4MTI0LCJleHAiOjE3Nzc5OTUzMjR9.wrjcK0ER0Mxf9MYLr4IB543yK8MFYebUaZX5aLzO8QE",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/demo/waiter-area",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "demo",
+                "waiter-area"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mesero - Caja Denegado",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzQ0NDQ0NDQtNDQ0NC00NDQ0LTQ0NDQtNDQ0NDQ0NDQ0NDQ0IiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjQ0NDQ0NDQtNDQ0NC00NDQ0LTQ0NDQtNDQ0NDQ0NDQ0NDQ0Iiwicm9sIjoiTW96byIsImlhdCI6MTc3Nzk4NzkzMSwiZXhwIjoxNzc3OTk1MTMxfQ.fAT_mHQepdLeeOTGfvSmYX2FIjxmOrqGk0ZSBoGsKG8",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/demo/cashier-area",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "demo",
+                "cashier-area"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mesero - POS Permitido",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzQ0NDQ0NDQtNDQ0NC00NDQ0LTQ0NDQtNDQ0NDQ0NDQ0NDQ0IiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjQ0NDQ0NDQtNDQ0NC00NDQ0LTQ0NDQtNDQ0NDQ0NDQ0NDQ0Iiwicm9sIjoiTW96byIsImlhdCI6MTc3Nzk4ODA2NSwiZXhwIjoxNzc3OTk1MjY1fQ.2ifiaM_IAwhrse3iaOpaK_WOtVhB4agoXLEdpoldobQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/demo/waiter-area",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "demo",
+                "waiter-area"
+              ]
+            }
+          },
+          "response": []
         }
-      },
-      "response": []
+      ]
     },
     {
-      "name": "Users - Protected",
-      "request": {
-        "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzQ0NDQ0NDQtNDQ0NC00NDQ0LTQ0NDQtNDQ0NDQ0NDQ0NDQ0IiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjQ0NDQ0NDQtNDQ0NC00NDQ0LTQ0NDQtNDQ0NDQ0NDQ0NDQ0Iiwicm9sIjoiTW96byIsImlhdCI6MTc3Nzk2OTMyNiwiZXhwIjoxNzc3OTc2NTI2fQ.HcHqjTvpz8PuJ9l4p2jDrWZ7snFP8f2d4p5T7ZXcXNA",
-              "type": "string"
+      "name": "Roles",
+      "item": [
+        {
+          "name": "Admin Roles",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwibm9tYnJlcyI6Ikpvc2UgTHVpcyIsImFwZWxsaWRvcyI6IkFkbWluaXN0cmFkb3IiLCJlbWFpbCI6ImFkbWluQHVtYXJpLnBlIiwidXNlcm5hbWUiOiJhZG1pbi51bWFyaSIsInJvbCI6IkFkbWluaXN0cmFkb3IiLCJpYXQiOjE3Nzg0MTc4NjgsImV4cCI6MTc3ODQyNTA2OH0.Ap2Ik1SE1l0SbdzTPCSa8x64vv9pFGwycb9xsge6Aic",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/roles",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "roles"
+              ]
             }
-          ]
-        },
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:3000/api/users",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3000",
-          "path": [
-            "api",
-            "users"
-          ]
+          },
+          "response": []
         }
-      },
-      "response": []
+      ]
     },
     {
-      "name": "Login - Cajero",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"identifier\": \"caja@umari.pe\",\r\n  \"password\": \"Caja123\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+      "name": "User Maintenance",
+      "item": [
+        {
+          "name": "Users - Protected",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwibm9tYnJlcyI6Ikpvc2UgTHVpcyIsImFwZWxsaWRvcyI6IkFkbWluaXN0cmFkb3IiLCJlbWFpbCI6ImFkbWluQHVtYXJpLnBlIiwidXNlcm5hbWUiOiJhZG1pbi51bWFyaSIsInJvbCI6IkFkbWluaXN0cmFkb3IiLCJpYXQiOjE3Nzg0MjI5NjYsImV4cCI6MTc3ODQzMDE2Nn0.iowbLK6PiPYlXU6La4EqLDRQLzrwFtMchGhu9M36RZs",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/users",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "users"
+              ]
             }
-          }
+          },
+          "response": []
         },
-        "url": {
-          "raw": "http://localhost:3000/api/auth/login",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3000",
-          "path": [
-            "api",
-            "auth",
-            "login"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Login - Mesero",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"identifier\": \"mozo@umari.pe\",\r\n  \"password\": \"Mozo123\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+        {
+          "name": "Create User",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwibm9tYnJlcyI6Ikpvc2UgTHVpcyIsImFwZWxsaWRvcyI6IkFkbWluaXN0cmFkb3IiLCJlbWFpbCI6ImFkbWluQHVtYXJpLnBlIiwidXNlcm5hbWUiOiJhZG1pbi51bWFyaSIsInJvbCI6IkFkbWluaXN0cmFkb3IiLCJpYXQiOjE3Nzg0MjA4OTQsImV4cCI6MTc3ODQyODA5NH0.OL14vBRoi8JadawjvtIQlVqemov6KGiMMWxdt0bJHrQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombres\": \"Ana\",\r\n  \"apellidos\": \"Torres\",\r\n  \"email\": \"ana@umari.pe\",\r\n  \"username\": \"ana.umari\",\r\n  \"password\": \"Ana12345\",\r\n  \"celular\": \"+51 999 777 666\",\r\n  \"id_rol\": \"23333333-3333-3333-3333-333333333333\",\r\n  \"estado\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/users",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "users"
+              ]
             }
-          }
+          },
+          "response": []
         },
-        "url": {
-          "raw": "http://localhost:3000/api/auth/login",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3000",
-          "path": [
-            "api",
-            "auth",
-            "login"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Cajero - Caja Permitido",
-      "request": {
-        "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzMzMzMzMzMtMzMzMy0zMzMzLTMzMzMtMzMzMzMzMzMzMzMzIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjMzMzMzMzMtMzMzMy0zMzMzLTMzMzMtMzMzMzMzMzMzMzMzIiwicm9sIjoiQ2FqZXJvIiwiaWF0IjoxNzc3OTg3ODU0LCJleHAiOjE3Nzc5OTUwNTR9.v6_DOy52X1Dcc-XxBXM_TS6zby05XRbPxC68385ekOY",
-              "type": "string"
+        {
+          "name": "Edit User",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwibm9tYnJlcyI6Ikpvc2UgTHVpcyIsImFwZWxsaWRvcyI6IkFkbWluaXN0cmFkb3IiLCJlbWFpbCI6ImFkbWluQHVtYXJpLnBlIiwidXNlcm5hbWUiOiJhZG1pbi51bWFyaSIsInJvbCI6IkFkbWluaXN0cmFkb3IiLCJpYXQiOjE3Nzg0MjE5ODIsImV4cCI6MTc3ODQyOTE4Mn0.plWNYc2_6jpd0E8bplrUoCvEOpXPl9rSIVTvqQqay1E",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombres\": \"Carlos\",\r\n  \"apellidos\": \"Paredes Actualizado\",\r\n  \"email\": \"admin@umari.pe\",\r\n  \"username\": \"carlos.actualizado\",\r\n  \"celular\": \"+51 999 888 777\",\r\n  \"id_rol\": \"23333333-3333-3333-3333-333333333333\",\r\n  \"estado\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/users/8b8db402-cd28-42ca-bd2a-f90668a1a16d",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "users",
+                "8b8db402-cd28-42ca-bd2a-f90668a1a16d"
+              ]
             }
-          ]
+          },
+          "response": []
         },
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:3000/api/demo/cashier-area",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3000",
-          "path": [
-            "api",
-            "demo",
-            "cashier-area"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Mesero - Caja Denegado",
-      "request": {
-        "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzQ0NDQ0NDQtNDQ0NC00NDQ0LTQ0NDQtNDQ0NDQ0NDQ0NDQ0IiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjQ0NDQ0NDQtNDQ0NC00NDQ0LTQ0NDQtNDQ0NDQ0NDQ0NDQ0Iiwicm9sIjoiTW96byIsImlhdCI6MTc3Nzk4NzkzMSwiZXhwIjoxNzc3OTk1MTMxfQ.fAT_mHQepdLeeOTGfvSmYX2FIjxmOrqGk0ZSBoGsKG8",
-              "type": "string"
+        {
+          "name": "Edit Status User",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwibm9tYnJlcyI6Ikpvc2UgTHVpcyIsImFwZWxsaWRvcyI6IkFkbWluaXN0cmFkb3IiLCJlbWFpbCI6ImFkbWluQHVtYXJpLnBlIiwidXNlcm5hbWUiOiJhZG1pbi51bWFyaSIsInJvbCI6IkFkbWluaXN0cmFkb3IiLCJpYXQiOjE3Nzg0MjI5NjYsImV4cCI6MTc3ODQzMDE2Nn0.iowbLK6PiPYlXU6La4EqLDRQLzrwFtMchGhu9M36RZs",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"estado\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/users/8b8db402-cd28-42ca-bd2a-f90668a1a16d/status",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "users",
+                "8b8db402-cd28-42ca-bd2a-f90668a1a16d",
+                "status"
+              ]
             }
-          ]
+          },
+          "response": []
         },
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:3000/api/demo/cashier-area",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3000",
-          "path": [
-            "api",
-            "demo",
-            "cashier-area"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Mesero - POS Permitido",
-      "request": {
-        "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzQ0NDQ0NDQtNDQ0NC00NDQ0LTQ0NDQtNDQ0NDQ0NDQ0NDQ0IiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjQ0NDQ0NDQtNDQ0NC00NDQ0LTQ0NDQtNDQ0NDQ0NDQ0NDQ0Iiwicm9sIjoiTW96byIsImlhdCI6MTc3Nzk4ODA2NSwiZXhwIjoxNzc3OTk1MjY1fQ.2ifiaM_IAwhrse3iaOpaK_WOtVhB4agoXLEdpoldobQ",
-              "type": "string"
+        {
+          "name": "Create User No Permission",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwibm9tYnJlcyI6Ikpvc2UgTHVpcyIsImFwZWxsaWRvcyI6IkFkbWluaXN0cmFkb3IiLCJlbWFpbCI6ImFkbWluQHVtYXJpLnBlIiwidXNlcm5hbWUiOiJhZG1pbi51bWFyaSIsInJvbCI6IkFkbWluaXN0cmFkb3IiLCJpYXQiOjE3Nzg0MjAyODcsImV4cCI6MTc3ODQyNzQ4N30.MtlbJS4JAdJu3CZgo_CX64s9yq4G7b0unEdidmpcp-w",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombres\": \"Carlos\",\r\n  \"apellidos\": \"Paredes\",\r\n  \"email\": \"carlos2@umari.pe\",\r\n  \"username\": \"carlos.umari\",\r\n  \"password\": \"Carlos123\",\r\n  \"celular\": \"+51 999 888 777\",\r\n  \"id_rol\": \"23333333-3333-3333-3333-333333333333\",\r\n  \"estado\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/users",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "users"
+              ]
             }
-          ]
-        },
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:3000/api/demo/waiter-area",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3000",
-          "path": [
-            "api",
-            "demo",
-            "waiter-area"
-          ]
+          },
+          "response": []
         }
-      },
-      "response": []
-    },
-    {
-      "name": "Cajero - POS Denegado",
-      "request": {
-        "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzMzMzMzMzMtMzMzMy0zMzMzLTMzMzMtMzMzMzMzMzMzMzMzIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjMzMzMzMzMtMzMzMy0zMzMzLTMzMzMtMzMzMzMzMzMzMzMzIiwicm9sIjoiQ2FqZXJvIiwiaWF0IjoxNzc3OTg4MTI0LCJleHAiOjE3Nzc5OTUzMjR9.wrjcK0ER0Mxf9MYLr4IB543yK8MFYebUaZX5aLzO8QE",
-              "type": "string"
-            }
-          ]
-        },
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:3000/api/demo/waiter-area",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "3000",
-          "path": [
-            "api",
-            "demo",
-            "waiter-area"
-          ]
-        }
-      },
-      "response": []
+      ]
     }
   ]
 }
