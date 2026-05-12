@@ -191,10 +191,6 @@ export default function Login() {
             <span>{isSubmitting ? "Ingresando..." : "Ingresar"}</span>
           </button>
 
-          {isSubmitting && (
-            <p className="login-form__status">Validando credenciales...</p>
-          )}
-
           <p className="login-form__help">
             ¿Problemas con tu acceso? Contacta al Administrador del Sistema o
             Contacta a Soporte Técnico.
