@@ -13,27 +13,35 @@ El proyecto se encuentra en desarrollo.
 Actualmente cuenta con:
 
 - Frontend desarrollado con React y Vite.
-- Landing pública con secciones de presentación, módulos y acceso al portal.
-- Páginas de autenticación para login y recuperación de contraseña.
 - Backend desarrollado con Node.js y Express.
-- Conexión del backend con Supabase/PostgreSQL.
+- Base de datos PostgreSQL alojada en Supabase.
+- Landing pública con presentación del sistema y acceso al portal.
+- Login conectado al backend.
 - Autenticación con bcryptjs y JWT.
+- Feedback visual de carga durante el inicio de sesión.
+- Validación de sesión mediante `/api/auth/me`.
 - Middleware de autenticación mediante Bearer Token.
 - Middleware de autorización por permisos.
-- Validación de sesión desde el frontend mediante `/api/auth/me`.
 - Carga de usuario, permisos y módulos disponibles en la sesión del frontend.
 - Ruta interna principal protegida en `/app`.
-- Componentes de control visual por permisos.
-- Base de datos modelada en PostgreSQL/Supabase.
-- Scripts SQL para estructura, datos iniciales y validación.
+- Rutas internas protegidas por permisos.
+- Páginas iniciales para los módulos POS, KDS, Caja, Inventario, BI y Seguridad.
+- Página de acceso no autorizado para usuarios sin permisos suficientes.
+- Módulo de Seguridad con mantenimiento de usuarios para el perfil Administrador.
+- CRUD de usuarios desde el módulo de Seguridad:
+  - Listado de usuarios.
+  - Creación de usuarios.
+  - Edición de usuarios.
+  - Activación y desactivación de usuarios.
+- Scripts SQL para estructura, datos iniciales y validación de la base de datos.
 
-Próximas partes del desarrollo:
+Pendiente de desarrollo:
 
-- Proteger rutas internas por permiso.
-- Crear páginas iniciales para los módulos principales.
-- Implementar layout interno del sistema autenticado.
-- Desarrollar progresivamente los módulos POS, KDS, Caja, Inventario, BI y Seguridad.
-- Mejorar validaciones y manejo de errores del backend.
+- Mejorar el layout interno del sistema autenticado.
+- Desarrollar la lógica funcional de los módulos POS, KDS, Caja, Inventario y BI.
+- Implementar funcionalidades avanzadas de usuarios, roles y permisos.
+- Mejorar validaciones visuales y manejo de errores por formulario.
+- Preparar documentación técnica más detallada de endpoints si el proyecto escala.
 
 ---
 
@@ -74,8 +82,23 @@ unay-soft/
 ├─ frontend/
 │  ├─ src/
 │  │  ├─ assets/
+│  │  │  └─ styles/
 │  │  ├─ components/
 │  │  ├─ pages/
+│  │  │  ├─ AppHome/
+│  │  │  ├─ Home/
+│  │  │  ├─ Login/
+│  │  │  ├─ PermissionDemo/
+│  │  │  ├─ RestorePassword/
+│  │  │  ├─ Unauthorized/
+│  │  │  └─ modules/
+│  │  │     ├─ BiPage/
+│  │  │     ├─ CashierPage/
+│  │  │     ├─ InventoryPage/
+│  │  │     ├─ KdsPage/
+│  │  │     ├─ ModulePlaceholder/
+│  │  │     ├─ PosPage/
+│  │  │     └─ SecurityPage/
 │  │  ├─ routes/
 │  │  ├─ services/
 │  │  ├─ utils/
@@ -222,7 +245,7 @@ Descripción:
 
 ---
 
-## Autenticación y permisos
+## Autenticación y autorización
 
 El sistema utiliza autenticación con JWT.
 
@@ -230,17 +253,75 @@ Flujo general:
 
 1. El usuario inicia sesión desde el frontend.
 2. El backend valida las credenciales.
-3. Si las credenciales son correctas, el backend genera un token JWT.
-4. El frontend almacena la sesión.
-5. Las rutas internas validan la sesión con `/api/auth/me`.
-6. El backend devuelve el usuario autenticado, sus permisos y sus módulos disponibles.
-7. El frontend usa esa información para mostrar u ocultar secciones según permisos.
+3. El backend compara la contraseña usando bcryptjs.
+4. Si las credenciales son correctas, el backend genera un token JWT.
+5. El frontend almacena la sesión.
+6. Las rutas internas validan la sesión mediante `/api/auth/me`.
+7. El backend devuelve el usuario autenticado, sus permisos y sus módulos disponibles.
+8. El frontend usa esa información para mostrar u ocultar módulos, rutas y acciones según permisos.
 
-Rutas principales:
+Rutas principales de autenticación:
 
 ```txt
 POST /api/auth/login
 GET  /api/auth/me
+```
+
+---
+
+## Módulos y permisos
+
+El acceso interno se basa en roles y permisos.
+
+Los roles permiten agrupar responsabilidades operativas, mientras que los permisos definen qué módulos o acciones puede usar cada perfil.
+
+Módulos principales:
+
+- POS / Salón
+- KDS / Cocina
+- Caja
+- Inventario
+- BI / Reportes
+- Seguridad
+
+Ejemplos de permisos utilizados:
+
+```txt
+pos.ver
+kds.ver
+cashier.ver
+inventory.ver
+bi.ver
+security.ver
+security.gestionar_usuarios
+```
+
+El backend mantiene la autoridad real de seguridad mediante middlewares de autenticación y autorización. El frontend usa los permisos para mejorar la experiencia del usuario mostrando únicamente las opciones disponibles para su perfil.
+
+---
+
+## Mantenimiento de usuarios
+
+El módulo de Seguridad incluye una opción de mantenimiento de usuarios para el perfil Administrador.
+
+Funcionalidades actuales:
+
+- Listar usuarios registrados.
+- Crear nuevos usuarios.
+- Editar datos de usuarios.
+- Activar o desactivar usuarios.
+- Asignar roles a usuarios.
+- Validar permisos antes de acceder al módulo.
+- Evitar acciones no autorizadas desde el backend.
+
+Endpoints principales relacionados:
+
+```txt
+GET    /api/users
+POST   /api/users
+PUT    /api/users/:id
+PATCH  /api/users/:id/status
+GET    /api/roles
 ```
 
 ---
@@ -255,16 +336,12 @@ Rutas públicas:
 /restore-password
 ```
 
-Rutas internas actuales:
+Rutas internas:
 
 ```txt
 /app
 /app/permissions-demo
-```
-
-Rutas internas planificadas:
-
-```txt
+/app/unauthorized
 /app/pos
 /app/kds
 /app/cashier
@@ -272,6 +349,17 @@ Rutas internas planificadas:
 /app/bi
 /app/security
 ```
+
+---
+
+## Flujo interno esperado
+
+1. El usuario inicia sesión desde `/login`.
+2. Si las credenciales son correctas, ingresa a `/app`.
+3. El sistema carga los datos del usuario, permisos y módulos disponibles.
+4. La pantalla interna muestra solo los módulos permitidos para el perfil.
+5. Si un usuario intenta ingresar a una ruta sin permiso, el sistema muestra `/app/unauthorized`.
+6. El perfil Administrador puede acceder al módulo de Seguridad y administrar usuarios.
 
 ---
 
@@ -283,20 +371,22 @@ Tipos principales:
 
 - `feat`: nueva funcionalidad.
 - `fix`: corrección de errores.
-- `refactor`: mejora interna sin cambiar el comportamiento.
+- `refactor`: mejora interna sin cambiar el comportamiento esperado.
 - `style`: cambios visuales o de estilos.
 - `docs`: cambios de documentación.
 - `chore`: configuración, dependencias o mantenimiento.
 - `db`: cambios relacionados con scripts o estructura de base de datos.
 
-Ejemplos:
+Ejemplos usados en el proyecto:
 
 ```txt
 feat(auth): connect login form with backend API
 feat(auth): validate protected session with backend
 feat(auth): expose user permissions to frontend
 feat(auth): add permission-based UI guard
-refactor(routes): rename dashboard entry page to app home
+feat(auth): protect app module routes by permission
+feat(security): connect user CRUD actions
+fix(auth): prevent login loading feedback layout shift
 docs: update project documentation
 ```
 
@@ -312,6 +402,8 @@ Ejemplos adecuados:
 - Un commit para validar sesión protegida.
 - Un commit para exponer permisos al frontend.
 - Un commit para proteger rutas por permiso.
+- Un commit para implementar el mantenimiento de usuarios.
+- Un commit para corregir un comportamiento visual específico.
 - Un commit para actualizar documentación.
 
 Evitar:
@@ -319,3 +411,4 @@ Evitar:
 - Commits por cada archivo individual.
 - Commits con cambios no relacionados.
 - Mezclar lógica de autenticación, rediseño visual y documentación en un solo commit.
+- Mezclar cambios de backend, frontend y documentación sin una unidad lógica clara.
