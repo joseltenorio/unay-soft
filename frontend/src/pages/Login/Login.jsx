@@ -17,6 +17,7 @@ export default function Login() {
   const [remember, setRemember] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [toast, setToast] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     if (getToken()) {
@@ -37,6 +38,10 @@ export default function Login() {
   async function handleSubmit(event) {
     event.preventDefault()
 
+    if (isSubmitting) {
+      return
+    }
+
     if (!identifier.trim()) {
       setToast({
         type: "error",
@@ -55,28 +60,45 @@ export default function Login() {
       return
     }
 
+    const minimumFeedbackTime = 450
+    const startedAt = Date.now()
+
     try {
+      setIsSubmitting(true)
+
       await loginRequest({
         identifier: identifier.trim(),
         password,
         remember,
       })
 
-      setToast({
-        type: "success",
-        title: "Login exitoso",
-        message: "Bienvenido a Umarí OS.",
-      })
+      const elapsedTime = Date.now() - startedAt
+      const remainingTime = Math.max(0, minimumFeedbackTime - elapsedTime)
 
       window.setTimeout(() => {
-        navigate("/app")
-      }, 700)
+        setToast({
+          type: "success",
+          title: "Login exitoso",
+          message: "Bienvenido a Umarí OS.",
+        })
+
+        window.setTimeout(() => {
+          navigate("/app")
+        }, 400)
+      }, remainingTime)
     } catch (error) {
-      setToast({
-        type: "error",
-        title: "Acceso denegado",
-        message: error.message,
-      })
+      const elapsedTime = Date.now() - startedAt
+      const remainingTime = Math.max(0, minimumFeedbackTime - elapsedTime)
+
+      window.setTimeout(() => {
+        setToast({
+          type: "error",
+          title: "Acceso denegado",
+          message: error.message,
+        })
+
+        setIsSubmitting(false)
+      }, remainingTime)
     }
   }
 
@@ -112,6 +134,7 @@ export default function Login() {
               onChange={(event) => setIdentifier(event.target.value)}
               placeholder="Ingresa tu correo o usuario"
               autoComplete="username"
+              disabled={isSubmitting}
             />
           </div>
 
@@ -126,12 +149,14 @@ export default function Login() {
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="Ingresa tu contraseña"
                 autoComplete="current-password"
+                disabled={isSubmitting}
               />
 
               <button
                 type="button"
                 className="login-form__password-toggle"
                 onClick={() => setShowPassword((current) => !current)}
+                disabled={isSubmitting}
                 aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
               >
                 {showPassword ? "◡" : "●"}
@@ -145,6 +170,7 @@ export default function Login() {
                 type="checkbox"
                 checked={remember}
                 onChange={(event) => setRemember(event.target.checked)}
+                disabled={isSubmitting}
               />
               <span />
               Recordarme
@@ -155,9 +181,19 @@ export default function Login() {
             </Link>
           </div>
 
-          <button className="auth-submit-button login-form__submit" type="submit">
-            Ingresar
+          <button
+            className="auth-submit-button login-form__submit"
+            type="submit"
+            disabled={isSubmitting}
+            aria-busy={isSubmitting}
+          >
+            {isSubmitting && <span className="login-form__spinner" aria-hidden="true" />}
+            <span>{isSubmitting ? "Ingresando..." : "Ingresar"}</span>
           </button>
+
+          {isSubmitting && (
+            <p className="login-form__status">Validando credenciales...</p>
+          )}
 
           <p className="login-form__help">
             ¿Problemas con tu acceso? Contacta al Administrador del Sistema o
