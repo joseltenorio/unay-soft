@@ -3,6 +3,8 @@
 import { Link } from "react-router-dom"
 import { useEffect, useMemo, useState } from "react"
 
+import logoUmari from "../../assets/icons/logo-umari.svg"
+
 import {
   getCurrentModules,
   getCurrentPermissions,
@@ -453,7 +455,7 @@ export default function AppHome() {
         </div>
 
         <div className="app-home__hero-mark" aria-hidden="true">
-          U
+          <img src={logoUmari} alt="" />
         </div>
       </section>
 
