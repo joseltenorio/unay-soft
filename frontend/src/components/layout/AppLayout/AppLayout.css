@@ -1,0 +1,42 @@
+/* frontend/src/components/layout/AppLayout/AppLayout.css 
+   Styles for the AppLayout component
+*/
+
+.app-layout {
+  min-height: 100vh;
+
+  display: grid;
+  grid-template-columns: 292px minmax(0, 1fr);
+
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(119, 172, 162, 0.18) 0%,
+      rgba(119, 172, 162, 0) 34%
+    ),
+    var(--color-brand-feature);
+
+  color: var(--color-text-on-light);
+}
+
+.app-layout__content {
+  min-width: 0;
+  padding: 32px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.72) 0%,
+      rgba(244, 233, 205, 0.72) 100%
+    );
+}
+
+@media (max-width: 920px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .app-layout__content {
+    padding: 24px;
+  }
+}
