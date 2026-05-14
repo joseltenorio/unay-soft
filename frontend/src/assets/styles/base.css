@@ -50,6 +50,33 @@ html {
   /* Interactive */
   --color-primary-hover: #122d3d;
 
+  /* App shell */
+  --color-app-bg: #eeece8;
+  --color-app-bg-soft: #f7f5ef;
+  --color-app-surface: #ffffff;
+  --color-app-surface-soft: #fbfaf6;
+
+  --color-app-sidebar: #ffffff;
+  --color-app-sidebar-soft: #f7f5ef;
+  --color-app-sidebar-hover: #eeece8;
+  --color-app-sidebar-border: rgba(3, 25, 38, 0.08);
+
+  --color-app-text: #031926;
+  --color-app-text-muted: #68706c;
+  --color-app-text-soft: #9a9f9a;
+
+  --color-app-accent: #3d6b57;
+  --color-app-accent-strong: #2f5545;
+  --color-app-accent-soft: rgba(61, 107, 87, 0.12);
+  --color-app-accent-border: rgba(61, 107, 87, 0.22);
+
+  --color-app-danger-soft: rgba(200, 82, 77, 0.1);
+  --color-app-danger-border: rgba(200, 82, 77, 0.24);
+
+  --shadow-app-card: 0 18px 50px rgba(3, 25, 38, 0.08);
+  --shadow-app-panel: 0 24px 70px rgba(3, 25, 38, 0.1);
+  --shadow-app-sidebar: 12px 0 34px rgba(3, 25, 38, 0.06);
+
   /* Layout */
   --container-width: 1200px;
   --navbar-height: 72px;
@@ -74,7 +101,7 @@ html {
 
 body {
   font-family: "DM Sans", "Segoe UI", sans-serif;
-  background: var(--color-surface);
+  background: var(--color-app-bg);
   color: var(--color-text-primary);
   line-height: 1.6;
   text-rendering: optimizeLegibility;
