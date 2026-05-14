@@ -17,6 +17,12 @@
     var(--color-brand-feature);
 
   color: var(--color-text-on-light);
+
+  transition: grid-template-columns var(--transition-fast);
+}
+
+.app-layout--sidebar-collapsed {
+  grid-template-columns: 92px minmax(0, 1fr);
 }
 
 .app-layout__content {
@@ -32,7 +38,8 @@
 }
 
 @media (max-width: 920px) {
-  .app-layout {
+  .app-layout,
+  .app-layout--sidebar-collapsed {
     grid-template-columns: 1fr;
   }
 
