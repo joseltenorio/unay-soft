@@ -2,7 +2,7 @@
 
 import { Outlet } from "react-router-dom"
 
-import AppSidebar from "../../components/app/AppSidebar/AppSidebar"
+import AppSidebar from "../../app/AppSidebar/AppSidebar"
 
 import "./AppLayout.css"
 

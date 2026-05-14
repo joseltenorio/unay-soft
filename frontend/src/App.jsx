@@ -17,6 +17,8 @@ import InventoryPage from "./pages/modules/InventoryPage/InventoryPage"
 import BiPage from "./pages/modules/BiPage/BiPage"
 import SecurityPage from "./pages/modules/SecurityPage/SecurityPage"
 
+import AppLayout from "./components/layout/AppLayout/AppLayout"
+
 import ProtectedRoute from "./routes/ProtectedRoute"
 import PermissionRoute from "./routes/PermissionRoute"
 
@@ -25,103 +27,77 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
-
         <Route path="/login" element={<Login />} />
-
         <Route path="/restore-password" element={<RestorePassword />} />
 
         <Route
           path="/app"
           element={
             <ProtectedRoute>
-              <AppHome />
+              <AppLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<AppHome />} />
 
-        <Route
-          path="/app/permissions-demo"
-          element={
-            <ProtectedRoute>
-              <PermissionDemo />
-            </ProtectedRoute>
-          }
-        />
+          <Route path="permissions-demo" element={<PermissionDemo />} />
 
-        <Route
-          path="/app/unauthorized"
-          element={
-            <ProtectedRoute>
-              <Unauthorized />
-            </ProtectedRoute>
-          }
-        />
+          <Route path="unauthorized" element={<Unauthorized />} />
 
-        <Route
-          path="/app/pos"
-          element={
-            <ProtectedRoute>
+          <Route
+            path="pos"
+            element={
               <PermissionRoute permission="pos.ver">
                 <PosPage />
               </PermissionRoute>
-            </ProtectedRoute>
-          }
-        />
+            }
+          />
 
-        <Route
-          path="/app/kds"
-          element={
-            <ProtectedRoute>
+          <Route
+            path="kds"
+            element={
               <PermissionRoute permission="kds.ver">
                 <KdsPage />
               </PermissionRoute>
-            </ProtectedRoute>
-          }
-        />
+            }
+          />
 
-        <Route
-          path="/app/cashier"
-          element={
-            <ProtectedRoute>
+          <Route
+            path="cashier"
+            element={
               <PermissionRoute permission="cashier.ver">
                 <CashierPage />
               </PermissionRoute>
-            </ProtectedRoute>
-          }
-        />
+            }
+          />
 
-        <Route
-          path="/app/inventory"
-          element={
-            <ProtectedRoute>
+          <Route
+            path="inventory"
+            element={
               <PermissionRoute permission="inventory.ver">
                 <InventoryPage />
               </PermissionRoute>
-            </ProtectedRoute>
-          }
-        />
+            }
+          />
 
-        <Route
-          path="/app/bi"
-          element={
-            <ProtectedRoute>
+          <Route
+            path="bi"
+            element={
               <PermissionRoute permission="bi.ver">
                 <BiPage />
               </PermissionRoute>
-            </ProtectedRoute>
-          }
-        />
+            }
+          />
 
-        <Route
-          path="/app/security"
-          element={
-            <ProtectedRoute>
+          <Route
+            path="security"
+            element={
               <PermissionRoute permission="security.ver">
                 <SecurityPage />
               </PermissionRoute>
-            </ProtectedRoute>
-          }
-        />
+            }
+          />
+        </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
