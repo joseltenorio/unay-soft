@@ -1,23 +1,23 @@
-/* src/components/common/FeatureCard/FeatureCard.css
-   Reusable feature card component
-*/
+/* src/components/common/FeatureCard/FeatureCard.css */
 
 .feature-card {
-  min-height: 286px;
+  min-height: 306px;
   padding: 32px;
 
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 38px;
+  gap: 34px;
 
-  background: var(--color-brand-feature);
-  border: 1px solid var(--color-border);
-  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(157, 190, 187, 0.48);
+  border-radius: 28px;
 
   box-shadow:
-    0 10px 22px rgba(3, 25, 38, 0.12),
-    0 2px 6px rgba(3, 25, 38, 0.08);
+    0 18px 50px rgba(3, 25, 38, 0.08),
+    0 2px 8px rgba(3, 25, 38, 0.05);
+
+  backdrop-filter: blur(10px);
 
   transition:
     transform var(--transition-base),
@@ -28,22 +28,27 @@
 
 .feature-card:hover {
   transform: translateY(-8px);
-  border-color: var(--color-brand-accent);
+  background: #ffffff;
+  border-color: rgba(70, 129, 137, 0.5);
   box-shadow:
-    0 18px 34px rgba(3, 25, 38, 0.18),
+    0 26px 70px rgba(3, 25, 38, 0.14),
     0 4px 10px rgba(3, 25, 38, 0.08);
 }
 
 .feature-card__icon-wrapper {
-  width: 58px;
-  height: 58px;
+  width: 64px;
+  height: 64px;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  background: var(--color-surface-muted);
-  border-radius: 15px;
+  background:
+    linear-gradient(145deg, rgba(244, 233, 205, 0.95), rgba(255, 255, 255, 0.95));
+  border: 1px solid rgba(157, 190, 187, 0.3);
+  border-radius: 20px;
+
+  box-shadow: 0 12px 30px rgba(3, 25, 38, 0.08);
 
   transition:
     background-color var(--transition-base),
@@ -56,44 +61,42 @@
 }
 
 .feature-card__icon {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
 }
 
 .feature-card__content {
   display: flex;
   flex-direction: column;
-  gap: 13px;
+  gap: 14px;
 }
 
 .feature-card__title {
   color: var(--color-text-primary);
 
-  font-size: 18px;
-  font-weight: 800;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.22;
+  letter-spacing: -0.035em;
 }
 
 .feature-card__description {
   color: var(--color-text-muted);
 
   font-size: 16px;
-  font-weight: 400;
-  line-height: 1.6;
+  font-weight: 500;
+  line-height: 1.68;
 }
 
-/* Tablet */
 @media (max-width: 820px) {
   .feature-card {
-    min-height: 250px;
+    min-height: 270px;
     padding: 28px;
     gap: 30px;
   }
 }
 
-/* Mobile */
 @media (max-width: 520px) {
   .feature-card {
     min-height: auto;
@@ -102,7 +105,7 @@
   }
 
   .feature-card__title {
-    font-size: 17px;
+    font-size: 18px;
   }
 
   .feature-card__description {
