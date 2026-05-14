@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
 
+import logoUmari from "../../../assets/icons/logo-umari.svg"
 import {
   getCurrentModules,
   getCurrentUser,
@@ -109,7 +110,6 @@ function getNavigationGroups(modules, searchTerm) {
 
 export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
   const navigate = useNavigate()
-
   const [searchTerm, setSearchTerm] = useState("")
 
   const user = getCurrentUser()
@@ -137,16 +137,15 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
       aria-label="Navegación interna"
     >
       <div className="app-sidebar__brand">
-        <div className="app-sidebar__logo" aria-hidden="true">
-          U
-        </div>
+        <div className="app-sidebar__brand-pill">
+          <span className="app-sidebar__logo" aria-hidden="true">
+            <img src={logoUmari} alt="" />
+          </span>
 
-        {!isCollapsed && (
-          <div className="app-sidebar__brand-text">
-            <strong>Umarí OS</strong>
-            <span>Sistema interno</span>
-          </div>
-        )}
+          {!isCollapsed && (
+            <strong className="app-sidebar__brand-name">Umarí OS</strong>
+          )}
+        </div>
 
         <button
           className="app-sidebar__collapse-button"
@@ -194,6 +193,7 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
               <div className="app-sidebar__items">
                 {group.items.map((item) => (
                   <NavLink
+                    end={item.path === "/app"}
                     className={({ isActive }) =>
                       isActive
                         ? "app-sidebar__item app-sidebar__item--active"
@@ -202,6 +202,7 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
                     key={item.path}
                     to={item.path}
                     title={isCollapsed ? item.label : undefined}
+                    onClick={() => setSearchTerm("")}
                   >
                     <span className="app-sidebar__item-icon" aria-hidden="true">
                       {item.icon}
@@ -227,7 +228,9 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
           className="app-sidebar__profile"
           title={
             isCollapsed
-              ? `${user?.nombres || "Usuario"} ${user?.apellidos || ""}`
+              ? `${user?.rol || "Sin rol"} · ${user?.nombres || "Usuario"} ${
+                  user?.apellidos || ""
+                }`
               : undefined
           }
         >
@@ -242,7 +245,6 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
                 <strong>
                   {user?.nombres || "Usuario"} {user?.apellidos || ""}
                 </strong>
-                <p>{user?.email || "Correo no disponible"}</p>
               </div>
 
               <button
