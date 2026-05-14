@@ -229,15 +229,19 @@
   border-radius: 44px;
 
   background:
-    linear-gradient(145deg, var(--color-brand-primary), var(--color-brand-primary-light));
-
-  color: var(--color-brand-feature);
-
-  font-size: 72px;
-  font-weight: 950;
-  letter-spacing: -0.12em;
+    linear-gradient(
+      145deg,
+      var(--color-brand-primary),
+      var(--color-brand-primary-light)
+    );
 
   box-shadow: 0 24px 60px rgba(3, 25, 38, 0.22);
+}
+
+.app-home__hero-mark img {
+  width: 78px;
+  height: 78px;
+  object-fit: contain;
 }
 
 .app-home__metrics {
