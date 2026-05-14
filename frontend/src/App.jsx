@@ -7,7 +7,6 @@ import Login from "./pages/Login/Login"
 import RestorePassword from "./pages/RestorePassword/RestorePassword"
 
 import AppHome from "./pages/AppHome/AppHome"
-import PermissionDemo from "./pages/PermissionDemo/PermissionDemo"
 import Unauthorized from "./pages/Unauthorized/Unauthorized"
 
 import PosPage from "./pages/modules/PosPage/PosPage"
@@ -39,8 +38,6 @@ function App() {
           }
         >
           <Route index element={<AppHome />} />
-
-          <Route path="permissions-demo" element={<PermissionDemo />} />
 
           <Route path="unauthorized" element={<Unauthorized />} />
 

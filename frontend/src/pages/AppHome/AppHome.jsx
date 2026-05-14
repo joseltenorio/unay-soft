@@ -108,12 +108,6 @@ export default function AppHome() {
             </div>
           </div>
 
-          <div className="app-home__actions">
-            <Link className="app-home__action-link" to="/app/permissions-demo">
-              Probar permisos del usuario
-            </Link>
-          </div>
-
           <section
             className="app-home__modules"
             aria-label="Módulos disponibles"
