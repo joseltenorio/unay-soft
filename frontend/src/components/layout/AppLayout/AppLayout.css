@@ -1,40 +1,41 @@
-/* frontend/src/components/layout/AppLayout/AppLayout.css 
-   Styles for the AppLayout component
-*/
+/* frontend/src/components/layout/AppLayout/AppLayout.css */
 
 .app-layout {
   min-height: 100vh;
 
   display: grid;
-  grid-template-columns: 292px minmax(0, 1fr);
+  grid-template-columns: 280px minmax(0, 1fr);
+  align-items: stretch;
 
-  background:
-    radial-gradient(
-      circle at top right,
-      rgba(119, 172, 162, 0.18) 0%,
-      rgba(119, 172, 162, 0) 34%
-    ),
-    var(--color-brand-feature);
+  background: var(--color-app-bg);
+  color: var(--color-app-text);
 
-  color: var(--color-text-on-light);
-
-  transition: grid-template-columns var(--transition-fast);
+  overflow-x: hidden;
 }
 
 .app-layout--sidebar-collapsed {
-  grid-template-columns: 92px minmax(0, 1fr);
+  grid-template-columns: 76px minmax(0, 1fr);
 }
 
 .app-layout__content {
   min-width: 0;
+  min-height: 100vh;
   padding: 32px;
 
+  overflow-x: hidden;
+
   background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.72) 0%,
-      rgba(244, 233, 205, 0.72) 100%
-    );
+    radial-gradient(
+      circle at top right,
+      rgba(61, 107, 87, 0.1) 0%,
+      rgba(61, 107, 87, 0) 34%
+    ),
+    var(--color-app-bg);
+}
+
+.app-layout__route-view {
+  min-width: 0;
+  width: 100%;
 }
 
 @media (max-width: 920px) {
@@ -44,6 +45,12 @@
   }
 
   .app-layout__content {
-    padding: 24px;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-layout__content {
+    padding: 16px;
   }
 }
