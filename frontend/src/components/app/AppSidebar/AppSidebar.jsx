@@ -1,5 +1,6 @@
 // frontend/src/components/app/AppSidebar/AppSidebar.jsx
 
+import { useMemo, useState } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
 
 import {
@@ -16,36 +17,42 @@ const moduleNavigation = {
     path: "/app/pos",
     icon: "◫",
     group: "Operación",
+    keywords: "pos salon mesas pedidos mozo atención",
   },
   kds: {
     label: "Cocina",
     path: "/app/kds",
     icon: "▦",
     group: "Operación",
+    keywords: "cocina kds pedidos preparación",
   },
   cashier: {
     label: "Caja",
     path: "/app/cashier",
     icon: "▣",
     group: "Operación",
+    keywords: "caja pagos cierre cajero",
   },
   inventory: {
     label: "Inventario",
     path: "/app/inventory",
     icon: "▤",
     group: "Operación",
+    keywords: "inventario insumos stock almacén",
   },
   bi: {
     label: "Reportes",
     path: "/app/bi",
     icon: "◈",
     group: "Análisis",
+    keywords: "reportes bi indicadores ventas analítica",
   },
   security: {
     label: "Usuarios",
     path: "/app/security",
     icon: "◎",
     group: "Administración",
+    keywords: "usuarios seguridad roles permisos admin administrador",
   },
 }
 
@@ -58,8 +65,16 @@ function getInitials(user) {
   return `${firstName}${lastName}`.toUpperCase()
 }
 
-function getNavigationGroups(modules) {
+function normalizeText(value) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+}
+
+function getNavigationGroups(modules, searchTerm) {
   const availableCodes = new Set(modules.map((module) => module.codigo))
+  const normalizedSearchTerm = normalizeText(searchTerm.trim())
 
   const items = [
     {
@@ -67,103 +82,189 @@ function getNavigationGroups(modules) {
       path: "/app",
       icon: "⌂",
       group: "Principal",
+      keywords: "inicio home centro operativo principal",
     },
     ...Object.entries(moduleNavigation)
       .filter(([moduleCode]) => availableCodes.has(moduleCode))
       .map(([, item]) => item),
   ]
 
+  const filteredItems = normalizedSearchTerm
+    ? items.filter((item) => {
+        const searchableText = normalizeText(
+          `${item.label} ${item.group} ${item.keywords}`,
+        )
+
+        return searchableText.includes(normalizedSearchTerm)
+      })
+    : items
+
   return groupOrder
     .map((groupName) => ({
       name: groupName,
-      items: items.filter((item) => item.group === groupName),
+      items: filteredItems.filter((item) => item.group === groupName),
     }))
     .filter((group) => group.items.length > 0)
 }
 
-export default function AppSidebar() {
+export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
   const navigate = useNavigate()
+
+  const [searchTerm, setSearchTerm] = useState("")
 
   const user = getCurrentUser()
   const modules = getCurrentModules()
-  const navigationGroups = getNavigationGroups(modules)
+
+  const navigationGroups = useMemo(
+    () => getNavigationGroups(modules, searchTerm),
+    [modules, searchTerm],
+  )
 
   function handleLogout() {
     logout()
     navigate("/login", { replace: true })
   }
 
+  function handleSearchClick() {
+    if (isCollapsed) {
+      onToggleCollapse()
+    }
+  }
+
   return (
-    <aside className="app-sidebar" aria-label="Navegación interna">
+    <aside
+      className={isCollapsed ? "app-sidebar app-sidebar--collapsed" : "app-sidebar"}
+      aria-label="Navegación interna"
+    >
       <div className="app-sidebar__brand">
         <div className="app-sidebar__logo" aria-hidden="true">
           U
         </div>
 
-        <div className="app-sidebar__brand-text">
-          <strong>Umarí OS</strong>
-          <span>Sistema interno</span>
-        </div>
+        {!isCollapsed && (
+          <div className="app-sidebar__brand-text">
+            <strong>Umarí OS</strong>
+            <span>Sistema interno</span>
+          </div>
+        )}
+
+        <button
+          className="app-sidebar__collapse-button"
+          type="button"
+          onClick={onToggleCollapse}
+          aria-label={isCollapsed ? "Expandir menú" : "Contraer menú"}
+          title={isCollapsed ? "Expandir menú" : "Contraer menú"}
+        >
+          {isCollapsed ? "›" : "‹"}
+        </button>
+      </div>
+
+      <div className="app-sidebar__search">
+        <span aria-hidden="true">⌕</span>
+
+        {!isCollapsed && (
+          <input
+            type="search"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Buscar módulo..."
+            aria-label="Buscar módulo"
+          />
+        )}
+
+        {isCollapsed && (
+          <button
+            className="app-sidebar__search-button"
+            type="button"
+            onClick={handleSearchClick}
+            aria-label="Expandir para buscar módulos"
+            title="Buscar módulos"
+          />
+        )}
       </div>
 
       <nav className="app-sidebar__nav">
-        {navigationGroups.map((group) => (
-          <section className="app-sidebar__group" key={group.name}>
-            <p className="app-sidebar__group-title">{group.name}</p>
+        {navigationGroups.length > 0 ? (
+          navigationGroups.map((group) => (
+            <section className="app-sidebar__group" key={group.name}>
+              {!isCollapsed && (
+                <p className="app-sidebar__group-title">{group.name}</p>
+              )}
 
-            <div className="app-sidebar__items">
-              {group.items.map((item) => (
-                <NavLink
-                  className={({ isActive }) =>
-                    isActive
-                      ? "app-sidebar__item app-sidebar__item--active"
-                      : "app-sidebar__item"
-                  }
-                  key={item.path}
-                  to={item.path}
-                >
-                  <span className="app-sidebar__item-icon" aria-hidden="true">
-                    {item.icon}
-                  </span>
-                  <span className="app-sidebar__item-label">{item.label}</span>
-                </NavLink>
-              ))}
-            </div>
-          </section>
-        ))}
+              <div className="app-sidebar__items">
+                {group.items.map((item) => (
+                  <NavLink
+                    className={({ isActive }) =>
+                      isActive
+                        ? "app-sidebar__item app-sidebar__item--active"
+                        : "app-sidebar__item"
+                    }
+                    key={item.path}
+                    to={item.path}
+                    title={isCollapsed ? item.label : undefined}
+                  >
+                    <span className="app-sidebar__item-icon" aria-hidden="true">
+                      {item.icon}
+                    </span>
+
+                    {!isCollapsed && (
+                      <span className="app-sidebar__item-label">{item.label}</span>
+                    )}
+                  </NavLink>
+                ))}
+              </div>
+            </section>
+          ))
+        ) : (
+          !isCollapsed && (
+            <p className="app-sidebar__empty">No se encontraron módulos.</p>
+          )
+        )}
       </nav>
 
       <div className="app-sidebar__footer">
-        <div className="app-sidebar__profile">
+        <div
+          className="app-sidebar__profile"
+          title={
+            isCollapsed
+              ? `${user?.nombres || "Usuario"} ${user?.apellidos || ""}`
+              : undefined
+          }
+        >
           <div className="app-sidebar__avatar" aria-hidden="true">
             {getInitials(user)}
           </div>
 
-          <div className="app-sidebar__profile-info">
-            <span>{user?.rol || "Sin rol"}</span>
-            <strong>
-              {user?.nombres || "Usuario"} {user?.apellidos || ""}
-            </strong>
-            <p>{user?.email || "Correo no disponible"}</p>
-          </div>
+          {!isCollapsed && (
+            <>
+              <div className="app-sidebar__profile-info">
+                <span>{user?.rol || "Sin rol"}</span>
+                <strong>
+                  {user?.nombres || "Usuario"} {user?.apellidos || ""}
+                </strong>
+                <p>{user?.email || "Correo no disponible"}</p>
+              </div>
 
-          <button
-            className="app-sidebar__profile-menu"
-            type="button"
-            aria-label="Opciones de cuenta"
-            title="Opciones de cuenta"
-          >
-            ⋯
-          </button>
+              <button
+                className="app-sidebar__profile-menu"
+                type="button"
+                aria-label="Opciones de cuenta"
+                title="Opciones de cuenta"
+              >
+                ⋯
+              </button>
+            </>
+          )}
         </div>
 
         <button
           className="app-sidebar__logout"
           type="button"
           onClick={handleLogout}
+          title={isCollapsed ? "Cerrar sesión" : undefined}
         >
           <span aria-hidden="true">↪</span>
-          Cerrar sesión
+          {!isCollapsed && "Cerrar sesión"}
         </button>
       </div>
     </aside>
