@@ -7,7 +7,7 @@ import {
   updateEstablishment,
 } from "../../../services/establishmentService"
 
-import logoUmari from "../../../assets/icons/logo-umari.svg"
+{/*import logoUmari from "../../../assets/icons/logo-umari.svg"*/}
 
 
 import "./EstablishmentPage.css"
@@ -158,22 +158,6 @@ export default function EstablishmentPage() {
           <strong>{hasChanges ? "Cambios sin guardar" : "Actualizado"}</strong>
         </div>
       </header>
-
-      <section className="establishment-page__hero">
-        <div className="establishment-page__hero-content">
-          <span>Centro administrativo</span>
-          <h2>Datos globales del negocio</h2>
-          <p>
-            Esta configuración se usará como base para la operación del sistema,
-            los reportes, los comprobantes internos y la identidad visual del
-            establecimiento.
-          </p>
-        </div>
-
-        <div className="establishment-page__hero-mark" aria-hidden="true">
-          <img src={logoUmari} alt="" />
-        </div>
-      </section>
 
       {isLoading ? (
         <div className="establishment-page__feedback">
