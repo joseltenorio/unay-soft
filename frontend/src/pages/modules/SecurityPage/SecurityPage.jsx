@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 
+import useToast from "../../../components/common/Toast/useToast"
+
 import { getRoles } from "../../../services/roleService"
 import {
   createUser,
@@ -36,6 +38,8 @@ export default function SecurityPage() {
   const [selectedUser, setSelectedUser] = useState(null)
   const [formError, setFormError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const { showToast } = useToast()
 
   async function loadSecurityData() {
     try {
@@ -98,14 +102,34 @@ export default function SecurityPage() {
 
       if (formMode === "edit" && selectedUser) {
         await updateUser(selectedUser.id_usuario, payload)
+
+        showToast({
+          type: "success",
+          title: "Usuario actualizado",
+          message: "Los datos del usuario se guardaron correctamente.",
+        })
       } else {
         await createUser(payload)
+
+        showToast({
+          type: "success",
+          title: "Usuario creado",
+          message: "El nuevo usuario fue registrado correctamente.",
+        })
       }
 
       await loadSecurityData()
       handleCloseForm()
     } catch (error) {
-      setFormError(error.message || "No se pudo guardar el usuario.")
+      const message = error.message || "No se pudo guardar el usuario."
+
+      setFormError(message)
+
+      showToast({
+        type: "error",
+        title: "No se pudo guardar",
+        message,
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -128,11 +152,25 @@ export default function SecurityPage() {
 
       await updateUserStatus(user.id_usuario, nextStatus)
       await loadSecurityData()
+
+      showToast({
+        type: "success",
+        title: nextStatus ? "Usuario activado" : "Usuario desactivado",
+        message: `${user.nombres} ${user.apellidos} fue ${
+          nextStatus ? "activado" : "desactivado"
+        } correctamente.`,
+      })
     } catch (error) {
+      const message = error.message || "No se pudo actualizar el estado del usuario."
+
       setStatus("error")
-      setErrorMessage(
-        error.message || "No se pudo actualizar el estado del usuario.",
-      )
+      setErrorMessage(message)
+
+      showToast({
+        type: "error",
+        title: "No se pudo actualizar",
+        message,
+      })
     }
   }
 
