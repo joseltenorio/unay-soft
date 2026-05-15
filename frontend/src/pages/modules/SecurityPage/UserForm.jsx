@@ -1,6 +1,6 @@
 // src/pages/modules/SecurityPage/UserForm.jsx
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import "./UserForm.css"
 
@@ -46,6 +46,10 @@ export default function UserForm({
   const [formData, setFormData] = useState(() =>
     getInitialFormState(mode, initialUser),
   )
+
+  useEffect(() => {
+    setFormData(getInitialFormState(mode, initialUser))
+  }, [mode, initialUser])
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target

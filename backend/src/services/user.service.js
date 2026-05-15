@@ -7,6 +7,7 @@ async function getUsers(idEstablecimiento) {
   const query = `
     select
       u.id_usuario,
+      u.id_rol,
       u.nombres,
       u.apellidos,
       u.email,
