@@ -8,7 +8,7 @@ const { testConnection } = require("./config/database")
 const authRoutes = require("./routes/auth.routes")
 const userRoutes = require("./routes/user.routes")
 const roleRoutes = require("./routes/role.routes")
-const demoRoutes = require("./routes/demo.routes")
+const establishmentRoutes = require("./routes/establishment.routes")
 
 const app = express()
 
@@ -39,7 +39,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes)
 app.use("/api/users", userRoutes)
 app.use("/api/roles", roleRoutes)
-app.use("/api/demo", demoRoutes)
+app.use("/api/establishment", establishmentRoutes)
 
 // Manejo de rutas no encontradas
 app.use((req, res) => {
