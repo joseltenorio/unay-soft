@@ -2,6 +2,18 @@
 
 import { useMemo, useState } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
+import {
+  BarChart3,
+  Boxes,
+  ChefHat,
+  Home,
+  LogOut,
+  Search,
+  ShieldUser,
+  Store,
+  Utensils,
+  Wallet,
+} from "lucide-react"
 
 import logoUmari from "../../../assets/icons/logo-umari.svg"
 import {
@@ -16,42 +28,42 @@ const moduleNavigation = {
   pos: {
     label: "POS / Salón",
     path: "/app/pos",
-    icon: "◫",
+    icon: Utensils,
     group: "Operación",
     keywords: "pos salon mesas pedidos mozo atención",
   },
   kds: {
     label: "Cocina",
     path: "/app/kds",
-    icon: "▦",
+    icon: ChefHat,
     group: "Operación",
     keywords: "cocina kds pedidos preparación",
   },
   cashier: {
     label: "Caja",
     path: "/app/cashier",
-    icon: "▣",
+    icon: Wallet,
     group: "Operación",
     keywords: "caja pagos cierre cajero",
   },
   inventory: {
     label: "Inventario",
     path: "/app/inventory",
-    icon: "▤",
+    icon: Boxes,
     group: "Operación",
     keywords: "inventario insumos stock almacén",
   },
   bi: {
     label: "Reportes",
     path: "/app/bi",
-    icon: "◈",
+    icon: BarChart3,
     group: "Análisis",
     keywords: "reportes bi indicadores ventas analítica",
   },
   security: {
     label: "Usuarios",
     path: "/app/security",
-    icon: "◎",
+    icon: ShieldUser,
     group: "Administración",
     keywords: "usuarios seguridad roles permisos admin administrador",
   },
@@ -81,7 +93,7 @@ function getNavigationGroups(modules, searchTerm) {
     {
       label: "Inicio",
       path: "/app",
-      icon: "⌂",
+      icon: Home,
       group: "Principal",
       keywords: "inicio home centro operativo principal",
     },
@@ -159,7 +171,9 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
       </div>
 
       <div className="app-sidebar__search">
-        <span aria-hidden="true">⌕</span>
+        <span aria-hidden="true">
+          <Search size={17} strokeWidth={2.4} />
+        </span>
 
         {!isCollapsed && (
           <input
@@ -194,28 +208,34 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
               </p>
 
               <div className="app-sidebar__items">
-                {group.items.map((item) => (
-                  <NavLink
-                    end={item.path === "/app"}
-                    className={({ isActive }) =>
-                      isActive
-                        ? "app-sidebar__item app-sidebar__item--active"
-                        : "app-sidebar__item"
-                    }
-                    key={item.path}
-                    to={item.path}
-                    title={isCollapsed ? item.label : undefined}
-                    onClick={() => setSearchTerm("")}
-                  >
-                    <span className="app-sidebar__item-icon" aria-hidden="true">
-                      {item.icon}
-                    </span>
+                {group.items.map((item) => {
+                  const ItemIcon = item.icon
 
-                    {!isCollapsed && (
-                      <span className="app-sidebar__item-label">{item.label}</span>
-                    )}
-                  </NavLink>
-                ))}
+                  return (
+                    <NavLink
+                      end={item.path === "/app"}
+                      className={({ isActive }) =>
+                        isActive
+                          ? "app-sidebar__item app-sidebar__item--active"
+                          : "app-sidebar__item"
+                      }
+                      key={item.path}
+                      to={item.path}
+                      title={isCollapsed ? item.label : undefined}
+                      onClick={() => setSearchTerm("")}
+                    >
+                      <span className="app-sidebar__item-icon" aria-hidden="true">
+                        <ItemIcon size={18} strokeWidth={2.25} />
+                      </span>
+
+                      {!isCollapsed && (
+                        <span className="app-sidebar__item-label">
+                          {item.label}
+                        </span>
+                      )}
+                    </NavLink>
+                  )
+                })}
               </div>
             </section>
           ))
@@ -268,7 +288,10 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
           onClick={handleLogout}
           title={isCollapsed ? "Cerrar sesión" : undefined}
         >
-          <span aria-hidden="true">↪</span>
+          <span aria-hidden="true">
+            <LogOut size={17} strokeWidth={2.4} />
+          </span>
+
           {!isCollapsed && "Cerrar sesión"}
         </button>
       </div>
