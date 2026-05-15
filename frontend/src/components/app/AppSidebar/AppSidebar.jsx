@@ -67,6 +67,14 @@ const moduleNavigation = {
     group: "Administración",
     keywords: "usuarios seguridad roles permisos admin administrador",
   },
+  establishment: {
+    label: "Establecimiento",
+    path: "/app/establishment",
+    icon: Store,
+    group: "Administración",
+    keywords:
+      "establecimiento local negocio configuracion configuración ruc razon social igv moneda logo",
+  },
 }
 
 const groupOrder = ["Principal", "Operación", "Análisis", "Administración"]
@@ -86,7 +94,8 @@ function normalizeText(value) {
 }
 
 function getNavigationGroups(modules, searchTerm) {
-  const availableCodes = new Set(modules.map((module) => module.codigo))
+  const safeModules = Array.isArray(modules) ? modules : []
+  const availableCodes = new Set(safeModules.map((module) => module.codigo))
   const normalizedSearchTerm = normalizeText(searchTerm.trim())
 
   const items = [
