@@ -59,7 +59,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"identifier\": \"admin@umari.pe\",\r\n  \"password\": \"Admin123\"\r\n}",
+              "raw": "{\r\n  \"identifier\": \"{{UMARI_ADMIN_IDENTIFIER}}\",\r\n  \"password\": \"{{UMARI_ADMIN_PASSWORD}}\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -90,7 +90,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwicm9sIjoiQWRtaW5pc3RyYWRvciIsImlhdCI6MTc3Nzk2NjgzNiwiZXhwIjoxNzc3OTc0MDM2fQ.NhKqSoxctnWVwBqFOv3krmGXMvEgysFR5cNg8S6v40M",
+                  "value": "{{AUTH_TOKEN}}",
                   "type": "string"
                 }
               ]
@@ -120,7 +120,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"identifier\": \"caja@umari.pe\",\r\n  \"password\": \"Caja123\"\r\n}",
+              "raw": "{\r\n  \"identifier\": \"{{UMARI_CAJA_IDENTIFIER}}\",\r\n  \"password\": \"{{UMARI_CAJA_PASSWORD}}\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -153,7 +153,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"identifier\": \"mozo@umari.pe\",\r\n  \"password\": \"Mozo123\"\r\n}",
+              "raw": "{\r\n  \"identifier\": \"{{UMARI_MOZO_IDENTIFIER}}\",\r\n  \"password\": \"{{UMARI_MOZO_PASSWORD}}\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -183,7 +183,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"identifier\": \"mozo@umari.pe\",\r\n  \"password\": \"Mozo123\"\r\n}",
+              "raw": "{\r\n  \"identifier\": \"{{UMARI_MOZO_IDENTIFIER}}\",\r\n  \"password\": \"{{UMARI_MOZO_PASSWORD}}\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -219,7 +219,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwicm9sIjoiQWRtaW5pc3RyYWRvciIsImlhdCI6MTc3Nzk2NzIxNywiZXhwIjoxNzc3OTc0NDE3fQ.P9QZLc8Qyn831C4CstivmE_u4i8grX6tQNLBCjUg3-k",
+                  "value": "{{AUTH_TOKEN}}",
                   "type": "string"
                 }
               ]
@@ -250,7 +250,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzMzMzMzMzMtMzMzMy0zMzMzLTMzMzMtMzMzMzMzMzMzMzMzIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjMzMzMzMzMtMzMzMy0zMzMzLTMzMzMtMzMzMzMzMzMzMzMzIiwicm9sIjoiQ2FqZXJvIiwiaWF0IjoxNzc3OTg3ODU0LCJleHAiOjE3Nzc5OTUwNTR9.v6_DOy52X1Dcc-XxBXM_TS6zby05XRbPxC68385ekOY",
+                  "value": "{{AUTH_TOKEN}}",
                   "type": "string"
                 }
               ]
@@ -281,7 +281,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzMzMzMzMzMtMzMzMy0zMzMzLTMzMzMtMzMzMzMzMzMzMzMzIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjMzMzMzMzMtMzMzMy0zMzMzLTMzMzMtMzMzMzMzMzMzMzMzIiwicm9sIjoiQ2FqZXJvIiwiaWF0IjoxNzc3OTg4MTI0LCJleHAiOjE3Nzc5OTUzMjR9.wrjcK0ER0Mxf9MYLr4IB543yK8MFYebUaZX5aLzO8QE",
+                  "value": "{{AUTH_TOKEN}}",
                   "type": "string"
                 }
               ]
@@ -312,7 +312,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzQ0NDQ0NDQtNDQ0NC00NDQ0LTQ0NDQtNDQ0NDQ0NDQ0NDQ0IiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjQ0NDQ0NDQtNDQ0NC00NDQ0LTQ0NDQtNDQ0NDQ0NDQ0NDQ0Iiwicm9sIjoiTW96byIsImlhdCI6MTc3Nzk4NzkzMSwiZXhwIjoxNzc3OTk1MTMxfQ.fAT_mHQepdLeeOTGfvSmYX2FIjxmOrqGk0ZSBoGsKG8",
+                  "value": "{{AUTH_TOKEN}}",
                   "type": "string"
                 }
               ]
@@ -343,7 +343,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzQ0NDQ0NDQtNDQ0NC00NDQ0LTQ0NDQtNDQ0NDQ0NDQ0NDQ0IiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjQ0NDQ0NDQtNDQ0NC00NDQ0LTQ0NDQtNDQ0NDQ0NDQ0NDQ0Iiwicm9sIjoiTW96byIsImlhdCI6MTc3Nzk4ODA2NSwiZXhwIjoxNzc3OTk1MjY1fQ.2ifiaM_IAwhrse3iaOpaK_WOtVhB4agoXLEdpoldobQ",
+                  "value": "{{AUTH_TOKEN}}",
                   "type": "string"
                 }
               ]
@@ -379,7 +379,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwibm9tYnJlcyI6Ikpvc2UgTHVpcyIsImFwZWxsaWRvcyI6IkFkbWluaXN0cmFkb3IiLCJlbWFpbCI6ImFkbWluQHVtYXJpLnBlIiwidXNlcm5hbWUiOiJhZG1pbi51bWFyaSIsInJvbCI6IkFkbWluaXN0cmFkb3IiLCJpYXQiOjE3Nzg0MTc4NjgsImV4cCI6MTc3ODQyNTA2OH0.Ap2Ik1SE1l0SbdzTPCSa8x64vv9pFGwycb9xsge6Aic",
+                  "value": "{{AUTH_TOKEN}}",
                   "type": "string"
                 }
               ]
@@ -414,7 +414,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwibm9tYnJlcyI6Ikpvc2UgTHVpcyIsImFwZWxsaWRvcyI6IkFkbWluaXN0cmFkb3IiLCJlbWFpbCI6ImFkbWluQHVtYXJpLnBlIiwidXNlcm5hbWUiOiJhZG1pbi51bWFyaSIsInJvbCI6IkFkbWluaXN0cmFkb3IiLCJpYXQiOjE3Nzg0MjI5NjYsImV4cCI6MTc3ODQzMDE2Nn0.iowbLK6PiPYlXU6La4EqLDRQLzrwFtMchGhu9M36RZs",
+                  "value": "{{AUTH_TOKEN}}",
                   "type": "string"
                 }
               ]
@@ -444,7 +444,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwibm9tYnJlcyI6Ikpvc2UgTHVpcyIsImFwZWxsaWRvcyI6IkFkbWluaXN0cmFkb3IiLCJlbWFpbCI6ImFkbWluQHVtYXJpLnBlIiwidXNlcm5hbWUiOiJhZG1pbi51bWFyaSIsInJvbCI6IkFkbWluaXN0cmFkb3IiLCJpYXQiOjE3Nzg0MjA4OTQsImV4cCI6MTc3ODQyODA5NH0.OL14vBRoi8JadawjvtIQlVqemov6KGiMMWxdt0bJHrQ",
+                  "value": "{{AUTH_TOKEN}}",
                   "type": "string"
                 }
               ]
@@ -453,7 +453,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"nombres\": \"Ana\",\r\n  \"apellidos\": \"Torres\",\r\n  \"email\": \"ana@umari.pe\",\r\n  \"username\": \"ana.umari\",\r\n  \"password\": \"Ana12345\",\r\n  \"celular\": \"+51 999 777 666\",\r\n  \"id_rol\": \"23333333-3333-3333-3333-333333333333\",\r\n  \"estado\": true\r\n}",
+              "raw": "{\r\n  \"nombres\": \"{{UMARI_USER_NAME}}\",\r\n  \"apellidos\": \"{{UMARI_USER_LAST_NAME}}\",\r\n  \"email\": \"{{UMARI_USER_EMAIL}}\",\r\n  \"username\": \"{{UMARI_USER_IDENTIFIER}}\",\r\n  \"password\": \"{{UMARI_USER_PASSWORD}}\",\r\n  \"celular\": \"{{UMARI_USER_MOBILE}}\",\r\n  \"id_rol\": \"{{UMARI_ROL}}\",\r\n  \"estado\": \"{{UMARI_STATUS}}\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -483,7 +483,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwibm9tYnJlcyI6Ikpvc2UgTHVpcyIsImFwZWxsaWRvcyI6IkFkbWluaXN0cmFkb3IiLCJlbWFpbCI6ImFkbWluQHVtYXJpLnBlIiwidXNlcm5hbWUiOiJhZG1pbi51bWFyaSIsInJvbCI6IkFkbWluaXN0cmFkb3IiLCJpYXQiOjE3Nzg0MjE5ODIsImV4cCI6MTc3ODQyOTE4Mn0.plWNYc2_6jpd0E8bplrUoCvEOpXPl9rSIVTvqQqay1E",
+                  "value": "{{AUTH_TOKEN}}",
                   "type": "string"
                 }
               ]
@@ -492,7 +492,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"nombres\": \"Carlos\",\r\n  \"apellidos\": \"Paredes Actualizado\",\r\n  \"email\": \"admin@umari.pe\",\r\n  \"username\": \"carlos.actualizado\",\r\n  \"celular\": \"+51 999 888 777\",\r\n  \"id_rol\": \"23333333-3333-3333-3333-333333333333\",\r\n  \"estado\": true\r\n}",
+              "raw": "{\r\n  \"nombres\": \"{{EDIT_USER_NOMBRES}}\",\r\n  \"apellidos\": \"{{EDIT_USER_APELLIDOS}}\",\r\n  \"email\": \"{{EDIT_USER_EMAIL}}\",\r\n  \"username\": \"{{EDIT_USER_USERNAME}}\",\r\n  \"celular\": \"{{EDIT_USER_CELULAR}}\",\r\n  \"id_rol\": \"{{EDIT_USER_ROLE_ID}}\",\r\n  \"estado\": \"{{EDIT_USER_STATUS}}\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -500,7 +500,7 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/api/users/8b8db402-cd28-42ca-bd2a-f90668a1a16d",
+              "raw": "http://localhost:3000/api/users/{{EDIT_USER_ID}}",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -509,7 +509,7 @@
               "path": [
                 "api",
                 "users",
-                "8b8db402-cd28-42ca-bd2a-f90668a1a16d"
+                "{{EDIT_USER_ID}}"
               ]
             }
           },
@@ -523,7 +523,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwibm9tYnJlcyI6Ikpvc2UgTHVpcyIsImFwZWxsaWRvcyI6IkFkbWluaXN0cmFkb3IiLCJlbWFpbCI6ImFkbWluQHVtYXJpLnBlIiwidXNlcm5hbWUiOiJhZG1pbi51bWFyaSIsInJvbCI6IkFkbWluaXN0cmFkb3IiLCJpYXQiOjE3Nzg0MjI5NjYsImV4cCI6MTc3ODQzMDE2Nn0.iowbLK6PiPYlXU6La4EqLDRQLzrwFtMchGhu9M36RZs",
+                  "value": "{{AUTH_TOKEN}}",
                   "type": "string"
                 }
               ]
@@ -532,7 +532,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"estado\": false\r\n}",
+              "raw": "{\r\n  \"estado\": {{EDIT_USER_STATUS}}\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -540,7 +540,7 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/api/users/8b8db402-cd28-42ca-bd2a-f90668a1a16d/status",
+              "raw": "http://localhost:3000/api/users/{{EDIT_USER_ID}}/status",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -549,7 +549,7 @@
               "path": [
                 "api",
                 "users",
-                "8b8db402-cd28-42ca-bd2a-f90668a1a16d",
+                "{{EDIT_USER_ID}}",
                 "status"
               ]
             }
@@ -564,7 +564,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoiMzExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfZXN0YWJsZWNpbWllbnRvIjoiMTExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiaWRfcm9sIjoiMjExMTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwibm9tYnJlcyI6Ikpvc2UgTHVpcyIsImFwZWxsaWRvcyI6IkFkbWluaXN0cmFkb3IiLCJlbWFpbCI6ImFkbWluQHVtYXJpLnBlIiwidXNlcm5hbWUiOiJhZG1pbi51bWFyaSIsInJvbCI6IkFkbWluaXN0cmFkb3IiLCJpYXQiOjE3Nzg0MjAyODcsImV4cCI6MTc3ODQyNzQ4N30.MtlbJS4JAdJu3CZgo_CX64s9yq4G7b0unEdidmpcp-w",
+                  "value": "{{AUTH_TOKEN}}",
                   "type": "string"
                 }
               ]
@@ -573,7 +573,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"nombres\": \"Carlos\",\r\n  \"apellidos\": \"Paredes\",\r\n  \"email\": \"carlos2@umari.pe\",\r\n  \"username\": \"carlos.umari\",\r\n  \"password\": \"Carlos123\",\r\n  \"celular\": \"+51 999 888 777\",\r\n  \"id_rol\": \"23333333-3333-3333-3333-333333333333\",\r\n  \"estado\": true\r\n}",
+              "raw": "{\r\n  \"nombres\": \"{{CREATE_USER_NOMBRES}}\",\r\n  \"apellidos\": \"{{CREATE_USER_APELLIDOS}}\",\r\n  \"email\": \"{{CREATE_USER_EMAIL}}\",\r\n  \"username\": \"{{CREATE_USER_USERNAME}}\",\r\n  \"celular\": \"{{CREATE_USER_CELULAR}}\",\r\n  \"id_rol\": \"{{CREATE_USER_ROLE_ID}}\",\r\n  \"estado\": \"{{CREATE_USER_STATUS}}\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -590,6 +590,80 @@
               "path": [
                 "api",
                 "users"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Establishment",
+      "item": [
+        {
+          "name": "Visual Establishment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/establishment",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "establishment"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Edit Establishment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombre_comercial\": \"{{ESTABLISHMENT_NOMBRE_COMERCIAL}}\",\r\n  \"razon_social\": \"U{{ESTABLISHMENT_RAZON_SOCIAL}}\",\r\n  \"ruc\": \"{{ESTABLISHMENT_RUC}}\",\r\n  \"direccion\": \"{{ESTABLISHMENT_DIRECCION}}\",\r\n  \"telefono\": \"{{ESTABLISHMENT_TELEFONO}}\",\r\n  \"email\": \"{{ESTABLISHMENT_EMAIL}}\",\r\n  \"logo_url\": \"{{ESTABLISHMENT_LOGO_URL}}\",\r\n  \"igv_porcentaje\": \"{{ESTABLISHMENT_IGV_PORCENTAJE}}\",\r\n  \"moneda_codigo\": \"{{ESTABLISHMENT_MONEDA_CODIGO}}\",\r\n  \"moneda_simbolo\": \"{{ESTABLISHMENT_MONEDA_SIMBOLO}}\"\r\n}\r\n\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/api/establishment",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "establishment"
               ]
             }
           },
