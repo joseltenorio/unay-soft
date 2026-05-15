@@ -2,6 +2,8 @@
 
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 
+import ToastProvider from "./components/common/Toast/ToastProvider"
+
 import Home from "./pages/Home/Home"
 import Login from "./pages/Login/Login"
 import RestorePassword from "./pages/RestorePassword/RestorePassword"
@@ -25,89 +27,91 @@ import PermissionRoute from "./routes/PermissionRoute"
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/restore-password" element={<RestorePassword />} />
-
-        <Route
-          path="/app"
-          element={
-            <ProtectedRoute>
-              <AppLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<AppHome />} />
-
-          <Route path="unauthorized" element={<Unauthorized />} />
+      <ToastProvider>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/restore-password" element={<RestorePassword />} />
 
           <Route
-            path="pos"
+            path="/app"
             element={
-              <PermissionRoute permission="pos.ver">
-                <PosPage />
-              </PermissionRoute>
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<AppHome />} />
 
-          <Route
-            path="kds"
-            element={
-              <PermissionRoute permission="kds.ver">
-                <KdsPage />
-              </PermissionRoute>
-            }
-          />
+            <Route path="unauthorized" element={<Unauthorized />} />
 
-          <Route
-            path="cashier"
-            element={
-              <PermissionRoute permission="cashier.ver">
-                <CashierPage />
-              </PermissionRoute>
-            }
-          />
+            <Route
+              path="pos"
+              element={
+                <PermissionRoute permission="pos.ver">
+                  <PosPage />
+                </PermissionRoute>
+              }
+            />
 
-          <Route
-            path="inventory"
-            element={
-              <PermissionRoute permission="inventory.ver">
-                <InventoryPage />
-              </PermissionRoute>
-            }
-          />
+            <Route
+              path="kds"
+              element={
+                <PermissionRoute permission="kds.ver">
+                  <KdsPage />
+                </PermissionRoute>
+              }
+            />
 
-          <Route
-            path="bi"
-            element={
-              <PermissionRoute permission="bi.ver">
-                <BiPage />
-              </PermissionRoute>
-            }
-          />
+            <Route
+              path="cashier"
+              element={
+                <PermissionRoute permission="cashier.ver">
+                  <CashierPage />
+                </PermissionRoute>
+              }
+            />
 
-          <Route
-            path="security"
-            element={
-              <PermissionRoute permission="security.ver">
-                <SecurityPage />
-              </PermissionRoute>
-            }
-          />
+            <Route
+              path="inventory"
+              element={
+                <PermissionRoute permission="inventory.ver">
+                  <InventoryPage />
+                </PermissionRoute>
+              }
+            />
 
-          <Route
-            path="establishment"
-            element={
-              <PermissionRoute permission="establishment.ver">
-                <EstablishmentPage />
-              </PermissionRoute>
-            }
-          />
-        </Route>
+            <Route
+              path="bi"
+              element={
+                <PermissionRoute permission="bi.ver">
+                  <BiPage />
+                </PermissionRoute>
+              }
+            />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+            <Route
+              path="security"
+              element={
+                <PermissionRoute permission="security.ver">
+                  <SecurityPage />
+                </PermissionRoute>
+              }
+            />
+
+            <Route
+              path="establishment"
+              element={
+                <PermissionRoute permission="establishment.ver">
+                  <EstablishmentPage />
+                </PermissionRoute>
+              }
+            />
+          </Route>
+
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </ToastProvider>
     </BrowserRouter>
   )
 }
