@@ -9,6 +9,7 @@ import {
 
 {/*import logoUmari from "../../../assets/icons/logo-umari.svg"*/}
 
+import useToast from "../../../components/common/Toast/useToast"
 
 import "./EstablishmentPage.css"
 
@@ -51,6 +52,8 @@ export default function EstablishmentPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
+
+  const { showToast } = useToast()
 
   const hasChanges = useMemo(
     () => JSON.stringify(formData) !== JSON.stringify(originalData),
@@ -125,11 +128,25 @@ export default function EstablishmentPage() {
 
       setFormData(normalizedData)
       setOriginalData(normalizedData)
-      setSuccessMessage("Configuración del establecimiento actualizada correctamente.")
+      setSuccessMessage("")
+
+      showToast({
+        type: "success",
+        title: "Configuración guardada",
+        message: "Los datos del establecimiento se actualizaron correctamente.",
+      })
+
     } catch (error) {
-      setErrorMessage(
-        error.message || "No se pudo actualizar la configuración del establecimiento.",
-      )
+      const message =
+        error.message || "No se pudo actualizar la configuración del establecimiento."
+
+      setErrorMessage(message)
+
+      showToast({
+        type: "error",
+        title: "No se pudo guardar",
+        message,
+      })
     } finally {
       setIsSaving(false)
     }
