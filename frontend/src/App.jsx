@@ -15,6 +15,7 @@ import CashierPage from "./pages/modules/CashierPage/CashierPage"
 import InventoryPage from "./pages/modules/InventoryPage/InventoryPage"
 import BiPage from "./pages/modules/BiPage/BiPage"
 import SecurityPage from "./pages/modules/SecurityPage/SecurityPage"
+import EstablishmentPage from "./pages/modules/EstablishmentPage/EstablishmentPage"
 
 import AppLayout from "./components/layout/AppLayout/AppLayout"
 
@@ -91,6 +92,15 @@ function App() {
             element={
               <PermissionRoute permission="security.ver">
                 <SecurityPage />
+              </PermissionRoute>
+            }
+          />
+
+          <Route
+            path="establishment"
+            element={
+              <PermissionRoute permission="establishment.ver">
+                <EstablishmentPage />
               </PermissionRoute>
             }
           />
