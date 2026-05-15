@@ -84,7 +84,8 @@ html {
   /* Radius */
   --radius-sm: 8px;
   --radius-md: 16px;
-  --radius-lg: 24px;
+  --radius-lg: 20px;
+  --radius-hero: 28px;
   --radius-xl: 32px;
   --radius-pill: 999px;
 
