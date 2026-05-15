@@ -327,7 +327,7 @@ export default function EstablishmentPage() {
               </div>
 
               <div className="establishment-page__fields">
-                <label>
+                <label className="establishment-page__field--full">
                   <span>URL del logo</span>
                   <input
                     type="url"
