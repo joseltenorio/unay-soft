@@ -301,6 +301,16 @@ values
   10,
   true
 );
+(
+  '4bbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+  'Establecimiento',
+  'establishment',
+  'Configuración fiscal, visual y operativa del establecimiento.',
+  '/app/establishment',
+  'store',
+  11,
+  true
+)
 
 -- =========================================================
 -- 5. Permisos
@@ -349,6 +359,10 @@ values
 ('50000000-0000-0000-0000-000000000002', '4aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'ver', 'security.ver', 'Permite visualizar seguridad.', true),
 ('50000000-0000-0000-0000-000000000003', '4aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'gestionar_usuarios', 'security.gestionar_usuarios', 'Permite crear, editar o desactivar usuarios.', true),
 ('50000000-0000-0000-0000-000000000004', '4aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'gestionar_roles', 'security.gestionar_roles', 'Permite administrar roles y permisos.', true);
+
+--Establecimiento
+('5ab11111-1111-1111-1111-111111111111', '4bbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'ver', 'establishment.ver', 'Permite visualizar la configuración del establecimiento.', true),
+('5ab22222-2222-2222-2222-222222222222', '4bbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'editar', 'establishment.editar', 'Permite editar datos fiscales, parámetros de venta e identidad visual del establecimiento.', true)
 
 -- =========================================================
 -- 6. Asignación de Permisos y Roles

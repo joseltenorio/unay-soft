@@ -53,13 +53,17 @@ create table establecimiento (
   email varchar(120),
   logo_url text,
   igv_porcentaje numeric(5,2) not null default 18.00,
+  moneda_codigo varchar(8) not null default 'PEN',
+  moneda_simbolo varchar(8) not null default 'S/.',
   estado boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
 
   constraint uq_establecimiento_ruc unique (ruc),
   constraint uq_establecimiento_email unique (email),
-  constraint chk_establecimiento_igv check (igv_porcentaje >= 0)
+  constraint chk_establecimiento_igv check (igv_porcentaje >= 0),
+  constraint chk_establecimiento_moneda_codigo check (length(trim(moneda_codigo)) > 0),
+  constraint chk_establecimiento_moneda_simbolo check (length(trim(moneda_simbolo)) > 0)
 );
 
 -- =========================================================
