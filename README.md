@@ -23,8 +23,10 @@ Actualmente cuenta con:
 - Middleware de autenticación mediante Bearer Token.
 - Middleware de autorización por permisos.
 - Carga de usuario, permisos y módulos disponibles en la sesión del frontend.
-- Ruta interna principal protegida en `/app`.
-- Rutas internas protegidas por permisos.
+- Layout interno autenticado con sidebar lateral.
+- Sidebar con módulos visibles según permisos del usuario.
+- Rutas internas protegidas por sesión y por permisos.
+- Página interna principal protegida en `/app`.
 - Páginas iniciales para los módulos POS, KDS, Caja, Inventario, BI y Seguridad.
 - Página de acceso no autorizado para usuarios sin permisos suficientes.
 - Módulo de Seguridad con mantenimiento de usuarios para el perfil Administrador.
@@ -33,14 +35,21 @@ Actualmente cuenta con:
   - Creación de usuarios.
   - Edición de usuarios.
   - Activación y desactivación de usuarios.
+- Módulo de Establecimiento para configuración administrativa del negocio:
+  - Datos fiscales.
+  - Parámetros de venta.
+  - Identidad visual.
+  - Configuración de IGV y moneda.
+- Endpoints protegidos para consultar y actualizar la configuración del establecimiento.
 - Scripts SQL para estructura, datos iniciales y validación de la base de datos.
+- Colecciones/pruebas en Postman para validación de endpoints principales.
 
 Pendiente de desarrollo:
 
-- Mejorar el layout interno del sistema autenticado.
-- Desarrollar la lógica funcional de los módulos POS, KDS, Caja, Inventario y BI.
-- Implementar funcionalidades avanzadas de usuarios, roles y permisos.
+- Desarrollar la lógica funcional completa de los módulos POS, KDS, Caja, Inventario y BI.
+- Implementar funcionalidades avanzadas de roles y permisos.
 - Mejorar validaciones visuales y manejo de errores por formulario.
+- Implementar carga real de archivos o integración con almacenamiento externo para logos e imágenes.
 - Preparar documentación técnica más detallada de endpoints si el proyecto escala.
 
 ---
@@ -53,6 +62,7 @@ Pendiente de desarrollo:
 - Vite
 - JavaScript
 - React Router DOM
+- Lucide React
 - CSS modular por componente
 - Variables CSS para tokens de diseño
 
@@ -82,8 +92,12 @@ unay-soft/
 ├─ frontend/
 │  ├─ src/
 │  │  ├─ assets/
+│  │  │  ├─ icons/
 │  │  │  └─ styles/
 │  │  ├─ components/
+│  │  │  ├─ app/
+│  │  │  ├─ layout/
+│  │  │  └─ sections/
 │  │  ├─ pages/
 │  │  │  ├─ AppHome/
 │  │  │  ├─ Home/
@@ -94,6 +108,7 @@ unay-soft/
 │  │  │  └─ modules/
 │  │  │     ├─ BiPage/
 │  │  │     ├─ CashierPage/
+│  │  │     ├─ EstablishmentPage/
 │  │  │     ├─ InventoryPage/
 │  │  │     ├─ KdsPage/
 │  │  │     ├─ ModulePlaceholder/
@@ -243,6 +258,21 @@ Descripción:
 - `seed.sql`: inserta datos iniciales del sistema.
 - `validation.sql`: contiene consultas para validar la carga y relaciones principales.
 
+La base de datos incluye entidades para:
+
+- Establecimiento.
+- Usuarios.
+- Roles.
+- Módulos.
+- Permisos.
+- Relación rol-permiso.
+- Salón y mesas.
+- Carta y productos.
+- Órdenes y comandas.
+- Pagos y caja.
+- Inventario.
+- Auditoría y sesiones.
+
 ---
 
 ## Autenticación y autorización
@@ -271,22 +301,25 @@ GET  /api/auth/me
 
 ## Módulos y permisos
 
-El acceso interno se basa en roles y permisos.
+El acceso interno se basa en roles, módulos y permisos.
 
 Los roles permiten agrupar responsabilidades operativas, mientras que los permisos definen qué módulos o acciones puede usar cada perfil.
 
 Módulos principales:
 
+- Inicio
 - POS / Salón
 - KDS / Cocina
 - Caja
 - Inventario
 - BI / Reportes
 - Seguridad
+- Establecimiento
 
 Ejemplos de permisos utilizados:
 
 ```txt
+dashboard.ver
 pos.ver
 kds.ver
 cashier.ver
@@ -294,9 +327,29 @@ inventory.ver
 bi.ver
 security.ver
 security.gestionar_usuarios
+security.gestionar_roles
+establishment.ver
+establishment.editar
 ```
 
 El backend mantiene la autoridad real de seguridad mediante middlewares de autenticación y autorización. El frontend usa los permisos para mejorar la experiencia del usuario mostrando únicamente las opciones disponibles para su perfil.
+
+---
+
+## Layout interno
+
+La zona interna del sistema utiliza un layout autenticado con sidebar lateral.
+
+Características actuales:
+
+- Ruta padre protegida en `/app`.
+- Renderizado de páginas internas mediante layout compartido.
+- Sidebar con navegación filtrada por módulos disponibles.
+- Iconos consistentes para los módulos.
+- Buscador de módulos.
+- Colapso del sidebar.
+- Cierre de sesión desde la zona interna.
+- Página `/app/unauthorized` para accesos no permitidos.
 
 ---
 
@@ -326,13 +379,46 @@ GET    /api/roles
 
 ---
 
+## Configuración del establecimiento
+
+El módulo de Establecimiento permite administrar información global del negocio.
+
+Funcionalidades actuales:
+
+- Consultar datos del establecimiento.
+- Editar datos fiscales.
+- Editar información de contacto.
+- Configurar porcentaje de IGV.
+- Configurar código y símbolo de moneda.
+- Registrar URL del logo del establecimiento.
+- Previsualizar el logo registrado.
+- Validar permisos antes de acceder o actualizar datos.
+
+Endpoints principales relacionados:
+
+```txt
+GET /api/establishment
+PUT /api/establishment
+```
+
+Permisos principales:
+
+```txt
+establishment.ver
+establishment.editar
+```
+
+La configuración del establecimiento se ubica dentro del grupo Administración del sidebar, junto al módulo de Seguridad.
+
+---
+
 ## Rutas principales del frontend
 
 Rutas públicas:
 
 ```txt
 /
- /login
+/login
 /restore-password
 ```
 
@@ -348,6 +434,7 @@ Rutas internas:
 /app/inventory
 /app/bi
 /app/security
+/app/establishment
 ```
 
 ---
@@ -360,6 +447,35 @@ Rutas internas:
 4. La pantalla interna muestra solo los módulos permitidos para el perfil.
 5. Si un usuario intenta ingresar a una ruta sin permiso, el sistema muestra `/app/unauthorized`.
 6. El perfil Administrador puede acceder al módulo de Seguridad y administrar usuarios.
+7. El perfil Administrador puede acceder al módulo de Establecimiento y actualizar la configuración general del negocio.
+
+---
+
+## Pruebas con Postman
+
+El proyecto puede validarse mediante pruebas manuales en Postman.
+
+Flujo recomendado:
+
+1. Verificar disponibilidad del backend con `/api/health`.
+2. Iniciar sesión con `/api/auth/login`.
+3. Copiar el token JWT obtenido.
+4. Usar el token como Bearer Token en endpoints protegidos.
+5. Validar `/api/auth/me`.
+6. Probar endpoints protegidos de usuarios, roles y establecimiento.
+7. Verificar respuestas esperadas ante permisos insuficientes o token inválido.
+
+Ejemplos de endpoints protegidos:
+
+```txt
+GET    /api/users
+POST   /api/users
+PUT    /api/users/:id
+PATCH  /api/users/:id/status
+GET    /api/roles
+GET    /api/establishment
+PUT    /api/establishment
+```
 
 ---
 
@@ -385,7 +501,11 @@ feat(auth): validate protected session with backend
 feat(auth): expose user permissions to frontend
 feat(auth): add permission-based UI guard
 feat(auth): protect app module routes by permission
+refactor(routes): mount authenticated app layout
 feat(security): connect user CRUD actions
+db(establishment): add establishment module permissions
+feat(establishment): add protected configuration endpoints
+feat(establishment): add establishment settings page
 fix(auth): prevent login loading feedback layout shift
 docs: update project documentation
 ```
@@ -403,6 +523,7 @@ Ejemplos adecuados:
 - Un commit para exponer permisos al frontend.
 - Un commit para proteger rutas por permiso.
 - Un commit para implementar el mantenimiento de usuarios.
+- Un commit para agregar la configuración del establecimiento.
 - Un commit para corregir un comportamiento visual específico.
 - Un commit para actualizar documentación.
 
