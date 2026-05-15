@@ -112,8 +112,8 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState("")
 
-  const user = getCurrentUser()
-  const modules = getCurrentModules()
+  const user = useMemo(() => getCurrentUser(), [])
+  const modules = useMemo(() => getCurrentModules(), [])
 
   const navigationGroups = useMemo(
     () => getNavigationGroups(modules, searchTerm),
@@ -186,9 +186,12 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
         {navigationGroups.length > 0 ? (
           navigationGroups.map((group) => (
             <section className="app-sidebar__group" key={group.name}>
-              {!isCollapsed && (
-                <p className="app-sidebar__group-title">{group.name}</p>
-              )}
+              <p
+                className="app-sidebar__group-title"
+                aria-hidden={isCollapsed ? "true" : undefined}
+              >
+                {group.name}
+              </p>
 
               <div className="app-sidebar__items">
                 {group.items.map((item) => (
