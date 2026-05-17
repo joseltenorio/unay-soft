@@ -35,6 +35,12 @@ html {
   --color-surface-muted: #efefef;
   --color-border: #9dbebb;
 
+  /* Auth */
+  --color-auth-bg: #f8efd8;
+  --color-auth-bg-light: #f5f1eb; 
+  --color-auth-bg-soft: #f7f3ed;   
+  --color-auth-panel: #f2ede6;   
+  
   /* Text */
   --color-text-primary: #031926;
   --color-text-secondary: #468189;
