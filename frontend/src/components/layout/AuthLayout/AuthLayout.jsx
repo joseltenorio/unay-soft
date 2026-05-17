@@ -15,10 +15,12 @@ export default function AuthLayout({
   const isLogin = variant === "login"
 
   return (
-    <main className={`auth-layout auth-layout--${variant}`}>
+    <main
+      className={`auth-layout auth-layout--${variant}`}
+      style={{ "--auth-bg": `url(${loginIllustration})` }}
+    >
       <section
         className="auth-visual"
-        style={{ "--auth-bg": `url(${loginIllustration})` }}
         aria-label="Presentación de Umarí"
       >
         <div className="auth-visual__content">
@@ -38,8 +40,17 @@ export default function AuthLayout({
 
       <section className="auth-panel" aria-label="Formulario de acceso">
         <div className="auth-panel__inner">
-          <Link className="auth-panel__brand" to="/" aria-label="Ir al inicio de Umarí">
-            <img src={logoUmari} alt="" className="auth-panel__logo" aria-hidden="true" />
+          <Link
+            className="auth-panel__brand"
+            to="/"
+            aria-label="Ir al inicio de Umarí"
+          >
+            <img
+              src={logoUmari}
+              alt=""
+              className="auth-panel__logo"
+              aria-hidden="true"
+            />
             <span>Umarí</span>
           </Link>
 
