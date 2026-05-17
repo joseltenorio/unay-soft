@@ -181,9 +181,13 @@
       rgba(119, 172, 162, 0.08) 0%,
       rgba(119, 172, 162, 0) 34%
     ),
-    var(--color-brand-feature);
+    linear-gradient(
+      180deg,
+      var(--color-auth-bg-soft) 0%,
+      var(--color-auth-panel) 100%
+    );
 
-    animation: auth-panel-enter 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: auth-panel-enter 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .auth-panel__inner {
