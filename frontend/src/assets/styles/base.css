@@ -38,9 +38,9 @@ html {
   /* Auth */
   --color-auth-bg: #f8efd8;
   --color-auth-bg-light: #f5f1eb; 
-  --color-auth-bg-soft: #f7f3ed;   
+  --color-auth-bg-soft: #ece4ce;   
   --color-auth-panel: #f2ede6;   
-  
+
   /* Text */
   --color-text-primary: #031926;
   --color-text-secondary: #468189;
