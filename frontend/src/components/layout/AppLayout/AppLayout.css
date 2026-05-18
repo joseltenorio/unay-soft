@@ -1,18 +1,20 @@
 /* frontend/src/components/layout/AppLayout/AppLayout.css */
 
 .app-layout {
-  height: 100dvh;
-  min-height: 100dvh;
+  min-height: 100vh;
 
   display: grid;
   grid-template-columns: 292px minmax(0, 1fr);
-  align-items: stretch;
 
-  background: var(--color-app-bg);
-  color: var(--color-app-text);
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(119, 172, 162, 0.18) 0%,
+      rgba(119, 172, 162, 0) 34%
+    ),
+    var(--color-brand-feature);
 
-  overflow: hidden;
-
+  color: var(--color-text-on-light);
   transition: grid-template-columns var(--transition-fast);
 }
 
@@ -20,53 +22,45 @@
   grid-template-columns: 92px minmax(0, 1fr);
 }
 
-.app-layout__content {
-  min-width: 0;
-  min-height: 0;
-  height: 100dvh;
-
-  padding: 32px;
-
-  overflow-y: auto;
-  overflow-x: hidden;
-
-  background:
-    radial-gradient(
-      circle at top right,
-      rgba(61, 107, 87, 0.1) 0%,
-      rgba(61, 107, 87, 0) 34%
-    ),
-    var(--color-app-bg);
+.app-layout--kds {
+  display: block;
+  min-height: 100vh;
+  background: #f6efe1;
 }
 
-.app-layout__route-view {
-  width: 100%;
+.app-layout__content {
   min-width: 0;
+  padding: 32px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.72) 0%,
+      rgba(244, 233, 205, 0.72) 100%
+    );
+}
+
+.app-layout--kds .app-layout__content {
+  min-height: 100vh;
+  padding: 0;
+  background: transparent;
+}
+
+.app-layout--kds .app-layout__route-view {
+  min-height: 100vh;
 }
 
 @media (max-width: 920px) {
   .app-layout,
   .app-layout--sidebar-collapsed {
-    height: auto;
-    min-height: 100dvh;
-
     grid-template-columns: 1fr;
-
-    overflow: visible;
   }
 
   .app-layout__content {
-    height: auto;
-    min-height: 100dvh;
-
-    padding: 20px;
-
-    overflow: visible;
+    padding: 24px;
   }
-}
 
-@media (max-width: 640px) {
-  .app-layout__content {
-    padding: 16px;
+  .app-layout--kds .app-layout__content {
+    padding: 0;
   }
 }
