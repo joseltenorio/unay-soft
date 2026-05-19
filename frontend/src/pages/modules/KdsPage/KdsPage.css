@@ -261,6 +261,68 @@
   transform: translateY(-1px);
 }
 
+.kds-secondary-button--active {
+  color: #ffffff;
+  background: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+}
+
+.kds-secondary-button--active:hover {
+  background: var(--color-brand-primary);
+}
+
+.kds-quick-filters {
+  flex: 0 0 auto;
+  margin: -2px 0 14px;
+
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.kds-quick-filter {
+  min-height: 34px;
+  padding: 0 12px;
+
+  display: inline-flex;
+  align-items: center;
+
+  color: rgba(3, 25, 38, 0.68);
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(3, 25, 38, 0.1);
+  border-radius: 999px;
+
+  font-size: 0.8rem;
+  font-weight: 850;
+  cursor: pointer;
+
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.kds-quick-filter:hover {
+  color: var(--color-brand-primary);
+  background: rgba(255, 255, 255, 0.86);
+  border-color: rgba(70, 129, 137, 0.3);
+  transform: translateY(-1px);
+}
+
+.kds-quick-filter--active {
+  color: #ffffff;
+  background: var(--color-brand-main);
+  border-color: var(--color-brand-main);
+}
+
+.kds-quick-filter--active:hover {
+  color: #ffffff;
+  background: var(--color-brand-main-hover);
+  border-color: var(--color-brand-main-hover);
+}
+
 .kds-board {
   display: flex;
   flex-direction: row;
