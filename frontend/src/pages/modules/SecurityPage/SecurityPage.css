@@ -411,3 +411,24 @@
     font-size: 32px;
   }
 }
+
+.security-page__modal-overlay {
+  position: fixed;
+  inset: 0;
+
+  background: rgba(15, 23, 42, 0.45);
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 24px;
+
+  z-index: 999;
+}
+
+.security-page__modal {
+  width: min(900px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+}

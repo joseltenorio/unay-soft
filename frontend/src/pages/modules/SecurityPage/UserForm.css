@@ -4,13 +4,15 @@
  */
 
 .user-form {
-  margin-top: 28px;
-  padding: clamp(24px, 4vw, 34px);
+  margin-top: 0;
+  padding:
+  clamp(22px, 3vw, 28px)
+  clamp(30px, 4vw, 40px);
 
   border: 1px solid rgba(157, 190, 187, 0.38);
   border-radius: 28px;
 
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255);
   box-shadow: var(--shadow-app-card);
 }
 
@@ -37,7 +39,7 @@
 .user-form__header h2 {
   color: var(--color-app-text);
 
-  font-size: clamp(24px, 3vw, 34px);
+  font-size: clamp(22px, 2.2vw, 30px);
   font-weight: 950;
   line-height: 1.12;
   letter-spacing: -0.04em;
@@ -55,6 +57,8 @@
 }
 
 .user-form__close {
+  margin-right: -20px;
+  margin-top: -10px;
   width: 42px;
   height: 42px;
   flex: 0 0 42px;
@@ -63,14 +67,17 @@
   align-items: center;
   justify-content: center;
 
-  border: 1px solid var(--color-app-accent-border);
-  border-radius: 14px;
+  border: none;
+  border-radius: 50%;
 
-  background: var(--color-app-accent-soft);
+  background: transparent;
   color: var(--color-app-accent-strong);
 
-  font-size: 26px;
+  font-size: 30px;
+  font-weight: 300;
   line-height: 1;
+
+  cursor: pointer;
 
   transition:
     transform var(--transition-fast),
