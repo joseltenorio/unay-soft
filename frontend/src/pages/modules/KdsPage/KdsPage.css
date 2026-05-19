@@ -436,17 +436,6 @@
   transform: translateY(-2px);
 }
 
-.kds-order-card--split-start {
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-  border-bottom: 2px dashed rgba(3, 25, 38, 0.14);
-  box-shadow:
-    0 2px 4px rgba(3, 25, 38, 0.04),
-    -3px 0 8px rgba(3, 25, 38, 0.03),
-     3px 0 8px rgba(3, 25, 38, 0.03),
-    0 -4px 12px rgba(3, 25, 38, 0.03);
-}
-
 .kds-order-card--split-start:hover {
   box-shadow:
     0 2px 4px rgba(3, 25, 38, 0.05),
@@ -454,17 +443,6 @@
      3px 0 8px rgba(3, 25, 38, 0.04),
     0 -4px 12px rgba(3, 25, 38, 0.04);
   transform: translateY(-2px);
-}
-
-.kds-order-card--split-end {
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-  border-top: 1px solid rgba(3, 25, 38, 0.08);
-
-  box-shadow:
-    -3px 0 8px rgba(3, 25, 38, 0.03),
-     3px 0 8px rgba(3, 25, 38, 0.03),
-    0 10px 24px rgba(3, 25, 38, 0.09);
 }
 
 .kds-order-card--split-end:hover {
@@ -571,16 +549,6 @@
   background: linear-gradient(90deg, var(--color-brand-main), #a8d5b0);
   transition: width 0.4s ease;
   border-radius: 0 3px 3px 0;
-}
-
-.kds-card-continuation {
-  min-height: 38px;
-  padding: 8px 14px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(3, 25, 38, 0.03);
-  border-bottom: 1px solid rgba(3, 25, 38, 0.07);
 }
 
 .kds-card-body {
