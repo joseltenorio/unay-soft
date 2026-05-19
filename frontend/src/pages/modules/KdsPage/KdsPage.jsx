@@ -691,6 +691,12 @@ export default function KdsPage() {
     oldestFirst: true,
   })
 
+  const hasActiveQuickFilters =
+  quickFilters.criticalOnly ||
+  quickFilters.withNotes ||
+  quickFilters.pendingItems ||
+  !quickFilters.oldestFirst
+
   useEffect(() => {
     function measure() {
       const topbar = document.querySelector(".kds-topbar")
@@ -881,69 +887,72 @@ export default function KdsPage() {
             ))}
           </div>
 
-          <button
-            className={
-              showQuickFilters
-                ? "kds-secondary-button kds-secondary-button--active"
-                : "kds-secondary-button"
-            }
-            type="button"
-            onClick={() => setShowQuickFilters((isVisible) => !isVisible)}
-          >
-            <Filter size={16} />
-            Filtrar
-          </button>
+          <div className="kds-toolbar-actions">
+            {showQuickFilters && (
+              <div className="kds-quick-filters" aria-label="Filtros rápidos">
+                <button
+                  className={
+                    quickFilters.criticalOnly
+                      ? "kds-quick-filter kds-quick-filter--active"
+                      : "kds-quick-filter"
+                  }
+                  type="button"
+                  onClick={() => handleToggleQuickFilter("criticalOnly")}
+                >
+                  Críticas
+                </button>
+
+                <button
+                  className={
+                    quickFilters.withNotes
+                      ? "kds-quick-filter kds-quick-filter--active"
+                      : "kds-quick-filter"
+                  }
+                  type="button"
+                  onClick={() => handleToggleQuickFilter("withNotes")}
+                >
+                  Con notas
+                </button>
+
+                <button
+                  className={
+                    quickFilters.pendingItems
+                      ? "kds-quick-filter kds-quick-filter--active"
+                      : "kds-quick-filter"
+                  }
+                  type="button"
+                  onClick={() => handleToggleQuickFilter("pendingItems")}
+                >
+                  Pendientes
+                </button>
+
+                <button
+                  className="kds-quick-filter"
+                  type="button"
+                  onClick={handleToggleOrderDirection}
+                >
+                  {quickFilters.oldestFirst ? "Más antiguas" : "Más recientes"}
+                </button>
+              </div>
+            )}
+
+            <button
+              className={
+                showQuickFilters || hasActiveQuickFilters
+                  ? "kds-secondary-button kds-secondary-button--active"
+                  : "kds-secondary-button"
+              }
+              type="button"
+              onClick={() => setShowQuickFilters((isVisible) => !isVisible)}
+            >
+              <Filter size={16} />
+              Filtrar
+              {hasActiveQuickFilters && (
+                <span className="kds-filter-active-dot" aria-hidden="true" />
+              )}
+            </button>
+          </div>
         </section>
-
-        {showQuickFilters && (
-          <section className="kds-quick-filters" aria-label="Filtros rápidos">
-            <button
-              className={
-                quickFilters.criticalOnly
-                  ? "kds-quick-filter kds-quick-filter--active"
-                  : "kds-quick-filter"
-              }
-              type="button"
-              onClick={() => handleToggleQuickFilter("criticalOnly")}
-            >
-              Críticas
-            </button>
-
-            <button
-              className={
-                quickFilters.withNotes
-                  ? "kds-quick-filter kds-quick-filter--active"
-                  : "kds-quick-filter"
-              }
-              type="button"
-              onClick={() => handleToggleQuickFilter("withNotes")}
-            >
-              Con notas
-            </button>
-
-            <button
-              className={
-                quickFilters.pendingItems
-                  ? "kds-quick-filter kds-quick-filter--active"
-                  : "kds-quick-filter"
-              }
-              type="button"
-              onClick={() => handleToggleQuickFilter("pendingItems")}
-            >
-              Ítems pendientes
-            </button>
-
-            <button
-              className="kds-quick-filter"
-              type="button"
-              onClick={handleToggleOrderDirection}
-            >
-              {quickFilters.oldestFirst
-                ? "Más antiguas primero"
-                : "Más recientes primero"}
-            </button>
-          </section>
-        )}
 
         {filteredOrders.length === 0 ? (
           <div className="kds-board-empty">
