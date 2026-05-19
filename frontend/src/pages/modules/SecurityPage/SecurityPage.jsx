@@ -235,18 +235,25 @@ export default function SecurityPage() {
               + Nuevo usuario
             </button>
           </div>
-
+          
           {isFormOpen && (
-            <UserForm
-              key={selectedUser?.id_usuario || "create"}
-              mode={formMode}
-              roles={roles}
-              initialUser={selectedUser}
-              isSubmitting={isSubmitting}
-              errorMessage={formError}
-              onCancel={handleCloseForm}
-              onSubmit={handleSubmitUser}
-            />
+            <div className="security-page__modal-overlay">
+              <div
+                className="security-page__modal"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <UserForm
+                  key={selectedUser?.id_usuario || "create"}
+                  mode={formMode}
+                  roles={roles}
+                  initialUser={selectedUser}
+                  isSubmitting={isSubmitting}
+                  errorMessage={formError}
+                  onCancel={handleCloseForm}
+                  onSubmit={handleSubmitUser}
+                />
+              </div>
+            </div>
           )}
 
           {status === "loading" && (
