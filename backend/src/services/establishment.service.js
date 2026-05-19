@@ -111,7 +111,30 @@ async function updateEstablishment(idEstablecimiento, establishmentData) {
   return rows[0]
 }
 
+
+async function updateEstablishmentLogo(idEstablecimiento, logoUrl) {
+  const query = `
+    update establecimiento
+    set
+      logo_url = $1,
+      updated_at = now()
+    where id_establecimiento = $2
+    returning logo_url;
+  `
+
+  const { rows } = await pool.query(query, [logoUrl, idEstablecimiento])
+
+  if (rows.length === 0) {
+    const error = new Error("El establecimiento no existe.")
+    error.statusCode = 404
+    throw error
+  }
+
+  return rows[0]
+}
+
 module.exports = {
   getEstablishmentById,
   updateEstablishment,
+  updateEstablishmentLogo,
 }

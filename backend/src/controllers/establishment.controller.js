@@ -3,6 +3,7 @@
 const {
   getEstablishmentById,
   updateEstablishment,
+  updateEstablishmentLogo,
 } = require("../services/establishment.service")
 
 async function getEstablishment(req, res) {
@@ -91,7 +92,54 @@ async function editEstablishment(req, res) {
   }
 }
 
+async function uploadEstablishmentLogo(req, res) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No se envió ningún archivo." })
+    }
+
+    const { createClient } = require("@supabase/supabase-js")
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    )
+
+    const idEstablecimiento = req.user.id_establecimiento
+    const extension = req.file.originalname.split(".").pop()
+    const filePath = `${idEstablecimiento}/logo.${extension}`
+
+    const { error: uploadError } = await supabase.storage
+      .from("Logo_img")
+      .upload(filePath, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: true, 
+      })
+
+    if (uploadError) {
+      return res.status(500).json({ message: "Error al subir la imagen a Supabase." })
+    }
+
+    const { data: urlData } = supabase.storage
+      .from("Logo_img")
+      .getPublicUrl(filePath)
+
+    const logoUrl = urlData.publicUrl
+
+    const updated = await updateEstablishmentLogo(idEstablecimiento, logoUrl)
+
+    return res.status(200).json({
+      message: "Logo actualizado correctamente.",
+      logo_url: updated.logo_url,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al subir el logo.",
+    })
+  }
+}
+
 module.exports = {
   getEstablishment,
   editEstablishment,
+  uploadEstablishmentLogo,
 }
