@@ -85,3 +85,74 @@ from orden o
 left join mesa m on m.id_mesa = o.id_mesa
 join usuario u on u.id_usuario = o.id_usuario
 order by o.created_at desc;
+
+-- =========================================================
+-- KDS - Órdenes activas para monitor de cocina
+-- =========================================================
+
+select
+  o.id_orden,
+  o.numero_orden,
+  o.estado,
+  o.tipo_servicio,
+  m.numero as mesa,
+  u.nombres || ' ' || u.apellidos as usuario,
+  o.abierta_at,
+  o.enviada_cocina_at,
+  o.preparacion_inicio_at,
+  o.lista_at,
+  count(io.id_item_orden) as total_items
+from orden o
+left join mesa m on m.id_mesa = o.id_mesa
+join usuario u on u.id_usuario = o.id_usuario
+left join item_orden io on io.id_orden = o.id_orden
+where o.estado in ('ABIERTA', 'EN_PREPARACION', 'LISTA')
+group by
+  o.id_orden,
+  o.numero_orden,
+  o.estado,
+  o.tipo_servicio,
+  m.numero,
+  u.nombres,
+  u.apellidos,
+  o.abierta_at,
+  o.enviada_cocina_at,
+  o.preparacion_inicio_at,
+  o.lista_at
+order by coalesce(o.enviada_cocina_at, o.abierta_at) asc;
+
+-- =========================================================
+-- KDS - Ítems por orden con estado de cocina
+-- =========================================================
+
+select
+  o.numero_orden,
+  io.id_item_orden,
+  p.nombre as producto,
+  io.cantidad,
+  io.notas_cocina,
+  io.estado_cocina,
+  io.preparacion_inicio_at,
+  io.listo_at
+from item_orden io
+join orden o on o.id_orden = io.id_orden
+join producto p on p.id_producto = io.id_producto
+where o.estado in ('ABIERTA', 'EN_PREPARACION', 'LISTA')
+order by
+  o.numero_orden,
+  io.created_at asc;
+
+-- =========================================================
+-- KDS - Permisos asignados al módulo de cocina
+-- =========================================================
+
+select
+  m.codigo as modulo,
+  p.codigo as permiso,
+  p.accion,
+  p.descripcion,
+  p.estado
+from permiso p
+join modulo m on m.id_modulo = p.id_modulo
+where m.codigo = 'kds'
+order by p.codigo;

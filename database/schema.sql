@@ -425,6 +425,9 @@ create table orden (
   total numeric(10,2) not null default 0,
   observaciones text,
   abierta_at timestamptz not null default now(),
+  enviada_cocina_at timestamptz,
+  preparacion_inicio_at timestamptz,
+  lista_at timestamptz,
   cerrada_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -463,6 +466,8 @@ create table item_orden (
   subtotal numeric(10,2) not null default 0,
   notas_cocina text,
   estado_cocina varchar(30) not null default 'PENDIENTE',
+  preparacion_inicio_at timestamptz,
+  listo_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
 
@@ -760,8 +765,12 @@ create index idx_producto_establecimiento on producto(id_establecimiento);
 create index idx_orden_usuario on orden(id_usuario);
 create index idx_orden_mesa on orden(id_mesa);
 create index idx_orden_estado on orden(estado);
+create index idx_orden_enviada_cocina_at on orden(enviada_cocina_at);
+create index idx_orden_preparacion_inicio_at on orden(preparacion_inicio_at);
+create index idx_orden_lista_at on orden(lista_at);
 
 create index idx_item_orden_orden on item_orden(id_orden);
+create index idx_item_orden_estado_cocina on item_orden(estado_cocina);
 create index idx_pago_orden on pago(id_orden);
 
 create index idx_insumo_establecimiento on insumo(id_establecimiento);
