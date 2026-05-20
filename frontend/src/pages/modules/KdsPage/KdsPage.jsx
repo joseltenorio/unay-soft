@@ -18,8 +18,8 @@ import "./KdsPage.css"
 const TIME_THRESHOLDS = { fresh: 5, normal: 10, warn: 15 }
 
 const H = {
-  headerBase: 76,
-  splitStrip: 9,
+  headerBase: 62,
+  splitStrip: 16,
   headerProg: 3,
   itemBase: 47,
   itemNote: 20,
@@ -219,6 +219,216 @@ const MOCK_ORDERS = [
         name: "Jalea mixta",
         quantity: 1,
         notes: ["Sin yuyo"],
+        done: false,
+      },
+    ],
+  },
+  {
+    id: "#009",
+    table: "M4",
+    waiter: "Luis",
+    elapsedMinutes: 4,
+    status: "new",
+    items: [
+      {
+        id: 1,
+        name: "Ceviche clásico",
+        quantity: 2,
+        notes: ["Sin ají", "Sin cebolla"],
+        done: false,
+      },
+      {
+        id: 2,
+        name: "Chicha morada",
+        quantity: 1,
+        notes: ["Sin hielo"],
+        done: false,
+      },
+      {
+        id: 3,
+        name: "Arroz con mariscos",
+        quantity: 1,
+        notes: ["Extra limón"],
+        done: false,
+      },
+    ],
+  },
+  {
+    id: "#009",
+    table: "M4",
+    waiter: "Luis",
+    elapsedMinutes: 4,
+    status: "new",
+    items: [
+      {
+        id: 1,
+        name: "Ceviche clásico",
+        quantity: 2,
+        notes: ["Sin ají", "Sin cebolla"],
+        done: false,
+      },
+      {
+        id: 2,
+        name: "Chicha morada",
+        quantity: 1,
+        notes: ["Sin hielo"],
+        done: false,
+      },
+      {
+        id: 3,
+        name: "Arroz con mariscos",
+        quantity: 1,
+        notes: ["Extra limón"],
+        done: false,
+      },
+    ],
+  },
+  {
+    id: "#009",
+    table: "M4",
+    waiter: "Luis",
+    elapsedMinutes: 4,
+    status: "new",
+    items: [
+      {
+        id: 1,
+        name: "Ceviche clásico",
+        quantity: 2,
+        notes: ["Sin ají", "Sin cebolla"],
+        done: false,
+      },
+      {
+        id: 2,
+        name: "Chicha morada",
+        quantity: 1,
+        notes: ["Sin hielo"],
+        done: false,
+      },
+      {
+        id: 3,
+        name: "Arroz con mariscos",
+        quantity: 1,
+        notes: ["Extra limón"],
+        done: false,
+      },
+    ],
+  },
+  {
+    id: "#009",
+    table: "M4",
+    waiter: "Luis",
+    elapsedMinutes: 4,
+    status: "new",
+    items: [
+      {
+        id: 1,
+        name: "Ceviche clásico",
+        quantity: 2,
+        notes: ["Sin ají", "Sin cebolla"],
+        done: false,
+      },
+      {
+        id: 2,
+        name: "Chicha morada",
+        quantity: 1,
+        notes: ["Sin hielo"],
+        done: false,
+      },
+      {
+        id: 3,
+        name: "Arroz con mariscos",
+        quantity: 1,
+        notes: ["Extra limón"],
+        done: false,
+      },
+    ],
+  },
+  {
+    id: "#009",
+    table: "M4",
+    waiter: "Luis",
+    elapsedMinutes: 4,
+    status: "new",
+    items: [
+      {
+        id: 1,
+        name: "Ceviche clásico",
+        quantity: 2,
+        notes: ["Sin ají", "Sin cebolla"],
+        done: false,
+      },
+      {
+        id: 2,
+        name: "Chicha morada",
+        quantity: 1,
+        notes: ["Sin hielo"],
+        done: false,
+      },
+      {
+        id: 3,
+        name: "Arroz con mariscos",
+        quantity: 1,
+        notes: ["Extra limón"],
+        done: false,
+      },
+    ],
+  },
+  {
+    id: "#009",
+    table: "M4",
+    waiter: "Luis",
+    elapsedMinutes: 4,
+    status: "new",
+    items: [
+      {
+        id: 1,
+        name: "Ceviche clásico",
+        quantity: 2,
+        notes: ["Sin ají", "Sin cebolla"],
+        done: false,
+      },
+      {
+        id: 2,
+        name: "Chicha morada",
+        quantity: 1,
+        notes: ["Sin hielo"],
+        done: false,
+      },
+      {
+        id: 3,
+        name: "Arroz con mariscos",
+        quantity: 1,
+        notes: ["Extra limón"],
+        done: false,
+      },
+    ],
+  },
+  {
+    id: "#009",
+    table: "M4",
+    waiter: "Luis",
+    elapsedMinutes: 4,
+    status: "new",
+    items: [
+      {
+        id: 1,
+        name: "Ceviche clásico",
+        quantity: 2,
+        notes: ["Sin ají", "Sin cebolla"],
+        done: false,
+      },
+      {
+        id: 2,
+        name: "Chicha morada",
+        quantity: 1,
+        notes: ["Sin hielo"],
+        done: false,
+      },
+      {
+        id: 3,
+        name: "Arroz con mariscos",
+        quantity: 1,
+        notes: ["Extra limón"],
         done: false,
       },
     ],
@@ -510,10 +720,11 @@ function HeaderBand({ order }) {
         </div>
 
         <div className="kds-card-band__right">
-          <span className="kds-card-table">{order.table}</span>
           <small className="kds-card-status-badge">
             {getStatusLabel(order.status)}
           </small>
+
+          <span className="kds-card-table">{order.table}</span>
         </div>
       </div>
 
