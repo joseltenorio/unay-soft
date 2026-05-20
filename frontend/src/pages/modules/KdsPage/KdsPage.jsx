@@ -253,216 +253,6 @@ const MOCK_ORDERS = [
       },
     ],
   },
-  {
-    id: "#009",
-    table: "M4",
-    waiter: "Luis",
-    elapsedMinutes: 4,
-    status: "new",
-    items: [
-      {
-        id: 1,
-        name: "Ceviche clásico",
-        quantity: 2,
-        notes: ["Sin ají", "Sin cebolla"],
-        done: false,
-      },
-      {
-        id: 2,
-        name: "Chicha morada",
-        quantity: 1,
-        notes: ["Sin hielo"],
-        done: false,
-      },
-      {
-        id: 3,
-        name: "Arroz con mariscos",
-        quantity: 1,
-        notes: ["Extra limón"],
-        done: false,
-      },
-    ],
-  },
-  {
-    id: "#009",
-    table: "M4",
-    waiter: "Luis",
-    elapsedMinutes: 4,
-    status: "new",
-    items: [
-      {
-        id: 1,
-        name: "Ceviche clásico",
-        quantity: 2,
-        notes: ["Sin ají", "Sin cebolla"],
-        done: false,
-      },
-      {
-        id: 2,
-        name: "Chicha morada",
-        quantity: 1,
-        notes: ["Sin hielo"],
-        done: false,
-      },
-      {
-        id: 3,
-        name: "Arroz con mariscos",
-        quantity: 1,
-        notes: ["Extra limón"],
-        done: false,
-      },
-    ],
-  },
-  {
-    id: "#009",
-    table: "M4",
-    waiter: "Luis",
-    elapsedMinutes: 4,
-    status: "new",
-    items: [
-      {
-        id: 1,
-        name: "Ceviche clásico",
-        quantity: 2,
-        notes: ["Sin ají", "Sin cebolla"],
-        done: false,
-      },
-      {
-        id: 2,
-        name: "Chicha morada",
-        quantity: 1,
-        notes: ["Sin hielo"],
-        done: false,
-      },
-      {
-        id: 3,
-        name: "Arroz con mariscos",
-        quantity: 1,
-        notes: ["Extra limón"],
-        done: false,
-      },
-    ],
-  },
-  {
-    id: "#009",
-    table: "M4",
-    waiter: "Luis",
-    elapsedMinutes: 4,
-    status: "new",
-    items: [
-      {
-        id: 1,
-        name: "Ceviche clásico",
-        quantity: 2,
-        notes: ["Sin ají", "Sin cebolla"],
-        done: false,
-      },
-      {
-        id: 2,
-        name: "Chicha morada",
-        quantity: 1,
-        notes: ["Sin hielo"],
-        done: false,
-      },
-      {
-        id: 3,
-        name: "Arroz con mariscos",
-        quantity: 1,
-        notes: ["Extra limón"],
-        done: false,
-      },
-    ],
-  },
-  {
-    id: "#009",
-    table: "M4",
-    waiter: "Luis",
-    elapsedMinutes: 4,
-    status: "new",
-    items: [
-      {
-        id: 1,
-        name: "Ceviche clásico",
-        quantity: 2,
-        notes: ["Sin ají", "Sin cebolla"],
-        done: false,
-      },
-      {
-        id: 2,
-        name: "Chicha morada",
-        quantity: 1,
-        notes: ["Sin hielo"],
-        done: false,
-      },
-      {
-        id: 3,
-        name: "Arroz con mariscos",
-        quantity: 1,
-        notes: ["Extra limón"],
-        done: false,
-      },
-    ],
-  },
-  {
-    id: "#009",
-    table: "M4",
-    waiter: "Luis",
-    elapsedMinutes: 4,
-    status: "new",
-    items: [
-      {
-        id: 1,
-        name: "Ceviche clásico",
-        quantity: 2,
-        notes: ["Sin ají", "Sin cebolla"],
-        done: false,
-      },
-      {
-        id: 2,
-        name: "Chicha morada",
-        quantity: 1,
-        notes: ["Sin hielo"],
-        done: false,
-      },
-      {
-        id: 3,
-        name: "Arroz con mariscos",
-        quantity: 1,
-        notes: ["Extra limón"],
-        done: false,
-      },
-    ],
-  },
-  {
-    id: "#009",
-    table: "M4",
-    waiter: "Luis",
-    elapsedMinutes: 4,
-    status: "new",
-    items: [
-      {
-        id: 1,
-        name: "Ceviche clásico",
-        quantity: 2,
-        notes: ["Sin ají", "Sin cebolla"],
-        done: false,
-      },
-      {
-        id: 2,
-        name: "Chicha morada",
-        quantity: 1,
-        notes: ["Sin hielo"],
-        done: false,
-      },
-      {
-        id: 3,
-        name: "Arroz con mariscos",
-        quantity: 1,
-        notes: ["Extra limón"],
-        done: false,
-      },
-    ],
-  },
 ]
 
 const STATUS_FILTERS = [
@@ -903,10 +693,10 @@ export default function KdsPage() {
   })
 
   const hasActiveQuickFilters =
-  quickFilters.criticalOnly ||
-  quickFilters.withNotes ||
-  quickFilters.pendingItems ||
-  !quickFilters.oldestFirst
+    quickFilters.criticalOnly ||
+    quickFilters.withNotes ||
+    quickFilters.pendingItems ||
+    !quickFilters.oldestFirst
 
   useEffect(() => {
     function measure() {
@@ -1138,10 +928,13 @@ export default function KdsPage() {
                 </button>
 
                 <button
-                  className="kds-quick-filter"
+                  className="kds-quick-filter kds-quick-filter--sort"
                   type="button"
+                  aria-pressed="true"
+                  title="Cambiar orden de las comandas"
                   onClick={handleToggleOrderDirection}
                 >
+                  Orden:{" "}
                   {quickFilters.oldestFirst ? "Más antiguas" : "Más recientes"}
                 </button>
               </div>
