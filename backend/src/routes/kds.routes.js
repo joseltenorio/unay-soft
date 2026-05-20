@@ -2,7 +2,11 @@
 
 const express = require("express")
 
-const { listKitchenOrders } = require("../controllers/kds.controller")
+const {
+  changeKitchenItemStatus,
+  changeKitchenOrderStatus,
+  listKitchenOrders,
+} = require("../controllers/kds.controller")
 const { authenticateToken } = require("../middlewares/auth.middleware")
 const { authorizePermission } = require("../middlewares/permission.middleware")
 
@@ -13,6 +17,20 @@ router.get(
   authenticateToken,
   authorizePermission("kds.ver"),
   listKitchenOrders,
+)
+
+router.patch(
+  "/orders/:id/status",
+  authenticateToken,
+  authorizePermission("kds.actualizar_estado"),
+  changeKitchenOrderStatus,
+)
+
+router.patch(
+  "/items/:id/status",
+  authenticateToken,
+  authorizePermission("kds.actualizar_estado"),
+  changeKitchenItemStatus,
 )
 
 module.exports = router
