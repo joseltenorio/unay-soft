@@ -9,6 +9,7 @@ const authRoutes = require("./routes/auth.routes")
 const userRoutes = require("./routes/user.routes")
 const roleRoutes = require("./routes/role.routes")
 const establishmentRoutes = require("./routes/establishment.routes")
+const kdsRoutes = require("./routes/kds.routes")
 
 const app = express()
 
@@ -40,6 +41,7 @@ app.use("/api/auth", authRoutes)
 app.use("/api/users", userRoutes)
 app.use("/api/roles", roleRoutes)
 app.use("/api/establishment", establishmentRoutes)
+app.use("/api/kds", kdsRoutes)
 
 // Manejo de rutas no encontradas
 app.use((req, res) => {
