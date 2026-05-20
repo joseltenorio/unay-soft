@@ -23,14 +23,18 @@ export function mapKitchenOrdersToBoard(kitchenOrders = []) {
 }
 
 export function mapKitchenOrderToBoard(order) {
+  const elapsedMinutes = getElapsedMinutes(
+    order.enviada_cocina_at || order.abierta_at || order.created_at,
+  )
+
   return {
     id: formatOrderNumber(order.numero_orden),
     rawId: order.id_orden,
+    rawOrderNumber: order.numero_orden,
     table: formatTable(order.mesa),
     waiter: formatWaiter(order.usuario),
-    elapsedMinutes: getElapsedMinutes(
-      order.enviada_cocina_at || order.abierta_at || order.created_at,
-    ),
+    elapsedMinutes,
+    elapsedLabel: formatElapsedTime(elapsedMinutes),
     status: mapOrderStatusToUi(order.estado),
     rawStatus: order.estado,
     notes: order.observaciones || "",
@@ -98,6 +102,27 @@ export function canToggleKitchenItem({ orderStatus, itemDone }) {
   return orderStatus !== "new"
 }
 
+export function formatElapsedTime(minutes) {
+  const safeMinutes = Number(minutes || 0)
+
+  if (safeMinutes <= 0) {
+    return "0m"
+  }
+
+  if (safeMinutes < 60) {
+    return `${safeMinutes}m`
+  }
+
+  const hours = Math.floor(safeMinutes / 60)
+
+  if (hours < 24) {
+    const remainingMinutes = safeMinutes % 60
+    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`
+  }
+
+  return "+24h"
+}
+
 function mapItemStatusToDone(status) {
   return ITEM_STATUS_TO_UI_DONE[status] || false
 }
@@ -107,27 +132,47 @@ function formatOrderNumber(numeroOrden) {
     return "#---"
   }
 
-  if (String(numeroOrden).startsWith("#")) {
-    return numeroOrden
+  const value = String(numeroOrden).trim()
+
+  const lastNumericBlock = value.match(/(\d+)$/)
+
+  if (lastNumericBlock) {
+    return `#${lastNumericBlock[1]}`
   }
 
-  return `#${numeroOrden}`
+  if (value.startsWith("#")) {
+    return value
+  }
+
+  return `#${value}`
 }
 
 function formatTable(mesa) {
   if (!mesa) {
-    return "Sin mesa"
-  }
-
-  if (mesa.nombre) {
-    return mesa.nombre
+    return "SM"
   }
 
   if (mesa.numero) {
     return `M${mesa.numero}`
   }
 
-  return "Sin mesa"
+  if (mesa.nombre) {
+    const normalizedName = String(mesa.nombre).trim().toLowerCase()
+
+    if (normalizedName.includes("sin mesa")) {
+      return "SM"
+    }
+
+    const numericBlock = normalizedName.match(/(\d+)/)
+
+    if (numericBlock) {
+      return `M${numericBlock[1]}`
+    }
+
+    return mesa.nombre
+  }
+
+  return "SM"
 }
 
 function formatWaiter(usuario) {

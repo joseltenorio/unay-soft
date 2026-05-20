@@ -13,6 +13,8 @@ import {
 } from "lucide-react"
 
 import logoUmari from "../../../assets/icons/logo-umari-dark.svg"
+import { getKitchenOrders } from "../../../services/kdsService"
+import { mapKitchenOrdersToBoard } from "../../../utils/kdsMapper"
 import "./KdsPage.css"
 
 const TIME_THRESHOLDS = { fresh: 5, normal: 10, warn: 15 }
@@ -271,8 +273,7 @@ const getTimeUrgencyClass = (minutes) =>
         ? "time--warn"
         : "time--critical"
 
-const formatElapsed = (minutes) =>
-  `${String(Math.floor(minutes)).padStart(2, "0")}:00`
+const formatElapsed = (order) => order.elapsedLabel || `${order.elapsedMinutes}m`
 
 const getStatusLabel = (status) =>
   ({
@@ -505,7 +506,7 @@ function HeaderBand({ order }) {
 
           <span className={`kds-card-time ${timeClass}`}>
             <Clock3 size={12} strokeWidth={2.5} />
-            {formatElapsed(order.elapsedMinutes)}
+            {formatElapsed(order)}
           </span>
         </div>
 
@@ -681,7 +682,10 @@ function CardEnd({ order, items, onAdvance, onToggleItem }) {
 
 export default function KdsPage() {
   const [activeFilter, setActiveFilter] = useState("all")
-  const [orders, setOrders] = useState(MOCK_ORDERS)
+  const [orders, setOrders] = useState([])
+  const [isLoadingOrders, setIsLoadingOrders] = useState(true)
+  const [ordersError, setOrdersError] = useState("")
+  const [lastUpdatedAt, setLastUpdatedAt] = useState(null)
   const [boardHeight, setBoardHeight] = useState(600)
   const [searchTerm, setSearchTerm] = useState("")
   const [showQuickFilters, setShowQuickFilters] = useState(false)
@@ -697,6 +701,40 @@ export default function KdsPage() {
     quickFilters.withNotes ||
     quickFilters.pendingItems ||
     !quickFilters.oldestFirst
+
+  async function loadKitchenOrders({ showLoading = false } = {}) {
+    try {
+      if (showLoading) {
+        setIsLoadingOrders(true)
+      }
+
+      setOrdersError("")
+
+      const kitchenOrders = await getKitchenOrders()
+      const boardOrders = mapKitchenOrdersToBoard(kitchenOrders)
+
+      setOrders(boardOrders)
+      setLastUpdatedAt(new Date())
+    } catch (error) {
+      setOrdersError(
+        error.message || "No se pudieron cargar las comandas de cocina.",
+      )
+    } finally {
+      setIsLoadingOrders(false)
+    }
+  }
+
+  useEffect(() => {
+    loadKitchenOrders({ showLoading: true })
+
+    const intervalId = window.setInterval(() => {
+      loadKitchenOrders()
+    }, 30000)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [])
 
   useEffect(() => {
     function measure() {
@@ -940,6 +978,24 @@ export default function KdsPage() {
               </div>
             )}
 
+            {lastUpdatedAt && (
+              <span className="kds-last-update">
+                Actualizado {lastUpdatedAt.toLocaleTimeString("es-PE", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            )}
+
+            <button
+              className="kds-secondary-button"
+              type="button"
+              onClick={() => loadKitchenOrders({ showLoading: true })}
+              disabled={isLoadingOrders}
+            >
+              {isLoadingOrders ? "Actualizando..." : "Actualizar"}
+            </button>
+
             <button
               className={
                 showQuickFilters || hasActiveQuickFilters
@@ -958,10 +1014,26 @@ export default function KdsPage() {
           </div>
         </section>
 
-        {filteredOrders.length === 0 ? (
+        {isLoadingOrders && orders.length === 0 ? (
+          <section className="kds-state-card">
+            <strong>Cargando comandas de cocina...</strong>
+            <p>Estamos consultando las órdenes activas del monitor KDS.</p>
+          </section>
+        ) : ordersError ? (
+          <section className="kds-state-card kds-state-card--error">
+            <strong>No se pudieron cargar las comandas</strong>
+            <p>{ordersError}</p>
+            <button
+              type="button"
+              onClick={() => loadKitchenOrders({ showLoading: true })}
+            >
+              Reintentar
+            </button>
+          </section>
+        ) : filteredOrders.length === 0 ? (
           <div className="kds-board-empty">
             <UtensilsCrossed size={28} />
-            <p>Sin comandas en esta categoría</p>
+            <p>No hay comandas para los filtros seleccionados</p>
           </div>
         ) : (
           <div className="kds-board" style={{ height: `${boardHeight}px` }}>
