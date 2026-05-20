@@ -4,6 +4,51 @@
   --kds-card-radius: 16px;
   --kds-card-split-radius: var(--kds-card-radius);
 
+  /* Local tokens: board filters */
+  --kds-filter-bg: #ffffff;
+  --kds-filter-text: rgba(3, 25, 38, 0.72);
+  --kds-filter-text-hover: #031926;
+  --kds-filter-border: rgba(3, 25, 38, 0.12);
+  --kds-filter-border-hover: rgba(3, 25, 38, 0.26);
+  --kds-filter-active-bg: #111111;
+  --kds-filter-active-text: #ffffff;
+  --kds-filter-active-border: #111111;
+  --kds-filter-active-shadow: rgba(17, 17, 17, 0.18);
+
+  --kds-filter-count-bg: rgba(3, 25, 38, 0.08);
+  --kds-filter-count-text: #031926;
+  --kds-filter-count-active-bg: #ffffff;
+  --kds-filter-count-active-text: #111111;
+
+  /* Local tokens: quick filters */
+  --kds-quick-bg: #ffffff;
+  --kds-quick-text: rgba(3, 25, 38, 0.72);
+  --kds-quick-border: rgba(3, 25, 38, 0.12);
+  --kds-quick-active-bg: #f4f4f4;
+  --kds-quick-active-text: #111111;
+  --kds-quick-active-border: #111111;
+
+  /* Local tokens: filter panel trigger */
+  --kds-filter-trigger-bg: #ffffff;
+  --kds-filter-trigger-text: #031926;
+  --kds-filter-trigger-border: rgba(3, 25, 38, 0.16);
+  --kds-filter-trigger-active-bg: #ffffff;
+  --kds-filter-trigger-active-text: #111111;
+  --kds-filter-trigger-active-border: #111111;
+  --kds-filter-trigger-dot-bg: #111111;
+  --kds-filter-trigger-dot-ring: rgba(17, 17, 17, 0.18);
+
+  /* Local tokens: actions */
+  --kds-action-new-bg: var(--color-brand-primary);
+  --kds-action-new-bg-hover: var(--color-primary-hover);
+  --kds-action-new-text: #ffffff;
+  --kds-action-new-border: var(--color-brand-primary);
+
+  --kds-action-process-bg: #c68a00;
+  --kds-action-process-bg-hover: #a87200;
+  --kds-action-process-text: #ffffff;
+  --kds-action-process-border: #c68a00;
+
   height: 100dvh;
   overflow: hidden;
   display: flex;
@@ -195,8 +240,8 @@
   height: 7px;
   display: inline-block;
   border-radius: 999px;
-  background: #f5dea3;
-  box-shadow: 0 0 0 2px rgba(245, 222, 163, 0.28);
+  background: var(--kds-filter-trigger-dot-bg);
+  box-shadow: 0 0 0 2px var(--kds-filter-trigger-dot-ring);
 }
 
 .kds-filter-tabs {
@@ -207,53 +252,66 @@
 }
 
 .kds-filter-tab {
-  min-height: 38px;
-  padding: 0 14px;
+  min-height: 40px;
+  padding: 0 16px;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  color: rgba(3, 25, 38, 0.68);
-  background: rgba(255, 255, 255, 0.52);
-  border: 1px solid rgba(3, 25, 38, 0.11);
+  gap: 8px;
+  color: var(--kds-filter-text);
+  background: var(--kds-filter-bg);
+  border: 1px solid var(--kds-filter-border);
   border-radius: 999px;
-  font-size: 0.86rem;
-  font-weight: 800;
+  font-size: 0.88rem;
+  font-weight: 900;
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(3, 25, 38, 0.04);
   transition:
     background-color var(--transition-fast),
     border-color var(--transition-fast),
     box-shadow var(--transition-fast),
-    color var(--transition-fast);
+    color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .kds-filter-tab:hover {
-  background: rgba(255, 255, 255, 0.78);
-  border-color: rgba(70, 129, 137, 0.3);
+  color: var(--kds-filter-text-hover);
+  background: var(--kds-filter-bg);
+  border-color: var(--kds-filter-border-hover);
+  box-shadow: 0 6px 16px rgba(3, 25, 38, 0.08);
+  transform: translateY(-1px);
 }
 
 .kds-filter-tab__count {
-  min-width: 22px;
-  min-height: 22px;
-  padding: 0 6px;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0 7px;
   display: inline-grid;
   place-items: center;
-  color: var(--color-brand-main);
-  background: rgba(70, 129, 137, 0.12);
+  color: var(--kds-filter-count-text);
+  background: var(--kds-filter-count-bg);
   border-radius: 999px;
   font-size: 0.76rem;
-  font-weight: 900;
+  font-weight: 950;
 }
 
 .kds-filter-tab--active {
-  color: var(--color-brand-primary);
-  background: rgba(255, 255, 255, 0.94);
-  border-color: rgba(70, 129, 137, 0.4);
-  box-shadow: 0 8px 20px rgba(3, 25, 38, 0.07);
+  color: var(--kds-filter-active-text);
+  background: var(--kds-filter-active-bg);
+  border-color: var(--kds-filter-active-border);
+  box-shadow:
+    0 8px 20px var(--kds-filter-active-shadow),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.kds-filter-tab--active:hover {
+  color: var(--kds-filter-active-text);
+  background: var(--kds-filter-active-bg);
+  border-color: var(--kds-filter-active-border);
 }
 
 .kds-filter-tab--active .kds-filter-tab__count {
-  color: var(--color-brand-primary);
-  background: rgba(70, 129, 137, 0.2);
+  color: var(--kds-filter-count-active-text);
+  background: var(--kds-filter-count-active-bg);
 }
 
 .kds-toolbar-actions {
@@ -266,38 +324,47 @@
 
 .kds-secondary-button {
   min-height: 38px;
-  padding: 0 14px;
+  padding: 0 15px;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  color: var(--color-brand-primary);
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(3, 25, 38, 0.12);
+  gap: 8px;
+  color: var(--kds-filter-trigger-text);
+  background: var(--kds-filter-trigger-bg);
+  border: 1px solid var(--kds-filter-trigger-border);
   border-radius: 12px;
   font-size: 0.86rem;
-  font-weight: 900;
+  font-weight: 950;
   white-space: nowrap;
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(3, 25, 38, 0.04);
   transition:
     background-color var(--transition-fast),
     border-color var(--transition-fast),
     color var(--transition-fast),
+    box-shadow var(--transition-fast),
     transform var(--transition-fast);
 }
 
 .kds-secondary-button:hover {
-  background: #ffffff;
+  background: var(--kds-filter-trigger-bg);
+  border-color: rgba(3, 25, 38, 0.28);
+  box-shadow: 0 6px 16px rgba(3, 25, 38, 0.08);
   transform: translateY(-1px);
 }
 
 .kds-secondary-button--active {
-  color: #ffffff;
-  background: var(--color-brand-primary);
-  border-color: var(--color-brand-primary);
+  color: var(--kds-filter-trigger-active-text);
+  background: var(--kds-filter-trigger-active-bg);
+  border-color: var(--kds-filter-trigger-active-border);
+  box-shadow:
+    0 6px 16px rgba(3, 25, 38, 0.08),
+    inset 0 0 0 1px rgba(17, 17, 17, 0.04);
 }
 
 .kds-secondary-button--active:hover {
-  background: var(--color-brand-primary);
+  color: var(--kds-filter-trigger-active-text);
+  background: var(--kds-filter-trigger-active-bg);
+  border-color: var(--kds-filter-trigger-active-border);
 }
 
 .kds-quick-filters {
@@ -310,42 +377,75 @@
 }
 
 .kds-quick-filter {
-  min-height: 34px;
-  padding: 0 12px;
+  min-height: 36px;
+  padding: 0 14px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   white-space: nowrap;
-  color: rgba(3, 25, 38, 0.68);
-  background: rgba(255, 255, 255, 0.58);
-  border: 1px solid rgba(3, 25, 38, 0.1);
+  color: var(--kds-quick-text);
+  background: var(--kds-quick-bg);
+  border: 1px solid var(--kds-quick-border);
   border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 850;
+  font-size: 0.82rem;
+  font-weight: 900;
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(3, 25, 38, 0.04);
   transition:
     background-color var(--transition-fast),
     border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
     color var(--transition-fast),
     transform var(--transition-fast);
 }
 
 .kds-quick-filter:hover {
-  color: var(--color-brand-primary);
-  background: rgba(255, 255, 255, 0.86);
-  border-color: rgba(70, 129, 137, 0.3);
+  color: var(--kds-filter-text-hover);
+  background: var(--kds-quick-bg);
+  border-color: rgba(3, 25, 38, 0.28);
+  box-shadow: 0 6px 16px rgba(3, 25, 38, 0.08);
   transform: translateY(-1px);
 }
 
 .kds-quick-filter--active {
-  color: #ffffff;
-  background: var(--color-brand-main);
-  border-color: var(--color-brand-main);
+  color: var(--kds-quick-active-text);
+  background: var(--kds-quick-active-bg);
+  border-color: var(--kds-quick-active-border);
+  box-shadow:
+    0 6px 16px rgba(3, 25, 38, 0.08),
+    inset 0 0 0 1px rgba(17, 17, 17, 0.04);
 }
 
 .kds-quick-filter--active:hover {
+  color: var(--kds-quick-active-text);
+  background: var(--kds-quick-active-bg);
+  border-color: var(--kds-quick-active-border);
+}
+
+.kds-quick-filter--sort {
+  color: #031926;
+  background: #f7f7f7;
+  border-color: rgba(3, 25, 38, 0.22);
+}
+
+.kds-quick-filter--sort::before {
+  content: "↓";
+  width: 18px;
+  height: 18px;
+  margin-right: 7px;
+  display: inline-grid;
+  place-items: center;
   color: #ffffff;
-  background: var(--color-brand-main-hover);
-  border-color: var(--color-brand-main-hover);
+  background: #111111;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.kds-quick-filter--sort:hover {
+  background: #ffffff;
+  border-color: #111111;
 }
 
 .kds-board {
@@ -463,10 +563,10 @@
 }
 
 .kds-card-band {
-  min-height: 72px;
-  padding: 14px 16px;
+  min-height: 62px;
+  padding: 12px 16px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   color: #ffffff;
@@ -487,16 +587,21 @@
 .kds-card-band__left,
 .kds-card-band__right {
   display: flex;
-  flex-direction: column;
+  align-items: center;
 }
 
 .kds-card-band__left {
+  flex-direction: column;
+  align-items: flex-start;
   gap: 8px;
+  min-width: 0;
 }
 
 .kds-card-band__right {
-  align-items: flex-end;
-  gap: 7px;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 8px;
+  flex: 0 0 auto;
 }
 
 .kds-split-strip {
@@ -557,6 +662,7 @@
   height: 38px;
   display: grid;
   place-items: center;
+  flex: 0 0 auto;
   color: var(--color-brand-primary);
   background: #ffb11f;
   border-radius: 999px;
@@ -574,6 +680,8 @@
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .kds-card-progress {
@@ -733,26 +841,26 @@
 }
 
 .kds-action-button--new {
-  color: #ffffff;
-  background: var(--color-brand-primary);
-  border: 1px solid var(--color-brand-primary);
+  color: var(--kds-action-new-text);
+  background: var(--kds-action-new-bg);
+  border: 1px solid var(--kds-action-new-border);
   box-shadow: 0 8px 18px rgba(3, 25, 38, 0.22);
 }
 
 .kds-action-button--new:hover {
-  background: var(--color-primary-hover);
+  background: var(--kds-action-new-bg-hover);
   box-shadow: 0 12px 24px rgba(3, 25, 38, 0.28);
 }
 
 .kds-action-button--process {
-  color: #ffffff;
-  background: #c68a00;
-  border: 1px solid #c68a00;
+  color: var(--kds-action-process-text);
+  background: var(--kds-action-process-bg);
+  border: 1px solid var(--kds-action-process-border);
   box-shadow: 0 8px 18px rgba(198, 138, 0, 0.32);
 }
 
 .kds-action-button--process:hover {
-  background: #a87200;
+  background: var(--kds-action-process-bg-hover);
   box-shadow: 0 12px 24px rgba(198, 138, 0, 0.4);
 }
 

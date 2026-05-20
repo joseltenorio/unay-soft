@@ -18,8 +18,8 @@ import "./KdsPage.css"
 const TIME_THRESHOLDS = { fresh: 5, normal: 10, warn: 15 }
 
 const H = {
-  headerBase: 76,
-  splitStrip: 9,
+  headerBase: 62,
+  splitStrip: 16,
   headerProg: 3,
   itemBase: 47,
   itemNote: 20,
@@ -510,10 +510,11 @@ function HeaderBand({ order }) {
         </div>
 
         <div className="kds-card-band__right">
-          <span className="kds-card-table">{order.table}</span>
           <small className="kds-card-status-badge">
             {getStatusLabel(order.status)}
           </small>
+
+          <span className="kds-card-table">{order.table}</span>
         </div>
       </div>
 
@@ -692,10 +693,10 @@ export default function KdsPage() {
   })
 
   const hasActiveQuickFilters =
-  quickFilters.criticalOnly ||
-  quickFilters.withNotes ||
-  quickFilters.pendingItems ||
-  !quickFilters.oldestFirst
+    quickFilters.criticalOnly ||
+    quickFilters.withNotes ||
+    quickFilters.pendingItems ||
+    !quickFilters.oldestFirst
 
   useEffect(() => {
     function measure() {
@@ -927,10 +928,13 @@ export default function KdsPage() {
                 </button>
 
                 <button
-                  className="kds-quick-filter"
+                  className="kds-quick-filter kds-quick-filter--sort"
                   type="button"
+                  aria-pressed="true"
+                  title="Cambiar orden de las comandas"
                   onClick={handleToggleOrderDirection}
                 >
+                  Orden:{" "}
                   {quickFilters.oldestFirst ? "Más antiguas" : "Más recientes"}
                 </button>
               </div>
