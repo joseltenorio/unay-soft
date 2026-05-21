@@ -83,7 +83,9 @@ async function getKitchenOrders(idEstablecimiento) {
             'created_at', io.created_at,
             'updated_at', io.updated_at
           )
-          order by io.created_at asc
+          order by
+            io.created_at asc,
+            io.id_item_orden asc
         ) filter (where io.id_item_orden is not null),
         '[]'::json
       ) as items
@@ -104,9 +106,12 @@ async function getKitchenOrders(idEstablecimiento) {
         o.estado in ('ABIERTA', 'EN_PREPARACION')
         or (
           o.estado = 'LISTA'
-          and (
-            o.lista_at is null
-            or o.lista_at > now() - interval '7 seconds'
+          and not exists (
+            select 1
+            from orden_notificacion_servicio ns
+            where ns.id_orden = o.id_orden
+              and ns.tipo = 'PEDIDO_LISTO'
+              and ns.estado in ('PENDIENTE', 'ATENDIDA')
           )
         )
       )
@@ -350,6 +355,8 @@ async function updateKitchenItemStatus({
             else preparacion_inicio_at
           end,
           listo_at = case
+            when $3::varchar(30) = 'EN_PREPARACION'
+              then null
             when listo_at is null
              and $3::varchar(30) = 'LISTO'
               then now()
@@ -398,8 +405,35 @@ async function validateOrderTransition({
   currentStatus,
   nextStatus,
 }) {
+  if (
+    currentStatus === ORDER_STATUS.READY &&
+    nextStatus === ORDER_STATUS.IN_PREPARATION
+  ) {
+    const pendingServiceCallResult = await client.query(
+      `
+        select count(*)::int as pending_service_calls
+        from orden_notificacion_servicio
+        where id_orden = $1
+          and tipo = 'PEDIDO_LISTO'
+          and estado = 'PENDIENTE';
+      `,
+      [idOrden],
+    )
+
+    const pendingServiceCalls =
+      pendingServiceCallResult.rows[0]?.pending_service_calls || 0
+
+    if (pendingServiceCalls > 0) {
+      throw createBusinessError(
+        "No se puede abortar una comanda lista que ya fue notificada al mesero.",
+      )
+    }
+
+    return
+  }
+
   if (currentStatus === ORDER_STATUS.READY && nextStatus !== ORDER_STATUS.READY) {
-    throw createBusinessError("Una comanda lista no puede volver a preparación.")
+    throw createBusinessError("Una comanda lista no puede cambiar a ese estado.")
   }
 
   if (
@@ -442,12 +476,20 @@ function validateItemTransition({
     )
   }
 
-  if (currentOrderStatus === ORDER_STATUS.READY && nextStatus !== ITEM_STATUS.READY) {
+  if (currentOrderStatus === ORDER_STATUS.READY) {
     throw createBusinessError("No se puede modificar un ítem de una comanda lista.")
   }
 
+  if (
+    currentItemStatus === ITEM_STATUS.READY &&
+    nextStatus === ITEM_STATUS.IN_PREPARATION &&
+    currentOrderStatus === ORDER_STATUS.IN_PREPARATION
+  ) {
+    return
+  }
+
   if (currentItemStatus === ITEM_STATUS.READY && nextStatus !== ITEM_STATUS.READY) {
-    throw createBusinessError("Un ítem listo no puede volver a preparación.")
+    throw createBusinessError("Un ítem listo no puede cambiar a ese estado.")
   }
 }
 
@@ -719,7 +761,9 @@ async function getServiceNotifications({
             'listo_at', io.listo_at,
             'entregado_at', io.entregado_at
           )
-          order by io.created_at asc
+          order by
+            io.created_at asc,
+            io.id_item_orden asc
         ) filter (where io.id_item_orden is not null),
         '[]'::json
       ) as items
