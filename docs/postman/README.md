@@ -2,7 +2,7 @@
 
 Esta carpeta contiene la colección de Postman utilizada para validar los endpoints principales del backend de Umarí OS.
 
-La colección está organizada por módulos para facilitar la validación de autenticación, autorización por perfiles, roles, mantenimiento de usuarios, configuración del establecimiento y monitor de cocina.
+La colección está organizada por módulos para facilitar la validación de autenticación, autorización por perfiles, roles, mantenimiento de usuarios, configuración del establecimiento, monitor de cocina y notificaciones de servicio.
 
 ---
 
@@ -83,20 +83,36 @@ Umari OS API
 │  ├─ Get Establishment
 │  └─ Update Establishment
 │
-└─ KDS - Kitchen Monitor
-   ├─ List Kitchen Orders
-   ├─ List Kitchen Orders Without Token
-   ├─ List Kitchen Orders Denied
-   ├─ Change Order Status to In Preparation
-   ├─ Change Order Status to Ready
-   ├─ Change Item Status to In Preparation
-   ├─ Change Item Status to Ready
-   ├─ Reject Item Ready Before Order Starts
-   ├─ Reject Order Invalid Status
-   ├─ Reject Item Invalid Status
-   ├─ Reject Order Status Without Body
-   ├─ Reject Missing Order
-   └─ Reject Missing Item
+├─ KDS - Kitchen Monitor
+│  ├─ List Kitchen Orders
+│  ├─ List Kitchen Orders Without Token
+│  ├─ List Kitchen Orders Denied
+│  ├─ Change Order Status to In Preparation
+│  ├─ Change Order Status to Ready
+│  ├─ Change Item Status to In Preparation
+│  ├─ Change Item Status to Ready
+│  ├─ Reject Item Ready Before Order Starts
+│  ├─ Reject Order Invalid Status
+│  ├─ Reject Item Invalid Status
+│  ├─ Reject Order Status Without Body
+│  ├─ Reject Missing Order
+│  └─ Reject Missing Item
+│
+└─ KDS - Service Notifications
+   ├─ Create Ready Order Service Call
+   ├─ Create Kitchen Incident Service Call
+   ├─ List Kitchen Service Calls
+   ├─ Attend Kitchen Service Call
+   ├─ Confirm Delivered Order
+   ├─ Reject Service Call Without Token
+   ├─ Reject Service Call Without Permission
+   ├─ Reject Service Calls List Without Permission
+   ├─ Reject Attend Service Call Without Permission
+   ├─ Reject Delivered Order Without Permission
+   ├─ Reject Delivered Order Not Ready
+   ├─ Reject Missing Service Call
+   ├─ Reject Missing Service Call Type
+   └─ Reject Invalid Service Call Type
 ```
 
 ---
@@ -168,9 +184,16 @@ order_id =
 item_id =
 open_order_id =
 open_order_item_id =
+ready_order_id =
+service_call_id =
+incident_service_call_id =
+incident_reason = Apoyo requerido
+incident_message = Se requiere apoyo en cocina.
 
 invalid_order_id = 00000000-0000-0000-0000-000000000000
 invalid_item_id = 00000000-0000-0000-0000-000000000000
+invalid_service_call_id = 00000000-0000-0000-0000-000000000000
+invalid_service_call_id = 00000000-0000-0000-0000-000000000000
 ```
 
 ---
@@ -242,6 +265,24 @@ Ejemplo de body para actualizar el estado de un ítem de cocina:
 ```json
 {
   "status": "LISTO"
+}
+```
+
+Ejemplo de body para crear un aviso de pedido listo:
+
+```json
+{
+  "type": "PEDIDO_LISTO"
+}
+```
+
+Ejemplo de body para crear una incidencia de cocina:
+
+```json
+{
+  "type": "INCIDENCIA_COCINA",
+  "motivo": "{{incident_reason}}",
+  "mensaje": "{{incident_message}}"
 }
 ```
 
@@ -485,6 +526,63 @@ Para pruebas negativas de autorización, debe usarse un usuario sin permisos del
 
 ---
 
+### 10. Probar notificaciones de servicio y entrega
+
+Ejecutar las pruebas de la carpeta:
+
+```txt
+KDS - Service Notifications
+```
+
+Endpoints principales:
+
+```txt
+POST  /api/kds/orders/:id/service-calls
+GET   /api/kds/service-calls
+PATCH /api/kds/service-calls/:id/attend
+PATCH /api/kds/orders/:id/delivered
+```
+
+Operaciones incluidas:
+
+```txt
+Crear aviso de pedido listo para salón
+Crear incidencia de cocina con motivo y mensaje
+Listar avisos pendientes de cocina
+Marcar aviso como atendido
+Confirmar entrega de una comanda lista
+Validar rechazo de creación sin token
+Validar rechazo de creación sin permiso
+Validar rechazo de listado sin permiso
+Validar rechazo de atención sin permiso
+Validar rechazo de confirmación de entrega sin permiso
+Validar rechazo de entrega cuando la comanda no está LISTA
+Validar rechazo de aviso inexistente
+Validar rechazo de tipo de aviso faltante o inválido
+```
+
+Debe ejecutarse con usuarios que tengan los permisos correspondientes:
+
+```txt
+kds.notificar_servicio
+pos.ver_avisos_cocina
+pos.atender_avisos_cocina
+pos.confirmar_entrega
+```
+
+Para el flujo positivo, cocina crea el aviso y salón confirma la entrega.
+
+El cambio de entrega esperado es:
+
+```txt
+orden: LISTA -> ENTREGADA
+item_orden: LISTO -> ENTREGADO
+```
+
+La colección usa `ready_order_id` para confirmar entregas y `service_call_id` para atender avisos.
+
+---
+
 ## Descripción de carpetas
 
 ### Health
@@ -552,6 +650,36 @@ LISTO
 
 No se incluyen pruebas de entrega, despacho o cierre final de atención en esta carpeta.
 
+### KDS - Service Notifications
+
+Contiene las pruebas de notificación de servicio entre cocina y salón.
+
+Incluye creación de avisos de pedido listo, registro de incidencias de cocina, listado de avisos pendientes, atención de avisos y confirmación de entrega.
+
+Los tipos permitidos para avisos de servicio son:
+
+```txt
+PEDIDO_LISTO
+INCIDENCIA_COCINA
+```
+
+Los estados permitidos para avisos de servicio son:
+
+```txt
+PENDIENTE
+ATENDIDA
+CANCELADA
+```
+
+Los estados usados para confirmar entrega son:
+
+```txt
+orden: ENTREGADA
+item_orden: ENTREGADO
+```
+
+Esta carpeta no implementa pagos, caja, impresión, aplicación móvil ni comunicación por WebSockets.
+
 ---
 
 ## Consideraciones de seguridad
@@ -596,6 +724,9 @@ order_id
 item_id
 open_order_id
 open_order_item_id
+ready_order_id
+service_call_id
+incident_service_call_id
 ```
 
 ---
