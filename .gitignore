@@ -60,3 +60,4 @@ coverage/
 
 # Production artifacts
 *.local
+repomix-output*
