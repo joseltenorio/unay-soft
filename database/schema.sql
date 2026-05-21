@@ -19,6 +19,7 @@ drop table if exists apertura_caja cascade;
 drop table if exists caja cascade;
 drop table if exists pago cascade;
 drop table if exists item_orden_adicional cascade;
+drop table if exists orden_notificacion_servicio cascade;
 drop table if exists item_orden cascade;
 drop table if exists orden cascade;
 drop table if exists producto_etiqueta cascade;
@@ -428,6 +429,7 @@ create table orden (
   enviada_cocina_at timestamptz,
   preparacion_inicio_at timestamptz,
   lista_at timestamptz,
+  entregada_at timestamptz,
   cerrada_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -468,6 +470,7 @@ create table item_orden (
   estado_cocina varchar(30) not null default 'PENDIENTE',
   preparacion_inicio_at timestamptz,
   listo_at timestamptz,
+  entregado_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
 
@@ -494,6 +497,65 @@ create table item_orden (
   constraint chk_item_orden_estado_cocina
     check (estado_cocina in ('PENDIENTE', 'EN_PREPARACION', 'LISTO', 'ENTREGADO', 'ANULADO'))
 );
+
+create table orden_notificacion_servicio (
+  id_notificacion uuid primary key default uuid_generate_v4(),
+  id_orden uuid not null,
+  tipo varchar(40) not null,
+  motivo varchar(80),
+  mensaje text,
+  estado varchar(30) not null default 'PENDIENTE',
+  creado_por uuid not null,
+  atendido_por uuid,
+  created_at timestamptz not null default now(),
+  atendida_at timestamptz,
+  updated_at timestamptz not null default now(),
+
+  constraint fk_notificacion_servicio_orden
+    foreign key (id_orden)
+    references orden(id_orden)
+    on update cascade
+    on delete cascade,
+
+  constraint fk_notificacion_servicio_creado_por
+    foreign key (creado_por)
+    references usuario(id_usuario)
+    on update cascade
+    on delete restrict,
+
+  constraint fk_notificacion_servicio_atendido_por
+    foreign key (atendido_por)
+    references usuario(id_usuario)
+    on update cascade
+    on delete set null,
+
+  constraint chk_notificacion_servicio_tipo
+    check (tipo in ('PEDIDO_LISTO', 'INCIDENCIA_COCINA')),
+
+  constraint chk_notificacion_servicio_estado
+    check (estado in ('PENDIENTE', 'ATENDIDA', 'CANCELADA')),
+
+  constraint chk_notificacion_servicio_motivo
+    check (
+      tipo <> 'INCIDENCIA_COCINA'
+      or motivo is not null
+      or mensaje is not null
+    )
+);
+
+create index idx_notificacion_servicio_orden
+  on orden_notificacion_servicio(id_orden);
+
+create index idx_notificacion_servicio_estado
+  on orden_notificacion_servicio(estado);
+
+create index idx_notificacion_servicio_tipo_estado
+  on orden_notificacion_servicio(tipo, estado);
+
+create unique index uq_notificacion_pedido_listo_pendiente
+  on orden_notificacion_servicio(id_orden, tipo)
+  where tipo = 'PEDIDO_LISTO'
+    and estado = 'PENDIENTE';
 
 create table item_orden_adicional (
   id_item_orden_adicional uuid primary key default uuid_generate_v4(),

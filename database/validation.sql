@@ -28,6 +28,8 @@ select 'orden', count(*) from orden
 union all
 select 'item_orden', count(*) from item_orden
 union all
+select 'orden_notificacion_servicio', count(*) from orden_notificacion_servicio
+union all
 select 'pago', count(*) from pago
 union all
 select 'insumo', count(*) from insumo
@@ -101,6 +103,7 @@ select
   o.enviada_cocina_at,
   o.preparacion_inicio_at,
   o.lista_at,
+  o.entregada_at,
   count(io.id_item_orden) as total_items
 from orden o
 left join mesa m on m.id_mesa = o.id_mesa
@@ -118,7 +121,8 @@ group by
   o.abierta_at,
   o.enviada_cocina_at,
   o.preparacion_inicio_at,
-  o.lista_at
+  o.lista_at,
+  o.entregada_at
 order by coalesce(o.enviada_cocina_at, o.abierta_at) asc;
 
 -- =========================================================
@@ -133,11 +137,12 @@ select
   io.notas_cocina,
   io.estado_cocina,
   io.preparacion_inicio_at,
-  io.listo_at
+  io.listo_at,
+  io.entregado_at
 from item_orden io
 join orden o on o.id_orden = io.id_orden
 join producto p on p.id_producto = io.id_producto
-where o.estado in ('ABIERTA', 'EN_PREPARACION', 'LISTA')
+where o.estado in ('ABIERTA', 'EN_PREPARACION', 'LISTA', 'ENTREGADA')
 order by
   o.numero_orden,
   io.created_at asc;
@@ -156,3 +161,82 @@ from permiso p
 join modulo m on m.id_modulo = p.id_modulo
 where m.codigo = 'kds'
 order by p.codigo;
+
+-- =========================================================
+-- POS - Permisos asignados para avisos de cocina
+-- =========================================================
+
+select
+  m.codigo as modulo,
+  p.codigo as permiso,
+  p.accion,
+  p.descripcion,
+  p.estado
+from permiso p
+join modulo m on m.id_modulo = p.id_modulo
+where p.codigo in (
+  'pos.ver_avisos_cocina',
+  'pos.atender_avisos_cocina',
+  'pos.confirmar_entrega'
+)
+order by p.codigo;
+
+-- =========================================================
+-- Notificaciones de servicio cocina / salón
+-- =========================================================
+
+select
+  n.id_notificacion,
+  n.tipo,
+  n.motivo,
+  n.mensaje,
+  n.estado,
+  o.numero_orden,
+  o.estado as estado_orden,
+  m.numero as mesa,
+  creador.nombres || ' ' || creador.apellidos as creado_por,
+  atendido.nombres || ' ' || atendido.apellidos as atendido_por,
+  n.created_at,
+  n.atendida_at,
+  n.updated_at
+from orden_notificacion_servicio n
+join orden o on o.id_orden = n.id_orden
+left join mesa m on m.id_mesa = o.id_mesa
+join usuario creador on creador.id_usuario = n.creado_por
+left join usuario atendido on atendido.id_usuario = n.atendido_por
+order by n.created_at desc;
+
+-- Permisos nuevos por rol
+select
+  r.nombre as rol,
+  p.codigo as permiso
+from rol_permiso rp
+join rol r on r.id_rol = rp.id_rol
+join permiso p on p.id_permiso = rp.id_permiso
+where p.codigo in (
+  'kds.notificar_servicio',
+  'pos.ver_avisos_cocina',
+  'pos.atender_avisos_cocina',
+  'pos.confirmar_entrega'
+)
+order by r.nombre, p.codigo;
+
+-- Órdenes listas o entregadas con trazabilidad de tiempos
+select
+  o.numero_orden,
+  o.estado,
+  o.lista_at,
+  o.entregada_at,
+  count(io.id_item_orden) as total_items,
+  count(*) filter (where io.estado_cocina = 'LISTO') as items_listos,
+  count(*) filter (where io.estado_cocina = 'ENTREGADO') as items_entregados
+from orden o
+left join item_orden io on io.id_orden = o.id_orden
+where o.estado in ('LISTA', 'ENTREGADA')
+group by
+  o.id_orden,
+  o.numero_orden,
+  o.estado,
+  o.lista_at,
+  o.entregada_at
+order by coalesce(o.entregada_at, o.lista_at, o.created_at) desc;
