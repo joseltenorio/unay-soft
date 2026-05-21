@@ -189,50 +189,12 @@ async function updateKitchenOrderStatus({
 
     const currentOrder = currentOrderResult.rows[0]
 
-    validateOrderTransition(currentOrder.estado, nextStatus)
-
-    const updateResult = await client.query(
-      `
-        update orden
-        set
-        estado = $3::varchar(30),
-        enviada_cocina_at = case
-            when enviada_cocina_at is null
-            and $3::varchar(30) in ('ABIERTA', 'EN_PREPARACION', 'LISTA')
-            then now()
-            else enviada_cocina_at
-        end,
-        preparacion_inicio_at = case
-            when preparacion_inicio_at is null
-            and $3::varchar(30) in ('EN_PREPARACION', 'LISTA')
-            then now()
-            else preparacion_inicio_at
-        end,
-        lista_at = case
-            when lista_at is null
-            and $3::varchar(30) = 'LISTA'
-            then now()
-            else lista_at
-        end,
-        updated_at = now()
-        where id_orden = $1
-        and exists (
-            select 1
-            from usuario u
-            where u.id_usuario = orden.id_usuario
-            and u.id_establecimiento = $2
-        )
-        returning
-        id_orden,
-        numero_orden,
-        estado,
-        enviada_cocina_at,
-        preparacion_inicio_at,
-        lista_at,
-        updated_at;
-    `,
-    [idOrden, idEstablecimiento, nextStatus],
-    )
+    await validateOrderTransition({
+      client,
+      idOrden,
+      currentStatus: currentOrder.estado,
+      nextStatus,
+    })
 
     if (nextStatus === ORDER_STATUS.IN_PREPARATION) {
       await client.query(
@@ -245,7 +207,7 @@ async function updateKitchenOrderStatus({
             end,
             preparacion_inicio_at = case
               when preparacion_inicio_at is null
-              and estado_cocina = 'PENDIENTE'
+               and estado_cocina = 'PENDIENTE'
                 then now()
               else preparacion_inicio_at
             end,
@@ -257,32 +219,48 @@ async function updateKitchenOrderStatus({
       )
     }
 
-    if (nextStatus === ORDER_STATUS.READY) {
-      await client.query(
-        `
-          update item_orden
-          set
-            estado_cocina = case
-              when estado_cocina in ('PENDIENTE', 'EN_PREPARACION') then 'LISTO'
-              else estado_cocina
-            end,
-            preparacion_inicio_at = case
-              when preparacion_inicio_at is null
-                then now()
-              else preparacion_inicio_at
-            end,
-            listo_at = case
-              when listo_at is null
-                then now()
-              else listo_at
-            end,
-            updated_at = now()
-          where id_orden = $1
-            and estado_cocina in ('PENDIENTE', 'EN_PREPARACION');
-        `,
-        [idOrden],
-      )
-    }
+    const updateResult = await client.query(
+      `
+        update orden
+        set
+          estado = $3::varchar(30),
+          enviada_cocina_at = case
+            when enviada_cocina_at is null
+             and $3::varchar(30) in ('ABIERTA', 'EN_PREPARACION', 'LISTA')
+              then now()
+            else enviada_cocina_at
+          end,
+          preparacion_inicio_at = case
+            when preparacion_inicio_at is null
+             and $3::varchar(30) in ('EN_PREPARACION', 'LISTA')
+              then now()
+            else preparacion_inicio_at
+          end,
+          lista_at = case
+            when lista_at is null
+             and $3::varchar(30) = 'LISTA'
+              then now()
+            else lista_at
+          end,
+          updated_at = now()
+        where id_orden = $1
+          and exists (
+            select 1
+            from usuario u
+            where u.id_usuario = orden.id_usuario
+              and u.id_establecimiento = $2
+          )
+        returning
+          id_orden,
+          numero_orden,
+          estado,
+          enviada_cocina_at,
+          preparacion_inicio_at,
+          lista_at,
+          updated_at;
+      `,
+      [idOrden, idEstablecimiento, nextStatus],
+    )
 
     await client.query("commit")
 
@@ -344,16 +322,16 @@ async function updateKitchenItemStatus({
       `
         update item_orden
         set
-          estado_cocina = $3,
+          estado_cocina = $3::varchar(30),
           preparacion_inicio_at = case
             when preparacion_inicio_at is null
-             and $3 in ('EN_PREPARACION', 'LISTO')
+             and $3::varchar(30) in ('EN_PREPARACION', 'LISTO')
               then now()
             else preparacion_inicio_at
           end,
           listo_at = case
             when listo_at is null
-             and $3 = 'LISTO'
+             and $3::varchar(30) = 'LISTO'
               then now()
             else listo_at
           end,
@@ -394,13 +372,42 @@ async function updateKitchenItemStatus({
   }
 }
 
-function validateOrderTransition(currentStatus, nextStatus) {
+async function validateOrderTransition({
+  client,
+  idOrden,
+  currentStatus,
+  nextStatus,
+}) {
   if (currentStatus === ORDER_STATUS.READY && nextStatus !== ORDER_STATUS.READY) {
     throw createBusinessError("Una comanda lista no puede volver a preparación.")
   }
 
-  if (currentStatus === ORDER_STATUS.IN_PREPARATION && nextStatus === ORDER_STATUS.OPEN) {
+  if (
+    currentStatus === ORDER_STATUS.IN_PREPARATION &&
+    nextStatus === ORDER_STATUS.OPEN
+  ) {
     throw createBusinessError("Una comanda en preparación no puede volver a abierta.")
+  }
+
+  if (nextStatus === ORDER_STATUS.READY) {
+    const pendingItemsResult = await client.query(
+      `
+        select count(*)::int as pending_items
+        from item_orden
+        where id_orden = $1
+          and estado_cocina <> 'ANULADO'
+          and estado_cocina <> 'LISTO';
+      `,
+      [idOrden],
+    )
+
+    const pendingItems = pendingItemsResult.rows[0]?.pending_items || 0
+
+    if (pendingItems > 0) {
+      throw createBusinessError(
+        "No se puede finalizar la comanda mientras existan ítems pendientes.",
+      )
+    }
   }
 }
 
