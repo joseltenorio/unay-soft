@@ -1,0 +1,27 @@
+$kind: http-request
+url: http://localhost:3000/api/users/{{EDIT_USER_ID}}
+method: PUT
+body:
+  type: json
+  content: "{\r
+
+    \  \"nombres\": \"{{EDIT_USER_NOMBRES}}\",\r
+
+    \  \"apellidos\": \"{{EDIT_USER_APELLIDOS}}\",\r
+
+    \  \"email\": \"{{EDIT_USER_EMAIL}}\",\r
+
+    \  \"username\": \"{{EDIT_USER_USERNAME}}\",\r
+
+    \  \"celular\": \"{{EDIT_USER_CELULAR}}\",\r
+
+    \  \"id_rol\": \"{{EDIT_USER_ROLE_ID}}\",\r
+
+    \  \"estado\": \"{{EDIT_USER_STATUS}}\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{AUTH_TOKEN}}"
+order: 3000
