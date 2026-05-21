@@ -338,10 +338,14 @@ values
 ('56666666-6666-6666-6666-666666666666', '45555555-5555-5555-5555-555555555555', 'crear_orden', 'pos.crear_orden', 'Permite registrar órdenes.', true),
 ('57777777-7777-7777-7777-777777777777', '45555555-5555-5555-5555-555555555555', 'actualizar_orden', 'pos.actualizar_orden', 'Permite actualizar órdenes.', true),
 ('58888888-8888-8888-8888-888888888888', '45555555-5555-5555-5555-555555555555', 'anular_orden', 'pos.anular_orden', 'Permite anular órdenes.', true),
+('5ab33333-3333-3333-3333-333333333333', '45555555-5555-5555-5555-555555555555', 'ver_avisos_cocina', 'pos.ver_avisos_cocina', 'Permite visualizar avisos enviados desde cocina.', true),
+('5ab44444-4444-4444-4444-444444444444', '45555555-5555-5555-5555-555555555555', 'atender_avisos_cocina', 'pos.atender_avisos_cocina', 'Permite marcar avisos de cocina como atendidos.', true),
+('5ab55555-5555-5555-5555-555555555555', '45555555-5555-5555-5555-555555555555', 'confirmar_entrega', 'pos.confirmar_entrega', 'Permite confirmar la entrega de pedidos listos al cliente.', true),
 
 -- KDS
 ('59999999-9999-9999-9999-999999999999', '46666666-6666-6666-6666-666666666666', 'ver', 'kds.ver', 'Permite visualizar pedidos en cocina.', true),
 ('5aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '46666666-6666-6666-6666-666666666666', 'actualizar_estado', 'kds.actualizar_estado', 'Permite actualizar estado de preparación.', true),
+('5ab66666-6666-6666-6666-666666666666', '46666666-6666-6666-6666-666666666666', 'notificar_servicio', 'kds.notificar_servicio', 'Permite notificar a salón que un pedido está listo o que cocina requiere apoyo.', true),
 
 -- Inventario
 ('5bbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '47777777-7777-7777-7777-777777777777', 'ver', 'inventory.ver', 'Permite visualizar inventario.', true),
@@ -390,8 +394,12 @@ where codigo in (
   'pos.crear_orden',
   'pos.actualizar_orden',
   'pos.anular_orden',
+  'pos.ver_avisos_cocina',
+  'pos.atender_avisos_cocina',
+  'pos.confirmar_entrega',
   'kds.ver',
   'kds.actualizar_estado',
+  'kds.notificar_servicio',
   'inventory.ver',
   'inventory.registrar_movimiento',
   'cashier.ver',
@@ -428,7 +436,10 @@ where codigo in (
   'dashboard.ver',
   'pos.ver',
   'pos.crear_orden',
-  'pos.actualizar_orden'
+  'pos.actualizar_orden',
+  'pos.ver_avisos_cocina',
+  'pos.atender_avisos_cocina',
+  'pos.confirmar_entrega'
 );
 
 -- Cocina: KDS
@@ -442,7 +453,8 @@ where codigo in (
   'login.acceder',
   'dashboard.ver',
   'kds.ver',
-  'kds.actualizar_estado'
+  'kds.actualizar_estado',
+  'kds.notificar_servicio'
 );
 
 -- =========================================================
