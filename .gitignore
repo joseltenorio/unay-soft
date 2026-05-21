@@ -58,11 +58,8 @@ coverage/
 *.sqlite3
 *.db
 
-<<<<<<< Updated upstream
 # Production artifacts
 *.local
 repomix-output*
-=======
 # productoion artifacts
 *.local
->>>>>>> Stashed changes

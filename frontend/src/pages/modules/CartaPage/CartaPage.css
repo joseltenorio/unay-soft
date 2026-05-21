@@ -1,0 +1,519 @@
+/* ───────────────────────────────
+   CONTENEDOR GENERAL
+─────────────────────────────── */
+.carta {
+  padding: 24px;
+  background: #f6f7fb;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  color: #1f2937;
+}
+
+/* ───────────────────────────────
+   HEADER
+─────────────────────────────── */
+.carta__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.carta__title {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.carta__sub {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.carta__header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* ───────────────────────────────
+   BOTONES
+─────────────────────────────── */
+.carta__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.carta__btn--primary {
+  background: #2563eb;
+  color: white;
+}
+
+.carta__btn--primary:hover {
+  background: #1d4ed8;
+}
+
+.carta__btn--secondary {
+  background: white;
+  border: 1px solid #e5e7eb;
+}
+
+.carta__btn--secondary:hover {
+  background: #f3f4f6;
+}
+
+/* icon buttons */
+.carta__icon-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.carta__icon-btn:hover {
+  background: #f3f4f6;
+}
+
+.carta__icon-btn--warning {
+  color: #dc2626;
+}
+
+/* ───────────────────────────────
+   TOOLBAR
+─────────────────────────────── */
+.carta__toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+/* tabs */
+.carta__cat-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.carta__cat-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.carta__cat-tab:hover {
+  background: #f3f4f6;
+}
+
+.carta__cat-tab--active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.carta__cat-tab--inactive {
+  opacity: 0.5;
+}
+
+.carta__cat-count {
+  font-size: 11px;
+  background: rgba(0,0,0,0.08);
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+/* search */
+.carta__search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.carta__search {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  width: 220px;
+}
+
+/* ───────────────────────────────
+   LAYOUT
+─────────────────────────────── */
+.carta__layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 18px;
+}
+
+/* ───────────────────────────────
+   SIDEBAR
+─────────────────────────────── */
+.carta__sidebar {
+  background: white;
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid #e5e7eb;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.carta__sidebar-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.carta__cat-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  transition: background 0.2s;
+}
+
+.carta__cat-item:hover {
+  background: #f5f5f5;
+}
+
+.carta__cat-item--inactive {
+  opacity: 0.5;
+}
+
+.carta__cat-actions {
+  display: flex;
+  flex-direction: column; 
+  gap: 4px;
+  flex-shrink: 0;         
+  margin-left: 8px;
+}
+
+.carta__cat-name {
+  display: block;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #1a1a2e;
+}
+
+.carta__cat-desc {
+  display: block;
+  font-size: 0.78rem;
+  color: #888;
+  margin-top: 2px;
+}
+/* ───────────────────────────────
+   MAIN
+─────────────────────────────── */
+.carta__main {
+  min-height: 400px;
+}
+
+/* grid */
+.carta__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+/* group header */
+.carta__group {
+  margin-bottom: 24px;
+}
+
+.carta__group-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.carta__group-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.carta__group-count {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ───────────────────────────────
+   producto CARD
+─────────────────────────────── */
+.carta__prod-card {
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.carta__prod-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.carta__prod-card--inactive {
+  opacity: 0.6;
+}
+
+/* image */
+.carta__prod-img {
+  height: 140px;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.carta__prod-badge--agotado {
+  background: #f59e0b;
+  color: white;
+}
+
+.carta__prod-card--agotado {
+  opacity: 0.7;
+}
+
+.carta__prod-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.carta__prod-img-placeholder {
+  font-size: 28px;
+  font-weight: 700;
+  color: #9ca3af;
+}
+
+.carta__prod-badge--off {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #dc2626;
+  color: white;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+.carta__prod-card--add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #d1d5db;
+  background: transparent;
+  cursor: pointer;
+  min-height: 200px;
+  border-radius: 12px;
+  color: #9ca3af;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.carta__prod-card--add:hover {
+  border-color: #1a1a2e;
+  color: #1a1a2e;
+}
+
+.carta__prod-add-icon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.carta__prod-badge--active {
+  background: #16a34a;
+  color: white;
+}
+
+.carta__tag {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.carta__prod-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+/* body */
+.carta__prod-body {
+  padding: 12px;
+}
+
+.carta__prod-name {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.carta__prod-desc {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+/* tags */
+.carta__prod-tags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.carta__tag {
+  font-size: 11px;
+  background: #eef2ff;
+  color: #4338ca;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+/* footer */
+.carta__prod-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.carta__prod-price {
+  font-weight: 700;
+  color: #111827;
+}
+
+/* ───────────────────────────────
+   EMPTY STATE
+─────────────────────────────── */
+.carta__empty {
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+}
+
+/* ───────────────────────────────
+   SKELETON LOADING
+─────────────────────────────── */
+.carta__skeleton {
+  background: linear-gradient(90deg, #eee, #f5f5f5, #eee);
+  background-size: 200% 100%;
+  animation: shimmer 1.3s infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.carta__skeleton--row {
+  height: 40px;
+  margin-bottom: 8px;
+}
+
+.carta__skeleton-card {
+  padding: 10px;
+}
+
+.carta__skeleton--img {
+  height: 140px;
+}
+
+.carta__skeleton--title {
+  height: 14px;
+  margin-top: 10px;
+  width: 70%;
+}
+
+.carta__skeleton--sub {
+  height: 12px;
+  margin-top: 6px;
+  width: 50%;
+}
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.modal h2 {
+  margin: 0 0 24px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.modal label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #374151;
+}
+
+.modal input,
+.modal textarea,
+.modal select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+
+.modal textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.modal input:focus,
+.modal textarea:focus,
+.modal select:focus {
+  outline: none;
+  border-color: #1a1a2e;
+}
