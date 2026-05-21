@@ -13,6 +13,7 @@ import {
 } from "lucide-react"
 
 import logoUmari from "../../../assets/icons/logo-umari-dark.svg"
+import useToast from "../../../components/common/Toast/useToast"
 
 import {
   getKitchenOrders,
@@ -322,7 +323,8 @@ function HeaderBand({ order }) {
 
 function ItemRow({ order, item, isLast, updatingItemId, onToggleItem }) {
   const isUpdating = updatingItemId === item.id
-  const isDisabled = isUpdating || item.done
+  const isBlockedBeforeStart = order.status === "new" && !item.done
+  const isDisabled = isUpdating || item.done || isBlockedBeforeStart
 
   return (
     <div className={`kds-card-item${isLast ? " kds-card-item--last" : ""}`}>
@@ -333,7 +335,16 @@ function ItemRow({ order, item, isLast, updatingItemId, onToggleItem }) {
             : "kds-check-button"
         }
         type="button"
-        aria-label={`${item.done ? "Listo" : "Marcar"} ${item.name}`}
+        aria-label={
+          isBlockedBeforeStart
+            ? `Inicia la comanda antes de marcar ${item.name}`
+            : `${item.done ? "Listo" : "Marcar"} ${item.name}`
+        }
+        title={
+          isBlockedBeforeStart
+            ? "Primero inicia la preparación de la comanda"
+            : undefined
+        }
         onClick={() => onToggleItem(order.id, item.id)}
         disabled={isDisabled}
       >
@@ -516,9 +527,9 @@ export default function KdsPage() {
     pendingItems: false,
     oldestFirst: true,
   })
-  const [actionError, setActionError] = useState("")
   const [updatingOrderId, setUpdatingOrderId] = useState("")
   const [updatingItemId, setUpdatingItemId] = useState("")
+  const { showToast } = useToast()
 
   const hasActiveQuickFilters =
     quickFilters.criticalOnly ||
@@ -627,15 +638,16 @@ export default function KdsPage() {
     }
 
     try {
-      setActionError("")
       setUpdatingOrderId(orderId)
 
       await updateKitchenOrderStatus(selectedOrder.rawId, nextStatus)
       await loadKitchenOrders()
     } catch (error) {
-      setActionError(
-        error.message || "No se pudo actualizar el estado de la comanda.",
-      )
+      showToast({
+        type: "error",
+        title: "No se pudo actualizar",
+        message: error.message || "No se pudo actualizar el estado de la comanda.",
+      })
     } finally {
       setUpdatingOrderId("")
     }
@@ -660,7 +672,6 @@ export default function KdsPage() {
         itemDone: selectedItem.done,
       })
     ) {
-      setActionError("Primero inicia la preparación de la comanda.")
       return
     }
 
@@ -674,20 +685,21 @@ export default function KdsPage() {
     }
 
     try {
-      setActionError("")
       setUpdatingItemId(itemId)
 
       await updateKitchenItemStatus(selectedItem.rawId, nextStatus)
       await loadKitchenOrders()
     } catch (error) {
-      setActionError(
-        error.message || "No se pudo actualizar el estado del ítem.",
-      )
+      showToast({
+        type: "error",
+        title: "No se pudo actualizar",
+        message: error.message || "No se pudo actualizar el estado del ítem.",
+      })
     } finally {
       setUpdatingItemId("")
     }
   }
-  
+
   function handleToggleQuickFilter(filterKey) {
     setQuickFilters((currentFilters) => ({
       ...currentFilters,
@@ -763,12 +775,6 @@ export default function KdsPage() {
       </header>
 
       <main className="kds-shell">
-        {actionError && (
-          <div className="kds-action-error" role="alert">
-            {actionError}
-          </div>
-        )}
-
         <section className="kds-board-toolbar">
           <div
             className="kds-filter-tabs"
