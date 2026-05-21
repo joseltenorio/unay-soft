@@ -32,6 +32,7 @@ import "./KdsPage.css"
 
 const TIME_THRESHOLDS = { fresh: 5, normal: 10, warn: 15 }
 const READY_ORDER_HIDE_DELAY_MS = 7000
+const BOARD_BOTTOM_SAFE_GAP = 58
 
 const H = {
   headerBase: 62,
@@ -616,24 +617,29 @@ export default function KdsPage() {
 
   useEffect(() => {
     function measure() {
-      const topbar = document.querySelector(".kds-topbar")
       const toolbar = document.querySelector(".kds-board-toolbar")
 
-      const topbarHeight = topbar ? topbar.getBoundingClientRect().height : 70
-      const toolbarHeight = toolbar
-        ? toolbar.getBoundingClientRect().height
-        : 50
+      const toolbarBottom = toolbar
+        ? toolbar.getBoundingClientRect().bottom
+        : 0
 
-      setBoardHeight(
-        Math.max(window.innerHeight - topbarHeight - toolbarHeight - 46, 320),
+      const nextBoardHeight = Math.max(
+        window.innerHeight - toolbarBottom - BOARD_BOTTOM_SAFE_GAP,
+        320,
       )
+
+      setBoardHeight(nextBoardHeight)
     }
 
-    measure()
+    const measureFrame = window.requestAnimationFrame(measure)
+
     window.addEventListener("resize", measure)
 
-    return () => window.removeEventListener("resize", measure)
-  }, [])
+    return () => {
+      window.cancelAnimationFrame(measureFrame)
+      window.removeEventListener("resize", measure)
+    }
+  }, [showQuickFilters])
 
   const visibleOrders = useMemo(
     () =>
