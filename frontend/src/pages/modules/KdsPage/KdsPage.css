@@ -332,8 +332,8 @@
   background: var(--kds-filter-trigger-bg);
   border: 1px solid var(--kds-filter-trigger-border);
   border-radius: 12px;
-  font-size: 0.86rem;
-  font-weight: 950;
+  font-size: 0.83rem;
+  font-weight: 900;
   white-space: nowrap;
   cursor: pointer;
   box-shadow: 0 1px 2px rgba(3, 25, 38, 0.04);
@@ -875,37 +875,22 @@
   box-shadow: none;
 }
 
-.kds-action-error {
-  flex: 0 0 auto;
-  margin-bottom: 12px;
-  padding: 10px 14px;
-
-  border: 1px solid rgba(200, 82, 77, 0.28);
-  border-radius: 12px;
-
-  background: rgba(200, 82, 77, 0.1);
-  color: #8f2824;
-
-  font-size: 0.84rem;
-  font-weight: 800;
+.kds-check-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
 }
 
-.kds-check-button:disabled,
-.kds-action-button:disabled {
-  cursor: not-allowed;
+.kds-check-button:disabled:hover {
+  border-color: rgba(168, 121, 88, 0.38);
+}
+
+.kds-check-button--done:disabled {
   opacity: 0.72;
 }
 
-.kds-check-button__loader {
-  width: 12px;
-  height: 12px;
-  display: inline-block;
-
-  border: 2px solid rgba(3, 25, 38, 0.18);
-  border-top-color: var(--color-brand-main);
-  border-radius: 999px;
-
-  animation: kds-spin 0.72s linear infinite;
+.kds-action-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
 }
 
 @keyframes kds-spin {
@@ -913,7 +898,6 @@
     transform: rotate(360deg);
   }
 }
-
 
 @media (max-width: 1180px) {
   .kds-topbar {
