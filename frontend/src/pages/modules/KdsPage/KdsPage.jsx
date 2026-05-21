@@ -589,26 +589,34 @@ export default function KdsPage() {
   }, [])
 
   useEffect(() => {
-    const readyOrdersToHide = orders.filter(
-      (order) =>
-        order.status === "done" &&
-        order.rawId &&
-        !hiddenReadyOrderIds.includes(order.rawId),
-    )
+    const timeoutIds = []
 
-    if (readyOrdersToHide.length === 0) {
-      return undefined
-    }
+    orders.forEach((order) => {
+      if (
+        order.status !== "done" ||
+        !order.rawId ||
+        hiddenReadyOrderIds.includes(order.rawId)
+      ) {
+        return
+      }
 
-    const timeoutIds = readyOrdersToHide.map((order) =>
-      window.setTimeout(() => {
+      const readyTime = order.readyAt ? new Date(order.readyAt).getTime() : Date.now()
+      const elapsedReadyTime = Date.now() - readyTime
+      const remainingDelay = Math.max(
+        READY_ORDER_HIDE_DELAY_MS - elapsedReadyTime,
+        0,
+      )
+
+      const timeoutId = window.setTimeout(() => {
         setHiddenReadyOrderIds((currentIds) =>
           currentIds.includes(order.rawId)
             ? currentIds
             : [...currentIds, order.rawId],
         )
-      }, READY_ORDER_HIDE_DELAY_MS),
-    )
+      }, remainingDelay)
+
+      timeoutIds.push(timeoutId)
+    })
 
     return () => {
       timeoutIds.forEach((timeoutId) => window.clearTimeout(timeoutId))

@@ -89,7 +89,16 @@ async function getKitchenOrders(idEstablecimiento) {
       on p.id_producto = io.id_producto
 
     where u.id_establecimiento = $1
-      and o.estado in ('ABIERTA', 'EN_PREPARACION', 'LISTA')
+      and (
+        o.estado in ('ABIERTA', 'EN_PREPARACION')
+        or (
+          o.estado = 'LISTA'
+          and (
+            o.lista_at is null
+            or o.lista_at > now() - interval '7 seconds'
+          )
+        )
+      )
 
     group by
       o.id_orden,
@@ -117,7 +126,7 @@ async function getKitchenOrders(idEstablecimiento) {
     order by
       coalesce(o.enviada_cocina_at, o.abierta_at, o.created_at) asc;
   `
-
+  
   const { rows } = await pool.query(query, [idEstablecimiento])
 
   return rows.map((order) => ({
