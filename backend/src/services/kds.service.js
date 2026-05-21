@@ -14,6 +14,17 @@ const ITEM_STATUS = {
   READY: "LISTO",
 }
 
+const SERVICE_NOTIFICATION_TYPE = {
+  READY_ORDER: "PEDIDO_LISTO",
+  KITCHEN_INCIDENT: "INCIDENCIA_COCINA",
+}
+
+const SERVICE_NOTIFICATION_STATUS = {
+  PENDING: "PENDIENTE",
+  ATTENDED: "ATENDIDA",
+  CANCELLED: "CANCELADA",
+}
+
 function createBusinessError(message, statusCode = 400) {
   const error = new Error(message)
   error.statusCode = statusCode
@@ -486,8 +497,502 @@ async function syncOrderStatusFromItems({ client, idOrden, idEstablecimiento }) 
   }
 }
 
+function normalizeOptionalText(value) {
+  if (value === undefined || value === null) {
+    return null
+  }
+
+  const normalizedValue = String(value).trim()
+
+  return normalizedValue.length > 0 ? normalizedValue : null
+}
+
+function isValidServiceNotificationType(type) {
+  return Object.values(SERVICE_NOTIFICATION_TYPE).includes(type)
+}
+
+async function createServiceNotification({
+  idOrden,
+  idEstablecimiento,
+  idUsuario,
+  type,
+  motivo,
+  mensaje,
+}) {
+  if (!isValidServiceNotificationType(type)) {
+    throw createBusinessError("Tipo de aviso de servicio no permitido.")
+  }
+
+  const normalizedMotivo = normalizeOptionalText(motivo)
+  const normalizedMensaje = normalizeOptionalText(mensaje)
+
+  const client = await pool.connect()
+
+  try {
+    await client.query("begin")
+
+    const orderResult = await client.query(
+      `
+        select
+          o.id_orden,
+          o.numero_orden,
+          o.estado
+        from orden o
+        join usuario u on u.id_usuario = o.id_usuario
+        where o.id_orden = $1
+          and u.id_establecimiento = $2
+        for update;
+      `,
+      [idOrden, idEstablecimiento],
+    )
+
+    if (orderResult.rowCount === 0) {
+      throw createBusinessError("Comanda no encontrada.", 404)
+    }
+
+    const order = orderResult.rows[0]
+
+    if (
+      type === SERVICE_NOTIFICATION_TYPE.READY_ORDER &&
+      order.estado !== ORDER_STATUS.READY
+    ) {
+      throw createBusinessError(
+        "Solo se puede llamar al mesero cuando la comanda está lista.",
+      )
+    }
+
+    if (
+      type === SERVICE_NOTIFICATION_TYPE.KITCHEN_INCIDENT &&
+      ![ORDER_STATUS.OPEN, ORDER_STATUS.IN_PREPARATION].includes(order.estado)
+    ) {
+      throw createBusinessError(
+        "Solo se puede pedir apoyo en comandas abiertas o en preparación.",
+      )
+    }
+
+    if (
+      type === SERVICE_NOTIFICATION_TYPE.KITCHEN_INCIDENT &&
+      !normalizedMotivo &&
+      !normalizedMensaje
+    ) {
+      throw createBusinessError(
+        "Debe ingresar un motivo o mensaje para pedir apoyo.",
+      )
+    }
+
+    if (type === SERVICE_NOTIFICATION_TYPE.READY_ORDER) {
+      const existingNotificationResult = await client.query(
+        `
+          select
+            id_notificacion,
+            id_orden,
+            tipo,
+            motivo,
+            mensaje,
+            estado,
+            creado_por,
+            atendido_por,
+            created_at,
+            atendida_at,
+            updated_at
+          from orden_notificacion_servicio
+          where id_orden = $1
+            and tipo = 'PEDIDO_LISTO'
+            and estado = 'PENDIENTE'
+          limit 1;
+        `,
+        [idOrden],
+      )
+
+      if (existingNotificationResult.rowCount > 0) {
+        await client.query("commit")
+        return existingNotificationResult.rows[0]
+      }
+    }
+
+    const notificationResult = await client.query(
+      `
+        insert into orden_notificacion_servicio (
+          id_orden,
+          tipo,
+          motivo,
+          mensaje,
+          estado,
+          creado_por
+        )
+        values (
+          $1,
+          $2,
+          $3,
+          $4,
+          'PENDIENTE',
+          $5
+        )
+        returning
+          id_notificacion,
+          id_orden,
+          tipo,
+          motivo,
+          mensaje,
+          estado,
+          creado_por,
+          atendido_por,
+          created_at,
+          atendida_at,
+          updated_at;
+      `,
+      [
+        idOrden,
+        type,
+        normalizedMotivo,
+        normalizedMensaje,
+        idUsuario,
+      ],
+    )
+
+    await client.query("commit")
+
+    return notificationResult.rows[0]
+  } catch (error) {
+    await client.query("rollback")
+
+    if (error.code === "23505") {
+      throw createBusinessError(
+        "Ya existe un aviso pendiente para esta comanda.",
+        409,
+      )
+    }
+
+    throw error
+  } finally {
+    client.release()
+  }
+}
+
+async function getServiceNotifications({
+  idEstablecimiento,
+  status = SERVICE_NOTIFICATION_STATUS.PENDING,
+}) {
+  const normalizedStatus = normalizeOptionalText(status)
+
+  const query = `
+    select
+      ns.id_notificacion,
+      ns.id_orden,
+      ns.tipo,
+      ns.motivo,
+      ns.mensaje,
+      ns.estado,
+      ns.creado_por,
+      ns.atendido_por,
+      ns.created_at,
+      ns.atendida_at,
+      ns.updated_at,
+
+      o.numero_orden,
+      o.estado as orden_estado,
+      o.tipo_servicio,
+      o.observaciones,
+      o.lista_at,
+      o.entregada_at,
+
+      m.id_mesa,
+      m.numero as mesa_numero,
+      m.nombre as mesa_nombre,
+
+      creador.nombres as creado_por_nombres,
+      creador.apellidos as creado_por_apellidos,
+      creador.username as creado_por_username,
+
+      atendido.nombres as atendido_por_nombres,
+      atendido.apellidos as atendido_por_apellidos,
+      atendido.username as atendido_por_username,
+
+      coalesce(
+        json_agg(
+          json_build_object(
+            'id_item_orden', io.id_item_orden,
+            'producto_nombre', p.nombre,
+            'cantidad', io.cantidad,
+            'notas_cocina', io.notas_cocina,
+            'estado_cocina', io.estado_cocina,
+            'listo_at', io.listo_at,
+            'entregado_at', io.entregado_at
+          )
+          order by io.created_at asc
+        ) filter (where io.id_item_orden is not null),
+        '[]'::json
+      ) as items
+
+    from orden_notificacion_servicio ns
+    join orden o
+      on o.id_orden = ns.id_orden
+    join usuario creador
+      on creador.id_usuario = ns.creado_por
+    left join usuario atendido
+      on atendido.id_usuario = ns.atendido_por
+    left join mesa m
+      on m.id_mesa = o.id_mesa
+    left join item_orden io
+      on io.id_orden = o.id_orden
+     and io.estado_cocina <> 'ANULADO'
+    left join producto p
+      on p.id_producto = io.id_producto
+
+    where creador.id_establecimiento = $1
+      and ($2::varchar is null or ns.estado = $2::varchar)
+
+    group by
+      ns.id_notificacion,
+      ns.id_orden,
+      ns.tipo,
+      ns.motivo,
+      ns.mensaje,
+      ns.estado,
+      ns.creado_por,
+      ns.atendido_por,
+      ns.created_at,
+      ns.atendida_at,
+      ns.updated_at,
+      o.numero_orden,
+      o.estado,
+      o.tipo_servicio,
+      o.observaciones,
+      o.lista_at,
+      o.entregada_at,
+      m.id_mesa,
+      m.numero,
+      m.nombre,
+      creador.nombres,
+      creador.apellidos,
+      creador.username,
+      atendido.nombres,
+      atendido.apellidos,
+      atendido.username
+
+    order by
+      case ns.tipo
+        when 'PEDIDO_LISTO' then 1
+        when 'INCIDENCIA_COCINA' then 2
+        else 3
+      end,
+      ns.created_at asc;
+  `
+
+  const { rows } = await pool.query(query, [idEstablecimiento, normalizedStatus])
+
+  return rows.map((notification) => ({
+    id_notificacion: notification.id_notificacion,
+    id_orden: notification.id_orden,
+    tipo: notification.tipo,
+    motivo: notification.motivo,
+    mensaje: notification.mensaje,
+    estado: notification.estado,
+    creado_por: notification.creado_por,
+    atendido_por: notification.atendido_por,
+    created_at: notification.created_at,
+    atendida_at: notification.atendida_at,
+    updated_at: notification.updated_at,
+    orden: {
+      numero_orden: notification.numero_orden,
+      estado: notification.orden_estado,
+      tipo_servicio: notification.tipo_servicio,
+      observaciones: notification.observaciones,
+      lista_at: notification.lista_at,
+      entregada_at: notification.entregada_at,
+    },
+    mesa: notification.id_mesa
+      ? {
+          id_mesa: notification.id_mesa,
+          numero: notification.mesa_numero,
+          nombre: notification.mesa_nombre,
+        }
+      : null,
+    creado_por_usuario: {
+      nombres: notification.creado_por_nombres,
+      apellidos: notification.creado_por_apellidos,
+      username: notification.creado_por_username,
+    },
+    atendido_por_usuario: notification.atendido_por
+      ? {
+          nombres: notification.atendido_por_nombres,
+          apellidos: notification.atendido_por_apellidos,
+          username: notification.atendido_por_username,
+        }
+      : null,
+    items: notification.items || [],
+  }))
+}
+
+async function attendServiceNotification({
+  idNotificacion,
+  idEstablecimiento,
+  idUsuario,
+}) {
+  const updateResult = await pool.query(
+    `
+      update orden_notificacion_servicio ns
+      set
+        estado = 'ATENDIDA',
+        atendido_por = $3,
+        atendida_at = now(),
+        updated_at = now()
+      from orden o
+      join usuario creador
+        on creador.id_usuario = o.id_usuario
+      where ns.id_notificacion = $1
+        and ns.id_orden = o.id_orden
+        and creador.id_establecimiento = $2
+        and ns.estado = 'PENDIENTE'
+      returning
+        ns.id_notificacion,
+        ns.id_orden,
+        ns.tipo,
+        ns.motivo,
+        ns.mensaje,
+        ns.estado,
+        ns.creado_por,
+        ns.atendido_por,
+        ns.created_at,
+        ns.atendida_at,
+        ns.updated_at;
+    `,
+    [idNotificacion, idEstablecimiento, idUsuario],
+  )
+
+  if (updateResult.rowCount === 0) {
+    throw createBusinessError(
+      "Aviso de servicio no encontrado o ya fue atendido.",
+      404,
+    )
+  }
+
+  return updateResult.rows[0]
+}
+
+async function markOrderAsDelivered({
+  idOrden,
+  idEstablecimiento,
+  idUsuario,
+}) {
+  const client = await pool.connect()
+
+  try {
+    await client.query("begin")
+
+    const orderResult = await client.query(
+      `
+        select
+          o.id_orden,
+          o.numero_orden,
+          o.estado,
+          o.lista_at,
+          o.entregada_at
+        from orden o
+        join usuario u on u.id_usuario = o.id_usuario
+        where o.id_orden = $1
+          and u.id_establecimiento = $2
+        for update;
+      `,
+      [idOrden, idEstablecimiento],
+    )
+
+    if (orderResult.rowCount === 0) {
+      throw createBusinessError("Comanda no encontrada.", 404)
+    }
+
+    const currentOrder = orderResult.rows[0]
+
+    if (currentOrder.estado !== ORDER_STATUS.READY) {
+      throw createBusinessError(
+        "Solo se puede confirmar entrega de comandas listas.",
+      )
+    }
+
+    await client.query(
+      `
+        update item_orden
+        set
+          estado_cocina = 'ENTREGADO',
+          entregado_at = case
+            when entregado_at is null then now()
+            else entregado_at
+          end,
+          updated_at = now()
+        where id_orden = $1
+          and estado_cocina = 'LISTO';
+      `,
+      [idOrden],
+    )
+
+    const orderUpdateResult = await client.query(
+      `
+        update orden
+        set
+          estado = 'ENTREGADA',
+          entregada_at = case
+            when entregada_at is null then now()
+            else entregada_at
+          end,
+          updated_at = now()
+        where id_orden = $1
+          and exists (
+            select 1
+            from usuario u
+            where u.id_usuario = orden.id_usuario
+              and u.id_establecimiento = $2
+          )
+        returning
+          id_orden,
+          numero_orden,
+          estado,
+          lista_at,
+          entregada_at,
+          updated_at;
+      `,
+      [idOrden, idEstablecimiento],
+    )
+
+    await client.query(
+      `
+        update orden_notificacion_servicio ns
+        set
+          estado = 'ATENDIDA',
+          atendido_por = $3,
+          atendida_at = case
+            when atendida_at is null then now()
+            else atendida_at
+          end,
+          updated_at = now()
+        from orden o
+        join usuario creador
+          on creador.id_usuario = o.id_usuario
+        where ns.id_orden = o.id_orden
+          and ns.id_orden = $1
+          and creador.id_establecimiento = $2
+          and ns.estado = 'PENDIENTE'
+          and ns.tipo = 'PEDIDO_LISTO';
+      `,
+      [idOrden, idEstablecimiento, idUsuario],
+    )
+
+    await client.query("commit")
+
+    return orderUpdateResult.rows[0]
+  } catch (error) {
+    await client.query("rollback")
+    throw error
+  } finally {
+    client.release()
+  }
+}
+
 module.exports = {
   getKitchenOrders,
   updateKitchenOrderStatus,
   updateKitchenItemStatus,
+  createServiceNotification,
+  getServiceNotifications,
+  attendServiceNotification,
+  markOrderAsDelivered,
 }

@@ -1,7 +1,11 @@
 // backend/src/controllers/kds.controller.js
 
 const {
+  attendServiceNotification,
+  createServiceNotification,
   getKitchenOrders,
+  getServiceNotifications,
+  markOrderAsDelivered,
   updateKitchenItemStatus,
   updateKitchenOrderStatus,
 } = require("../services/kds.service")
@@ -78,8 +82,106 @@ async function changeKitchenItemStatus(req, res) {
   }
 }
 
+async function createKitchenServiceCall(req, res) {
+  try {
+    const { id } = req.params
+    const { type, motivo, mensaje } = req.body
+
+    if (!type) {
+      return res.status(400).json({
+        message: "El tipo de aviso de servicio es obligatorio.",
+      })
+    }
+
+    const notification = await createServiceNotification({
+      idOrden: id,
+      idEstablecimiento: req.user.id_establecimiento,
+      idUsuario: req.user.id_usuario,
+      type,
+      motivo,
+      mensaje,
+    })
+
+    return res.status(201).json({
+      message: "Aviso de servicio creado correctamente.",
+      notification,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al crear aviso de servicio.",
+    })
+  }
+}
+
+async function listKitchenServiceCalls(req, res) {
+  try {
+    const { status = "PENDIENTE" } = req.query
+
+    const notifications = await getServiceNotifications({
+      idEstablecimiento: req.user.id_establecimiento,
+      status,
+    })
+
+    return res.status(200).json({
+      message: "Avisos de cocina obtenidos correctamente.",
+      total: notifications.length,
+      notifications,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al obtener avisos de cocina.",
+    })
+  }
+}
+
+async function attendKitchenServiceCall(req, res) {
+  try {
+    const { id } = req.params
+
+    const notification = await attendServiceNotification({
+      idNotificacion: id,
+      idEstablecimiento: req.user.id_establecimiento,
+      idUsuario: req.user.id_usuario,
+    })
+
+    return res.status(200).json({
+      message: "Aviso de cocina atendido correctamente.",
+      notification,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al atender aviso de cocina.",
+    })
+  }
+}
+
+async function deliverKitchenOrder(req, res) {
+  try {
+    const { id } = req.params
+
+    const order = await markOrderAsDelivered({
+      idOrden: id,
+      idEstablecimiento: req.user.id_establecimiento,
+      idUsuario: req.user.id_usuario,
+    })
+
+    return res.status(200).json({
+      message: "Entrega de comanda confirmada correctamente.",
+      order,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al confirmar entrega de comanda.",
+    })
+  }
+}
+
 module.exports = {
   listKitchenOrders,
   changeKitchenOrderStatus,
   changeKitchenItemStatus,
+  createKitchenServiceCall,
+  listKitchenServiceCalls,
+  attendKitchenServiceCall,
+  deliverKitchenOrder,
 }
