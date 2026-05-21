@@ -2,10 +2,9 @@
   "info": {
     "_postman_id": "a5e711cc-b091-4037-928d-3e7c606a6ea7",
     "name": "Umari OS API",
-    "description": "### Welcome to Postman! This is your first collection.\n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests  \n• Test your API in real-world scenarios  \n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+    "description": "Postman collection for Umarí OS API.\n\nThis collection uses variables and does not store real credentials or tokens. Set local values in Postman before running the requests.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "54524212",
-    "_collection_link": "https://go.postman.co/collection/54524212-a5e711cc-b091-4037-928d-3e7c606a6ea7?source=collection_link"
+    "_exporter_id": "54524212"
   },
   "item": [
     {
@@ -32,14 +31,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/health",
-              "protocol": "http",
+              "raw": "{{base_url}}/health",
               "host": [
-                "localhost"
+                "{{base_url}}"
               ],
-              "port": "3000",
               "path": [
-                "api",
                 "health"
               ]
             },
@@ -57,154 +53,319 @@
           "request": {
             "method": "POST",
             "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"identifier\": \"{{UMARI_ADMIN_IDENTIFIER}}\",\r\n  \"password\": \"{{UMARI_ADMIN_PASSWORD}}\"\r\n}",
+              "raw": "{\n  \"identifier\": \"{{admin_identifier}}\",\n  \"password\": \"{{admin_password}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
             },
+            "description": "Authenticates a admin user and stores the token in `admin_token`."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Login Admin returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response contains token\", function () {",
+                  "    pm.expect(response.token).to.exist;",
+                  "});",
+                  "",
+                  "if (response.token) {",
+                  "    pm.collectionVariables.set(\"admin_token\", response.token);",
+                  "    pm.collectionVariables.set(\"auth_token\", response.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - KDS",
+          "request": {
+            "method": "POST",
+            "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/auth/login",
-              "protocol": "http",
+              "raw": "{{base_url}}/auth/login",
               "host": [
-                "localhost"
+                "{{base_url}}"
               ],
-              "port": "3000",
               "path": [
-                "api",
                 "auth",
                 "login"
               ]
-            }
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{kds_identifier}}\",\n  \"password\": \"{{kds_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Authenticates a kds user and stores the token in `kds_token`."
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Login KDS returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response contains token\", function () {",
+                  "    pm.expect(response.token).to.exist;",
+                  "});",
+                  "",
+                  "if (response.token) {",
+                  "    pm.collectionVariables.set(\"kds_token\", response.token);",
+                  "    pm.collectionVariables.set(\"auth_token\", response.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - Cashier",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{cashier_identifier}}\",\n  \"password\": \"{{cashier_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Authenticates a cashier user and stores the token in `cashier_token`."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Login Cashier returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response contains token\", function () {",
+                  "    pm.expect(response.token).to.exist;",
+                  "});",
+                  "",
+                  "if (response.token) {",
+                  "    pm.collectionVariables.set(\"cashier_token\", response.token);",
+                  "    pm.collectionVariables.set(\"auth_token\", response.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - Waiter",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{waiter_identifier}}\",\n  \"password\": \"{{waiter_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Authenticates a waiter user and stores the token in `waiter_token`."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Login Waiter returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response contains token\", function () {",
+                  "    pm.expect(response.token).to.exist;",
+                  "});",
+                  "",
+                  "if (response.token) {",
+                  "    pm.collectionVariables.set(\"waiter_token\", response.token);",
+                  "    pm.collectionVariables.set(\"auth_token\", response.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{user_identifier}}\",\n  \"password\": \"{{user_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Authenticates a user user and stores the token in `user_token`."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Login User returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response contains token\", function () {",
+                  "    pm.expect(response.token).to.exist;",
+                  "});",
+                  "",
+                  "if (response.token) {",
+                  "    pm.collectionVariables.set(\"user_token\", response.token);",
+                  "    pm.collectionVariables.set(\"auth_token\", response.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Auth - Me",
           "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
             "auth": {
               "type": "bearer",
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{AUTH_TOKEN}}",
+                  "value": "{{auth_token}}",
                   "type": "string"
                 }
               ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:3000/api/auth/me",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "auth",
-                "me"
-              ]
             }
           },
-          "response": []
-        },
-        {
-          "name": "Login - Cajero",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"identifier\": \"{{UMARI_CAJA_IDENTIFIER}}\",\r\n  \"password\": \"{{UMARI_CAJA_PASSWORD}}\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Authenticated user is returned\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response contains user data\", function () {",
+                  "    pm.expect(response.user).to.exist;",
+                  "});"
+                ]
               }
-            },
-            "url": {
-              "raw": "http://localhost:3000/api/auth/login",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
             }
-          },
-          "response": []
-        },
-        {
-          "name": "Login - User",
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"identifier\": \"{{UMARI_MOZO_IDENTIFIER}}\",\r\n  \"password\": \"{{UMARI_MOZO_PASSWORD}}\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "http://localhost:3000/api/auth/login",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Login - Mesero",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"identifier\": \"{{UMARI_MOZO_IDENTIFIER}}\",\r\n  \"password\": \"{{UMARI_MOZO_PASSWORD}}\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "http://localhost:3000/api/auth/login",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "3000",
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
-            }
-          },
-          "response": []
+          ]
         }
       ]
     },
@@ -219,7 +380,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{AUTH_TOKEN}}",
+                  "value": "{{admin_token}}",
                   "type": "string"
                 }
               ]
@@ -227,14 +388,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/auth/admin-check",
-              "protocol": "http",
+              "raw": "{{base_url}}/auth/admin-check",
               "host": [
-                "localhost"
+                "{{base_url}}"
               ],
-              "port": "3000",
               "path": [
-                "api",
                 "auth",
                 "admin-check"
               ]
@@ -250,7 +408,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{AUTH_TOKEN}}",
+                  "value": "{{cashier_token}}",
                   "type": "string"
                 }
               ]
@@ -258,14 +416,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/demo/cashier-area",
-              "protocol": "http",
+              "raw": "{{base_url}}/demo/cashier-area",
               "host": [
-                "localhost"
+                "{{base_url}}"
               ],
-              "port": "3000",
               "path": [
-                "api",
                 "demo",
                 "cashier-area"
               ]
@@ -281,7 +436,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{AUTH_TOKEN}}",
+                  "value": "{{cashier_token}}",
                   "type": "string"
                 }
               ]
@@ -289,14 +444,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/demo/waiter-area",
-              "protocol": "http",
+              "raw": "{{base_url}}/demo/waiter-area",
               "host": [
-                "localhost"
+                "{{base_url}}"
               ],
-              "port": "3000",
               "path": [
-                "api",
                 "demo",
                 "waiter-area"
               ]
@@ -312,7 +464,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{AUTH_TOKEN}}",
+                  "value": "{{waiter_token}}",
                   "type": "string"
                 }
               ]
@@ -320,14 +472,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/demo/cashier-area",
-              "protocol": "http",
+              "raw": "{{base_url}}/demo/cashier-area",
               "host": [
-                "localhost"
+                "{{base_url}}"
               ],
-              "port": "3000",
               "path": [
-                "api",
                 "demo",
                 "cashier-area"
               ]
@@ -343,7 +492,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{AUTH_TOKEN}}",
+                  "value": "{{waiter_token}}",
                   "type": "string"
                 }
               ]
@@ -351,14 +500,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/demo/waiter-area",
-              "protocol": "http",
+              "raw": "{{base_url}}/demo/waiter-area",
               "host": [
-                "localhost"
+                "{{base_url}}"
               ],
-              "port": "3000",
               "path": [
-                "api",
                 "demo",
                 "waiter-area"
               ]
@@ -379,7 +525,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{AUTH_TOKEN}}",
+                  "value": "{{admin_token}}",
                   "type": "string"
                 }
               ]
@@ -387,14 +533,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/roles",
-              "protocol": "http",
+              "raw": "{{base_url}}/roles",
               "host": [
-                "localhost"
+                "{{base_url}}"
               ],
-              "port": "3000",
               "path": [
-                "api",
                 "roles"
               ]
             }
@@ -414,7 +557,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{AUTH_TOKEN}}",
+                  "value": "{{admin_token}}",
                   "type": "string"
                 }
               ]
@@ -422,14 +565,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/users",
-              "protocol": "http",
+              "raw": "{{base_url}}/users",
               "host": [
-                "localhost"
+                "{{base_url}}"
               ],
-              "port": "3000",
               "path": [
-                "api",
                 "users"
               ]
             }
@@ -444,7 +584,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{AUTH_TOKEN}}",
+                  "value": "{{admin_token}}",
                   "type": "string"
                 }
               ]
@@ -453,7 +593,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"nombres\": \"{{UMARI_USER_NAME}}\",\r\n  \"apellidos\": \"{{UMARI_USER_LAST_NAME}}\",\r\n  \"email\": \"{{UMARI_USER_EMAIL}}\",\r\n  \"username\": \"{{UMARI_USER_IDENTIFIER}}\",\r\n  \"password\": \"{{UMARI_USER_PASSWORD}}\",\r\n  \"celular\": \"{{UMARI_USER_MOBILE}}\",\r\n  \"id_rol\": \"{{UMARI_ROL}}\",\r\n  \"estado\": \"{{UMARI_STATUS}}\"\r\n}",
+              "raw": "{\n  \"nombres\": \"{{user_create_first_name}}\",\n  \"apellidos\": \"{{user_create_last_name}}\",\n  \"email\": \"{{user_create_email}}\",\n  \"username\": \"{{user_create_identifier}}\",\n  \"password\": \"{{user_create_password}}\",\n  \"celular\": \"{{user_create_mobile}}\",\n  \"id_rol\": \"{{role_id}}\",\n  \"estado\": \"{{user_status}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -461,14 +601,11 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/api/users",
-              "protocol": "http",
+              "raw": "{{base_url}}/users",
               "host": [
-                "localhost"
+                "{{base_url}}"
               ],
-              "port": "3000",
               "path": [
-                "api",
                 "users"
               ]
             }
@@ -483,7 +620,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{AUTH_TOKEN}}",
+                  "value": "{{admin_token}}",
                   "type": "string"
                 }
               ]
@@ -492,7 +629,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"nombres\": \"{{EDIT_USER_NOMBRES}}\",\r\n  \"apellidos\": \"{{EDIT_USER_APELLIDOS}}\",\r\n  \"email\": \"{{EDIT_USER_EMAIL}}\",\r\n  \"username\": \"{{EDIT_USER_USERNAME}}\",\r\n  \"celular\": \"{{EDIT_USER_CELULAR}}\",\r\n  \"id_rol\": \"{{EDIT_USER_ROLE_ID}}\",\r\n  \"estado\": \"{{EDIT_USER_STATUS}}\"\r\n}",
+              "raw": "{\n  \"nombres\": \"{{user_create_first_name}}\",\n  \"apellidos\": \"{{user_create_last_name}}\",\n  \"email\": \"{{user_create_email}}\",\n  \"username\": \"{{user_create_identifier}}\",\n  \"celular\": \"{{user_create_mobile}}\",\n  \"id_rol\": \"{{role_id}}\",\n  \"estado\": \"{{user_status}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -500,16 +637,13 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/api/users/{{EDIT_USER_ID}}",
-              "protocol": "http",
+              "raw": "{{base_url}}/users/{{user_id_edit}}",
               "host": [
-                "localhost"
+                "{{base_url}}"
               ],
-              "port": "3000",
               "path": [
-                "api",
                 "users",
-                "{{EDIT_USER_ID}}"
+                "{{user_id_edit}}"
               ]
             }
           },
@@ -523,7 +657,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{AUTH_TOKEN}}",
+                  "value": "{{admin_token}}",
                   "type": "string"
                 }
               ]
@@ -532,7 +666,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"estado\": {{EDIT_USER_STATUS}}\r\n}",
+              "raw": "{\n  \"estado\": \"{{user_status_edit}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -540,16 +674,13 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/api/users/{{EDIT_USER_ID}}/status",
-              "protocol": "http",
+              "raw": "{{base_url}}/users/{{user_id_edit}}/status",
               "host": [
-                "localhost"
+                "{{base_url}}"
               ],
-              "port": "3000",
               "path": [
-                "api",
                 "users",
-                "{{EDIT_USER_ID}}",
+                "{{user_id_edit}}",
                 "status"
               ]
             }
@@ -564,7 +695,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{AUTH_TOKEN}}",
+                  "value": "{{cashier_token}}",
                   "type": "string"
                 }
               ]
@@ -573,7 +704,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"nombres\": \"{{CREATE_USER_NOMBRES}}\",\r\n  \"apellidos\": \"{{CREATE_USER_APELLIDOS}}\",\r\n  \"email\": \"{{CREATE_USER_EMAIL}}\",\r\n  \"username\": \"{{CREATE_USER_USERNAME}}\",\r\n  \"celular\": \"{{CREATE_USER_CELULAR}}\",\r\n  \"id_rol\": \"{{CREATE_USER_ROLE_ID}}\",\r\n  \"estado\": \"{{CREATE_USER_STATUS}}\"\r\n}",
+              "raw": "{\n  \"nombres\": \"{{user_create_first_name}}\",\n  \"apellidos\": \"{{user_create_last_name}}\",\n  \"email\": \"{{user_create_email}}\",\n  \"username\": \"{{user_create_identifier}}\",\n  \"password\": \"{{user_create_password}}\",\n  \"celular\": \"{{user_create_mobile}}\",\n  \"id_rol\": \"{{role_id}}\",\n  \"estado\": \"{{user_status}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -581,14 +712,11 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/api/users",
-              "protocol": "http",
+              "raw": "{{base_url}}/users",
               "host": [
-                "localhost"
+                "{{base_url}}"
               ],
-              "port": "3000",
               "path": [
-                "api",
                 "users"
               ]
             }
@@ -608,7 +736,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{AUTH_TOKEN}}",
+                  "value": "{{admin_token}}",
                   "type": "string"
                 }
               ]
@@ -616,14 +744,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:3000/api/establishment",
-              "protocol": "http",
+              "raw": "{{base_url}}/establishment",
               "host": [
-                "localhost"
+                "{{base_url}}"
               ],
-              "port": "3000",
               "path": [
-                "api",
                 "establishment"
               ]
             }
@@ -638,7 +763,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{AUTH_TOKEN}}",
+                  "value": "{{admin_token}}",
                   "type": "string"
                 }
               ]
@@ -647,7 +772,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"nombre_comercial\": \"{{ESTABLISHMENT_NOMBRE_COMERCIAL}}\",\r\n  \"razon_social\": \"U{{ESTABLISHMENT_RAZON_SOCIAL}}\",\r\n  \"ruc\": \"{{ESTABLISHMENT_RUC}}\",\r\n  \"direccion\": \"{{ESTABLISHMENT_DIRECCION}}\",\r\n  \"telefono\": \"{{ESTABLISHMENT_TELEFONO}}\",\r\n  \"email\": \"{{ESTABLISHMENT_EMAIL}}\",\r\n  \"logo_url\": \"{{ESTABLISHMENT_LOGO_URL}}\",\r\n  \"igv_porcentaje\": \"{{ESTABLISHMENT_IGV_PORCENTAJE}}\",\r\n  \"moneda_codigo\": \"{{ESTABLISHMENT_MONEDA_CODIGO}}\",\r\n  \"moneda_simbolo\": \"{{ESTABLISHMENT_MONEDA_SIMBOLO}}\"\r\n}\r\n\r\n",
+              "raw": "{\n  \"nombre_comercial\": \"{{establishment_name}}\",\n  \"razon_social\": \"{{establishment_business_name}}\",\n  \"ruc\": \"{{establishment_ruc}}\",\n  \"direccion\": \"{{establishment_address}}\",\n  \"telefono\": \"{{establishment_phone}}\",\n  \"email\": \"{{establishment_email}}\",\n  \"logo_url\": \"{{establishment_logo_url}}\",\n  \"igv_porcentaje\": \"{{establishment_tax_percentage}}\",\n  \"moneda_codigo\": \"{{establishment_currency_code}}\",\n  \"moneda_simbolo\": \"{{establishment_currency_symbol}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -655,14 +780,11 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/api/establishment",
-              "protocol": "http",
+              "raw": "{{base_url}}/establishment",
               "host": [
-                "localhost"
+                "{{base_url}}"
               ],
-              "port": "3000",
               "path": [
-                "api",
                 "establishment"
               ]
             }
@@ -670,6 +792,1102 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "KDS - Kitchen Monitor",
+      "description": "AAT-28 tests for the kitchen monitor. This folder validates listing kitchen orders, preparation status updates, business rules, and permission checks. It does not cover dispatch or delivery flows from AAT-29.",
+      "item": [
+        {
+          "name": "KDS - List Kitchen Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "orders"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{kds_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Lists active kitchen orders and stores reusable order/item IDs for the following KDS requests."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Lists kitchen orders\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response contains orders array\", function () {",
+                  "    pm.expect(response.orders).to.be.an('array');",
+                  "});",
+                  "",
+                  "if (response.orders && response.orders.length > 0) {",
+                  "    const firstOrder = response.orders[0];",
+                  "    pm.collectionVariables.set(\"order_id\", firstOrder.id_orden);",
+                  "",
+                  "    if (firstOrder.items && firstOrder.items.length > 0) {",
+                  "        pm.collectionVariables.set(\"item_id\", firstOrder.items[0].id_item_orden);",
+                  "    }",
+                  "",
+                  "    const openOrder = response.orders.find((order) => order.estado === \"ABIERTA\");",
+                  "    if (openOrder && openOrder.items && openOrder.items.length > 0) {",
+                  "        pm.collectionVariables.set(\"open_order_id\", openOrder.id_orden);",
+                  "        pm.collectionVariables.set(\"open_order_item_id\", openOrder.items[0].id_item_orden);",
+                  "    }",
+                  "}",
+                  "",
+                  "pm.test(\"First order has KDS base structure when data exists\", function () {",
+                  "    if (response.orders.length > 0) {",
+                  "        const order = response.orders[0];",
+                  "        pm.expect(order).to.have.property('id_orden');",
+                  "        pm.expect(order).to.have.property('numero_orden');",
+                  "        pm.expect(order).to.have.property('estado');",
+                  "        pm.expect(order).to.have.property('items');",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "KDS - Change Order Status to In Preparation",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/orders/{{open_order_id}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "orders",
+                "{{open_order_id}}",
+                "status"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{kds_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"EN_PREPARACION\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Changes order status to EN_PREPARACION\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Order is in preparation\", function () {",
+                  "    pm.expect(response.order.estado).to.eql('EN_PREPARACION');",
+                  "});",
+                  "",
+                  "pm.test(\"Preparation start timestamp exists\", function () {",
+                  "    pm.expect(response.order.preparacion_inicio_at).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "KDS - Change Item Status to In Preparation",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/items/{{open_order_item_id}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "items",
+                "{{open_order_item_id}}",
+                "status"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{kds_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"EN_PREPARACION\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Changes item status to EN_PREPARACION\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Item is in preparation\", function () {",
+                  "    pm.expect(response.item.estado_cocina).to.eql('EN_PREPARACION');",
+                  "});",
+                  "",
+                  "pm.test(\"Item preparation start timestamp exists\", function () {",
+                  "    pm.expect(response.item.preparacion_inicio_at).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "KDS - Change Item Status to Ready",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/items/{{open_order_item_id}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "items",
+                "{{open_order_item_id}}",
+                "status"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{kds_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"LISTO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Changes item status to LISTO\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Item is ready\", function () {",
+                  "    pm.expect(response.item.estado_cocina).to.eql('LISTO');",
+                  "});",
+                  "",
+                  "pm.test(\"Item ready timestamp exists\", function () {",
+                  "    pm.expect(response.item.listo_at).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "KDS - Change Order Status to Ready",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/orders/{{open_order_id}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "orders",
+                "{{open_order_id}}",
+                "status"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{kds_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"LISTA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Changes order status to LISTA\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Order is ready\", function () {",
+                  "    pm.expect(response.order.estado).to.eql('LISTA');",
+                  "});",
+                  "",
+                  "pm.test(\"Ready timestamp exists\", function () {",
+                  "    pm.expect(response.order.lista_at).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "KDS - Reject Ready Item Before Order Starts",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/items/{{open_order_item_id}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "items",
+                "{{open_order_item_id}}",
+                "status"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{kds_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"LISTO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Run this request against an item from an order still in ABIERTA. If the same order was already changed to EN_PREPARACION, run KDS - List Kitchen Orders again and set a fresh open_order_item_id."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Rejects ready item before order starts\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Business rule message is returned\", function () {",
+                  "    pm.expect(response.message).to.include('No se puede marcar un ítem como listo');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "KDS - Reject List Without Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "orders"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Rejects list without token\", function () {",
+                  "    pm.expect([401, 403]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "KDS - Reject List Without Permission",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "orders"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{cashier_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Rejects list without kds.ver permission\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "KDS - Reject Update Without Permission",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/orders/{{order_id}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "orders",
+                "{{order_id}}",
+                "status"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{cashier_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"EN_PREPARACION\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Rejects update without kds.actualizar_estado permission\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "KDS - Reject Invalid Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/orders/{{order_id}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "orders",
+                "{{order_id}}",
+                "status"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{kds_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ENTREGADA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Validates that AAT-28 does not accept delivery flow statuses. ENTREGADA belongs to AAT-29."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Rejects order status outside AAT-28 scope\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Invalid order status message is returned\", function () {",
+                  "    pm.expect(response.message).to.include('Estado de orden no permitido');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "KDS - Reject Invalid Item Status",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/items/{{item_id}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "items",
+                "{{item_id}}",
+                "status"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{kds_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ENTREGADO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Validates that AAT-28 does not accept delivered item statuses. ENTREGADO belongs to AAT-29."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Rejects item status outside AAT-28 scope\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Invalid item status message is returned\", function () {",
+                  "    pm.expect(response.message).to.include('Estado de ítem no permitido');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "KDS - Reject Missing Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/orders/{{order_id}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "orders",
+                "{{order_id}}",
+                "status"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{kds_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Rejects missing order status\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Required status message is returned\", function () {",
+                  "    pm.expect(response.message).to.include('obligatorio');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "KDS - Reject Missing Item Status",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/items/{{item_id}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "items",
+                "{{item_id}}",
+                "status"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{kds_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Rejects missing item status\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Required status message is returned\", function () {",
+                  "    pm.expect(response.message).to.include('obligatorio');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "KDS - Reject Missing Order",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/orders/{{invalid_order_id}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "orders",
+                "{{invalid_order_id}}",
+                "status"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{kds_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"EN_PREPARACION\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Rejects missing order\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "KDS - Reject Missing Item",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/items/{{invalid_item_id}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "items",
+                "{{invalid_item_id}}",
+                "status"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{kds_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"EN_PREPARACION\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Rejects missing item\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "admin_identifier",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "kds_identifier",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "kds_password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cashier_identifier",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cashier_password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "waiter_identifier",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "waiter_password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_identifier",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "kds_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cashier_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "waiter_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "order_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "item_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "open_order_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "open_order_item_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "invalid_order_id",
+      "value": "00000000-0000-0000-0000-000000000000",
+      "type": "string"
+    },
+    {
+      "key": "invalid_item_id",
+      "value": "00000000-0000-0000-0000-000000000000",
+      "type": "string"
+    },
+    {
+      "key": "user_id_edit",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "role_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_status",
+      "value": "true",
+      "type": "string"
+    },
+    {
+      "key": "user_status_edit",
+      "value": "false",
+      "type": "string"
+    },
+    {
+      "key": "user_create_first_name",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_create_last_name",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_create_email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_create_identifier",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_create_password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_create_mobile",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "establishment_name",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "establishment_business_name",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "establishment_ruc",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "establishment_address",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "establishment_phone",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "establishment_email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "establishment_logo_url",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "establishment_tax_percentage",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "establishment_currency_code",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "establishment_currency_symbol",
+      "value": "",
+      "type": "string"
     }
   ]
 }
