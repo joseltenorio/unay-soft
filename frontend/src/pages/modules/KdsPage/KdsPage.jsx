@@ -13,8 +13,20 @@ import {
 } from "lucide-react"
 
 import logoUmari from "../../../assets/icons/logo-umari-dark.svg"
-import { getKitchenOrders } from "../../../services/kdsService"
-import { mapKitchenOrdersToBoard } from "../../../utils/kdsMapper"
+
+import {
+  getKitchenOrders,
+  updateKitchenItemStatus,
+  updateKitchenOrderStatus,
+} from "../../../services/kdsService"
+
+import {
+  canToggleKitchenItem,
+  getNextItemStatus,
+  getNextOrderStatus,
+  mapKitchenOrdersToBoard,
+} from "../../../utils/kdsMapper"
+
 import "./KdsPage.css"
 
 const TIME_THRESHOLDS = { fresh: 5, normal: 10, warn: 15 }
@@ -308,7 +320,10 @@ function HeaderBand({ order }) {
   )
 }
 
-function ItemRow({ order, item, isLast, onToggleItem }) {
+function ItemRow({ order, item, isLast, updatingItemId, onToggleItem }) {
+  const isUpdating = updatingItemId === item.id
+  const isDisabled = isUpdating || item.done
+
   return (
     <div className={`kds-card-item${isLast ? " kds-card-item--last" : ""}`}>
       <button
@@ -318,10 +333,12 @@ function ItemRow({ order, item, isLast, onToggleItem }) {
             : "kds-check-button"
         }
         type="button"
-        aria-label={`${item.done ? "Desmarcar" : "Marcar"} ${item.name}`}
+        aria-label={`${item.done ? "Listo" : "Marcar"} ${item.name}`}
         onClick={() => onToggleItem(order.id, item.id)}
+        disabled={isDisabled}
       >
         {item.done && <Check size={12} strokeWidth={3} />}
+        {isUpdating && !item.done && <span className="kds-check-button__loader" />}
       </button>
 
       <div className="kds-card-item__main">
@@ -343,7 +360,10 @@ function ItemRow({ order, item, isLast, onToggleItem }) {
   )
 }
 
-function FooterActions({ order, onAdvance }) {
+function FooterActions({ order, updatingOrderId, onAdvance }) {
+  const isUpdating = updatingOrderId === order.id
+  const isDone = order.status === "done"
+
   return (
     <footer className="kds-card-footer">
       <button className="kds-waiter-button" type="button">
@@ -355,15 +375,21 @@ function FooterActions({ order, onAdvance }) {
         className={`kds-action-button kds-action-button--${order.status}`}
         type="button"
         onClick={() => onAdvance(order.id)}
-        disabled={order.status === "done"}
+        disabled={isDone || isUpdating}
       >
-        {getPrimaryAction(order.status)}
+        {isUpdating ? "Actualizando..." : getPrimaryAction(order.status)}
       </button>
     </footer>
   )
 }
 
-function CardComplete({ order, onAdvance, onToggleItem }) {
+function CardComplete({
+  order,
+  updatingOrderId,
+  updatingItemId,
+  onAdvance,
+  onToggleItem,
+}) {
   return (
     <article className={`kds-order-card kds-order-card--${order.status}`}>
       <HeaderBand order={order} />
@@ -375,18 +401,23 @@ function CardComplete({ order, onAdvance, onToggleItem }) {
             order={order}
             item={item}
             isLast={index === order.items.length - 1}
+            updatingItemId={updatingItemId}
             onToggleItem={onToggleItem}
           />
         ))}
       </div>
 
-      <FooterActions order={order} onAdvance={onAdvance} />
+      <FooterActions
+        order={order}
+        updatingOrderId={updatingOrderId}
+        onAdvance={onAdvance}
+      />
     </article>
   )
 }
 
-function CardStart({ order, items, onToggleItem }) {
-  return (
+function CardStart({ order, items, updatingItemId, onToggleItem }) {
+    return (
     <article
       className={`kds-order-card kds-order-card--${order.status} kds-order-card--split-start`}
     >
@@ -399,6 +430,7 @@ function CardStart({ order, items, onToggleItem }) {
             order={order}
             item={item}
             isLast={false}
+            updatingItemId={updatingItemId}
             onToggleItem={onToggleItem}
           />
         ))}
@@ -433,8 +465,15 @@ function SplitContinuationStrip({ order }) {
   )
 }
 
-function CardEnd({ order, items, onAdvance, onToggleItem }) {
-  return (
+function CardEnd({
+  order,
+  items,
+  updatingOrderId,
+  updatingItemId,
+  onAdvance,
+  onToggleItem,
+}) {
+    return (
     <article
       className={`kds-order-card kds-order-card--${order.status} kds-order-card--split-end`}
     >
@@ -447,12 +486,17 @@ function CardEnd({ order, items, onAdvance, onToggleItem }) {
             order={order}
             item={item}
             isLast={index === items.length - 1}
+            updatingItemId={updatingItemId}
             onToggleItem={onToggleItem}
           />
         ))}
       </div>
 
-      <FooterActions order={order} onAdvance={onAdvance} />
+      <FooterActions
+        order={order}
+        updatingOrderId={updatingOrderId}
+        onAdvance={onAdvance}
+      />
     </article>
   )
 }
@@ -472,6 +516,9 @@ export default function KdsPage() {
     pendingItems: false,
     oldestFirst: true,
   })
+  const [actionError, setActionError] = useState("")
+  const [updatingOrderId, setUpdatingOrderId] = useState("")
+  const [updatingItemId, setUpdatingItemId] = useState("")
 
   const hasActiveQuickFilters =
     quickFilters.criticalOnly ||
@@ -566,41 +613,81 @@ export default function KdsPage() {
     [filteredOrders, boardHeight],
   )
 
-  function handleAdvanceStatus(orderId) {
-    setOrders((currentOrders) =>
-      currentOrders.map((order) => {
-        if (order.id !== orderId) {
-          return order
-        }
+  async function handleAdvanceStatus(orderId) {
+    const selectedOrder = orders.find((order) => order.id === orderId)
 
-        const nextStatus = {
-          new: "process",
-          process: "done",
-          done: "done",
-        }[order.status]
+    if (!selectedOrder || updatingOrderId) {
+      return
+    }
 
-        return { ...order, status: nextStatus }
-      }),
-    )
+    const nextStatus = getNextOrderStatus(selectedOrder.status)
+
+    if (!nextStatus) {
+      return
+    }
+
+    try {
+      setActionError("")
+      setUpdatingOrderId(orderId)
+
+      await updateKitchenOrderStatus(selectedOrder.rawId, nextStatus)
+      await loadKitchenOrders()
+    } catch (error) {
+      setActionError(
+        error.message || "No se pudo actualizar el estado de la comanda.",
+      )
+    } finally {
+      setUpdatingOrderId("")
+    }
   }
 
-  function handleToggleItem(orderId, itemId) {
-    setOrders((currentOrders) =>
-      currentOrders.map((order) => {
-        if (order.id !== orderId) {
-          return order
-        }
+  async function handleToggleItem(orderId, itemId) {
+    const selectedOrder = orders.find((order) => order.id === orderId)
 
-        return {
-          ...order,
-          items: order.items.map((item) =>
-            item.id === itemId ? { ...item, done: !item.done } : item,
-          ),
-        }
-      }),
-    )
+    if (!selectedOrder || updatingItemId) {
+      return
+    }
+
+    const selectedItem = selectedOrder.items.find((item) => item.id === itemId)
+
+    if (!selectedItem) {
+      return
+    }
+
+    if (
+      !canToggleKitchenItem({
+        orderStatus: selectedOrder.status,
+        itemDone: selectedItem.done,
+      })
+    ) {
+      setActionError("Primero inicia la preparación de la comanda.")
+      return
+    }
+
+    const nextStatus = getNextItemStatus({
+      orderStatus: selectedOrder.status,
+      itemDone: selectedItem.done,
+    })
+
+    if (!nextStatus) {
+      return
+    }
+
+    try {
+      setActionError("")
+      setUpdatingItemId(itemId)
+
+      await updateKitchenItemStatus(selectedItem.rawId, nextStatus)
+      await loadKitchenOrders()
+    } catch (error) {
+      setActionError(
+        error.message || "No se pudo actualizar el estado del ítem.",
+      )
+    } finally {
+      setUpdatingItemId("")
+    }
   }
-
+  
   function handleToggleQuickFilter(filterKey) {
     setQuickFilters((currentFilters) => ({
       ...currentFilters,
@@ -676,6 +763,12 @@ export default function KdsPage() {
       </header>
 
       <main className="kds-shell">
+        {actionError && (
+          <div className="kds-action-error" role="alert">
+            {actionError}
+          </div>
+        )}
+
         <section className="kds-board-toolbar">
           <div
             className="kds-filter-tabs"
@@ -833,6 +926,8 @@ export default function KdsPage() {
                       <CardComplete
                         key={key}
                         order={block.order}
+                        updatingOrderId={updatingOrderId}
+                        updatingItemId={updatingItemId}
                         onAdvance={handleAdvanceStatus}
                         onToggleItem={handleToggleItem}
                       />
@@ -845,6 +940,7 @@ export default function KdsPage() {
                         key={key}
                         order={block.order}
                         items={block.items}
+                        updatingItemId={updatingItemId}
                         onToggleItem={handleToggleItem}
                       />
                     )
@@ -856,6 +952,8 @@ export default function KdsPage() {
                         key={key}
                         order={block.order}
                         items={block.items}
+                        updatingOrderId={updatingOrderId}
+                        updatingItemId={updatingItemId}
                         onAdvance={handleAdvanceStatus}
                         onToggleItem={handleToggleItem}
                       />

@@ -239,37 +239,21 @@ async function updateKitchenOrderStatus({
         `
           update item_orden
           set
-          estado_cocina = $3::varchar(30),
-          preparacion_inicio_at = case
+            estado_cocina = case
+              when estado_cocina = 'PENDIENTE' then 'EN_PREPARACION'
+              else estado_cocina
+            end,
+            preparacion_inicio_at = case
               when preparacion_inicio_at is null
-              and $3::varchar(30) in ('EN_PREPARACION', 'LISTO')
-              then now()
+              and estado_cocina = 'PENDIENTE'
+                then now()
               else preparacion_inicio_at
-          end,
-          listo_at = case
-              when listo_at is null
-              and $3::varchar(30) = 'LISTO'
-              then now()
-              else listo_at
-          end,
-          updated_at = now()
-          where id_item_orden = $1
-          and exists (
-              select 1
-              from orden o
-              join usuario u on u.id_usuario = o.id_usuario
-              where o.id_orden = item_orden.id_orden
-              and u.id_establecimiento = $2
-          )
-          returning
-          id_item_orden,
-          id_orden,
-          estado_cocina,
-          preparacion_inicio_at,
-          listo_at,
-          updated_at;
-      `,
-      [idItemOrden, idEstablecimiento, nextStatus],
+            end,
+            updated_at = now()
+          where id_orden = $1
+            and estado_cocina = 'PENDIENTE';
+        `,
+        [idOrden],
       )
     }
 

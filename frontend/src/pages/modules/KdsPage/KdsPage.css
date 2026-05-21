@@ -526,7 +526,7 @@
 .kds-card-id {
   max-width: 100%;
   color: #ffffff;
-  font-size: 1.34rem;
+  font-size: 1.25rem;
   font-weight: 950;
   letter-spacing: -0.035em;
   line-height: 1;
@@ -785,6 +785,46 @@
   cursor: default;
   box-shadow: none;
 }
+
+.kds-action-error {
+  flex: 0 0 auto;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+
+  border: 1px solid rgba(200, 82, 77, 0.28);
+  border-radius: 12px;
+
+  background: rgba(200, 82, 77, 0.1);
+  color: #8f2824;
+
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.kds-check-button:disabled,
+.kds-action-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.kds-check-button__loader {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+
+  border: 2px solid rgba(3, 25, 38, 0.18);
+  border-top-color: var(--color-brand-main);
+  border-radius: 999px;
+
+  animation: kds-spin 0.72s linear infinite;
+}
+
+@keyframes kds-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 
 @media (max-width: 1180px) {
   .kds-topbar {
