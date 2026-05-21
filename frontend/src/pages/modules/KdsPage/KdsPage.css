@@ -804,6 +804,78 @@
   opacity: 0.72;
 }
 
+.kds-check-button__loader {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+
+  border: 2px solid rgba(3, 25, 38, 0.18);
+  border-top-color: var(--color-brand-main);
+  border-radius: 999px;
+
+  animation: kds-spin 0.72s linear infinite;
+}
+
+.kds-last-update {
+  color: rgba(3, 25, 38, 0.58);
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.kds-state-card {
+  margin: 18px 0;
+  padding: 22px 24px;
+  border: 1px solid rgba(3, 25, 38, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.76);
+  color: var(--color-brand-primary);
+  box-shadow: 0 14px 36px rgba(3, 25, 38, 0.06);
+}
+
+.kds-state-card strong {
+  display: block;
+  color: var(--color-brand-primary);
+  font-size: 0.96rem;
+  font-weight: 900;
+}
+
+.kds-state-card p {
+  margin-top: 8px;
+  color: rgba(3, 25, 38, 0.62);
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.kds-state-card button {
+  min-height: 38px;
+  margin-top: 16px;
+  padding: 0 16px;
+  border: 1px solid rgba(70, 129, 137, 0.32);
+  border-radius: 999px;
+  background: rgba(70, 129, 137, 0.12);
+  color: var(--color-brand-primary);
+  font-size: 0.84rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.kds-state-card button:hover {
+  background: rgba(70, 129, 137, 0.18);
+  border-color: rgba(70, 129, 137, 0.42);
+  transform: translateY(-1px);
+}
+
+.kds-state-card--error {
+  border-color: rgba(200, 82, 77, 0.3);
+  background: rgba(200, 82, 77, 0.08);
+}
+
 @keyframes kds-spin {
   to {
     transform: rotate(360deg);
@@ -891,62 +963,3 @@
   }
 }
 
-.kds-last-update {
-  color: rgba(3, 25, 38, 0.58);
-  font-size: 0.78rem;
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-.kds-state-card {
-  margin: 18px 0;
-  padding: 22px 24px;
-  border: 1px solid rgba(3, 25, 38, 0.1);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.76);
-  color: var(--color-brand-primary);
-  box-shadow: 0 14px 36px rgba(3, 25, 38, 0.06);
-}
-
-.kds-state-card strong {
-  display: block;
-  color: var(--color-brand-primary);
-  font-size: 0.96rem;
-  font-weight: 900;
-}
-
-.kds-state-card p {
-  margin-top: 8px;
-  color: rgba(3, 25, 38, 0.62);
-  font-size: 0.9rem;
-  font-weight: 650;
-  line-height: 1.5;
-}
-
-.kds-state-card button {
-  min-height: 38px;
-  margin-top: 16px;
-  padding: 0 16px;
-  border: 1px solid rgba(70, 129, 137, 0.32);
-  border-radius: 999px;
-  background: rgba(70, 129, 137, 0.12);
-  color: var(--color-brand-primary);
-  font-size: 0.84rem;
-  font-weight: 900;
-  cursor: pointer;
-  transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast),
-    transform var(--transition-fast);
-}
-
-.kds-state-card button:hover {
-  background: rgba(70, 129, 137, 0.18);
-  border-color: rgba(70, 129, 137, 0.42);
-  transform: translateY(-1px);
-}
-
-.kds-state-card--error {
-  border-color: rgba(200, 82, 77, 0.3);
-  background: rgba(200, 82, 77, 0.08);
-}

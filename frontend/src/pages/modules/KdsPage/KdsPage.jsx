@@ -31,6 +31,7 @@ import {
 import "./KdsPage.css"
 
 const TIME_THRESHOLDS = { fresh: 5, normal: 10, warn: 15 }
+const READY_ORDER_HIDE_DELAY_MS = 7000
 
 const H = {
   headerBase: 76,
@@ -74,7 +75,7 @@ const getPrimaryAction = (status) =>
   ({
     new: "Iniciar",
     process: "Finalizar",
-    done: "Entregado",
+    done: "Listo",
   })[status] ?? "Actualizar"
 
 const getFilterCount = (orders, filterId) =>
@@ -529,6 +530,7 @@ export default function KdsPage() {
   })
   const [updatingOrderId, setUpdatingOrderId] = useState("")
   const [updatingItemId, setUpdatingItemId] = useState("")
+  const [hiddenReadyOrderIds, setHiddenReadyOrderIds] = useState([])
   const { showToast } = useToast()
 
   const hasActiveQuickFilters =
@@ -572,6 +574,33 @@ export default function KdsPage() {
   }, [])
 
   useEffect(() => {
+    const readyOrdersToHide = orders.filter(
+      (order) =>
+        order.status === "done" &&
+        order.rawId &&
+        !hiddenReadyOrderIds.includes(order.rawId),
+    )
+
+    if (readyOrdersToHide.length === 0) {
+      return undefined
+    }
+
+    const timeoutIds = readyOrdersToHide.map((order) =>
+      window.setTimeout(() => {
+        setHiddenReadyOrderIds((currentIds) =>
+          currentIds.includes(order.rawId)
+            ? currentIds
+            : [...currentIds, order.rawId],
+        )
+      }, READY_ORDER_HIDE_DELAY_MS),
+    )
+
+    return () => {
+      timeoutIds.forEach((timeoutId) => window.clearTimeout(timeoutId))
+    }
+  }, [orders, hiddenReadyOrderIds])
+
+  useEffect(() => {
     function measure() {
       const topbar = document.querySelector(".kds-topbar")
       const toolbar = document.querySelector(".kds-board-toolbar")
@@ -592,11 +621,21 @@ export default function KdsPage() {
     return () => window.removeEventListener("resize", measure)
   }, [])
 
+  const visibleOrders = useMemo(
+    () =>
+      orders.filter(
+        (order) =>
+          order.status !== "done" ||
+          !hiddenReadyOrderIds.includes(order.rawId),
+      ),
+    [orders, hiddenReadyOrderIds],
+  )
+
   const filteredOrders = useMemo(() => {
     let result =
       activeFilter === "all"
-        ? orders
-        : orders.filter((order) => order.status === activeFilter)
+        ? visibleOrders
+        : visibleOrders.filter((order) => order.status === activeFilter)
 
     result = result.filter((order) => orderMatchesSearch(order, searchTerm))
 
@@ -617,7 +656,7 @@ export default function KdsPage() {
         ? b.elapsedMinutes - a.elapsedMinutes
         : a.elapsedMinutes - b.elapsedMinutes,
     )
-  }, [activeFilter, orders, searchTerm, quickFilters])
+  }, [activeFilter, visibleOrders, searchTerm, quickFilters])
 
   const columns = useMemo(
     () => buildColumns(filteredOrders, boardHeight),
@@ -796,7 +835,7 @@ export default function KdsPage() {
               >
                 {filter.label}
                 <span className="kds-filter-tab__count">
-                  {getFilterCount(orders, filter.id)}
+                  {getFilterCount(visibleOrders, filter.id)}
                 </span>
               </button>
             ))}
