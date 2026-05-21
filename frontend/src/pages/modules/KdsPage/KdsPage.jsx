@@ -393,8 +393,17 @@ function FooterActions({ order, updatingOrderId, onAdvance }) {
             ? "Marca todos los ítems como listos antes de finalizar"
             : undefined
         }
+        aria-label={
+          isUpdating
+            ? "Actualizando estado de comanda"
+            : getPrimaryAction(order.status)
+        }
       >
-        {isUpdating ? "Actualizando..." : getPrimaryAction(order.status)}
+        {isUpdating ? (
+          <span className="kds-action-button__spinner" aria-hidden="true" />
+        ) : (
+          getPrimaryAction(order.status)
+        )}
       </button>
     </footer>
   )
