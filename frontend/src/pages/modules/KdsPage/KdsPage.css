@@ -463,11 +463,11 @@
 }
 
 .kds-card-band {
-  min-height: 72px;
+  min-height: 62px;
   padding: 14px 16px;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: flex-start;
-  justify-content: space-between;
   gap: 12px;
   color: #ffffff;
 }
@@ -486,17 +486,22 @@
 
 .kds-card-band__left,
 .kds-card-band__right {
+  min-width: 0;
   display: flex;
-  flex-direction: column;
 }
 
 .kds-card-band__left {
+  flex-direction: column;
+  align-items: flex-start;
   gap: 8px;
 }
 
 .kds-card-band__right {
-  align-items: flex-end;
-  gap: 7px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  white-space: nowrap;
 }
 
 .kds-split-strip {
@@ -519,21 +524,31 @@
 }
 
 .kds-card-id {
-  font-size: 1.1rem;
-  letter-spacing: 0.02em;
+  max-width: 100%;
+  color: #ffffff;
+  font-size: 1.34rem;
+  font-weight: 950;
+  letter-spacing: -0.035em;
   line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .kds-card-time {
   width: fit-content;
-  padding: 3px 8px;
+  max-width: 112px;
+  min-height: 30px;
+  padding: 0 9px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  border-radius: 6px;
-  font-size: 0.76rem;
-  font-weight: 900;
+  gap: 5px;
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-weight: 950;
+  line-height: 1;
   color: #ffffff;
+  white-space: nowrap;
 }
 
 .kds-card-time.time--fresh {
@@ -557,21 +572,28 @@
   height: 38px;
   display: grid;
   place-items: center;
+  flex: 0 0 auto;
   color: var(--color-brand-primary);
   background: #ffb11f;
   border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 900;
+  font-size: 0.76rem;
+  font-weight: 950;
   line-height: 1;
+  text-align: center;
 }
 
 .kds-card-status-badge {
+  min-height: 32px;
   padding: 4px 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
   color: var(--color-brand-primary);
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 999px;
   font-size: 0.68rem;
-  font-weight: 900;
+  font-weight: 950;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }

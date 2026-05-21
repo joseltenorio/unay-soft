@@ -502,7 +502,9 @@ function HeaderBand({ order }) {
     <>
       <div className={`kds-card-band kds-card-band--${order.status}`}>
         <div className="kds-card-band__left">
-          <strong className="kds-card-id">{order.id}</strong>
+          <strong className="kds-card-id" title={order.rawOrderNumber}>
+            {order.id}
+          </strong>
 
           <span className={`kds-card-time ${timeClass}`}>
             <Clock3 size={12} strokeWidth={2.5} />
@@ -511,10 +513,11 @@ function HeaderBand({ order }) {
         </div>
 
         <div className="kds-card-band__right">
-          <span className="kds-card-table">{order.table}</span>
           <small className="kds-card-status-badge">
             {getStatusLabel(order.status)}
           </small>
+
+          <span className="kds-card-table">{order.table}</span>
         </div>
       </div>
 
