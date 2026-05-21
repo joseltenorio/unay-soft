@@ -807,7 +807,7 @@ export default function KdsPage() {
           })
         }
 
-        hideReadyOrder(order.rawId, auto ? 0 : READY_ORDER_MANUAL_HIDE_DELAY_MS)
+        hideReadyOrder(order.rawId, READY_ORDER_MANUAL_HIDE_DELAY_MS)
       } catch (error) {
         showToast({
           type: "error",
