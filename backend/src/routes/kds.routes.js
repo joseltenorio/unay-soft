@@ -3,9 +3,13 @@
 const express = require("express")
 
 const {
+  attendKitchenServiceCall,
   changeKitchenItemStatus,
   changeKitchenOrderStatus,
+  createKitchenServiceCall,
+  deliverKitchenOrder,
   listKitchenOrders,
+  listKitchenServiceCalls,
 } = require("../controllers/kds.controller")
 const { authenticateToken } = require("../middlewares/auth.middleware")
 const { authorizePermission } = require("../middlewares/permission.middleware")
@@ -31,6 +35,34 @@ router.patch(
   authenticateToken,
   authorizePermission("kds.actualizar_estado"),
   changeKitchenItemStatus,
+)
+
+router.post(
+  "/orders/:id/service-calls",
+  authenticateToken,
+  authorizePermission("kds.notificar_servicio"),
+  createKitchenServiceCall,
+)
+
+router.get(
+  "/service-calls",
+  authenticateToken,
+  authorizePermission("pos.ver_avisos_cocina"),
+  listKitchenServiceCalls,
+)
+
+router.patch(
+  "/service-calls/:id/attend",
+  authenticateToken,
+  authorizePermission("pos.atender_avisos_cocina"),
+  attendKitchenServiceCall,
+)
+
+router.patch(
+  "/orders/:id/delivered",
+  authenticateToken,
+  authorizePermission("pos.confirmar_entrega"),
+  deliverKitchenOrder,
 )
 
 module.exports = router
