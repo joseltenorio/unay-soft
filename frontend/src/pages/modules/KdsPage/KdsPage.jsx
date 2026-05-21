@@ -16,6 +16,8 @@ import logoUmari from "../../../assets/icons/logo-umari-dark.svg"
 import useToast from "../../../components/common/Toast/useToast"
 
 import {
+  createKitchenIncidentServiceCall,
+  createReadyOrderServiceCall,
   getKitchenOrders,
   updateKitchenItemStatus,
   updateKitchenOrderStatus,
@@ -53,6 +55,18 @@ const STATUS_FILTERS = [
   { id: "process", label: "En proceso" },
   { id: "done", label: "Listos" },
 ]
+
+const INCIDENT_REASONS = [
+  "Falta insumo",
+  "Pedido confuso",
+  "Corrección de comanda",
+  "Apoyo en preparación",
+  "Demora por alta carga",
+  "Otro",
+]
+
+const getServiceActionLabel = (status) =>
+  status === "done" ? "Llamar mesero" : "Pedir apoyo"
 
 const getTimeUrgencyClass = (minutes) =>
   minutes <= TIME_THRESHOLDS.fresh
@@ -371,17 +385,36 @@ function ItemRow({ order, item, isLast, updatingItemId, onToggleItem }) {
   )
 }
 
-function FooterActions({ order, updatingOrderId, onAdvance }) {
+function FooterActions({
+  order,
+  updatingOrderId,
+  serviceCallOrderId,
+  onAdvance,
+  onServiceAction,
+}) {
   const hasPendingItems = order.items.some((item) => !item.done)
   const isFinishBlocked = order.status === "process" && hasPendingItems
   const isUpdating = updatingOrderId === order.id
+  const isServiceCallSubmitting = serviceCallOrderId === order.id
   const isDone = order.status === "done"
 
   return (
     <footer className="kds-card-footer">
-      <button className="kds-waiter-button" type="button">
+      <button
+        className={
+          isDone
+            ? "kds-waiter-button kds-waiter-button--ready"
+            : "kds-waiter-button"
+        }
+        type="button"
+        onClick={() => onServiceAction(order.id)}
+        disabled={isServiceCallSubmitting}
+        aria-busy={isServiceCallSubmitting}
+      >
         <PhoneCall size={15} strokeWidth={2.2} />
-        Llamar mesero
+        {isServiceCallSubmitting
+          ? "Enviando..."
+          : getServiceActionLabel(order.status)}
       </button>
 
       <button
@@ -414,8 +447,10 @@ function CardComplete({
   order,
   updatingOrderId,
   updatingItemId,
+  serviceCallOrderId,
   onAdvance,
   onToggleItem,
+  onServiceAction,
 }) {
   return (
     <article className={`kds-order-card kds-order-card--${order.status}`}>
@@ -437,7 +472,9 @@ function CardComplete({
       <FooterActions
         order={order}
         updatingOrderId={updatingOrderId}
+        serviceCallOrderId={serviceCallOrderId}
         onAdvance={onAdvance}
+        onServiceAction={onServiceAction}
       />
     </article>
   )
@@ -497,8 +534,10 @@ function CardEnd({
   items,
   updatingOrderId,
   updatingItemId,
+  serviceCallOrderId,
   onAdvance,
   onToggleItem,
+  onServiceAction,
 }) {
     return (
     <article
@@ -522,7 +561,9 @@ function CardEnd({
       <FooterActions
         order={order}
         updatingOrderId={updatingOrderId}
+        serviceCallOrderId={serviceCallOrderId}
         onAdvance={onAdvance}
+        onServiceAction={onServiceAction}
       />
     </article>
   )
@@ -546,6 +587,13 @@ export default function KdsPage() {
   const [updatingOrderId, setUpdatingOrderId] = useState("")
   const [updatingItemId, setUpdatingItemId] = useState("")
   const [hiddenReadyOrderIds, setHiddenReadyOrderIds] = useState([])
+  const [serviceCallOrderId, setServiceCallOrderId] = useState("")
+  const [supportModal, setSupportModal] = useState({
+    isOpen: false,
+    order: null,
+    motivo: INCIDENT_REASONS[0],
+    mensaje: "",
+  })
   const { showToast } = useToast()
 
   const hasActiveQuickFilters =
@@ -717,6 +765,91 @@ export default function KdsPage() {
       })
     } finally {
       setUpdatingOrderId("")
+    }
+  }
+
+  async function handleServiceAction(orderId) {
+    const selectedOrder = orders.find((order) => order.id === orderId)
+
+    if (!selectedOrder || serviceCallOrderId) {
+      return
+    }
+
+    if (selectedOrder.status === "done") {
+      try {
+        setServiceCallOrderId(orderId)
+
+        await createReadyOrderServiceCall(selectedOrder.rawId)
+
+        showToast({
+          type: "success",
+          title: "Mesero notificado",
+          message: "El pedido listo fue enviado a los avisos de cocina.",
+        })
+      } catch (error) {
+        showToast({
+          type: "error",
+          title: "No se pudo llamar al mesero",
+          message: error.message || "No se pudo crear el aviso de pedido listo.",
+        })
+      } finally {
+        setServiceCallOrderId("")
+      }
+
+      return
+    }
+
+    setSupportModal({
+      isOpen: true,
+      order: selectedOrder,
+      motivo: INCIDENT_REASONS[0],
+      mensaje: "",
+    })
+  }
+
+  function handleCloseSupportModal() {
+    if (serviceCallOrderId) {
+      return
+    }
+
+    setSupportModal({
+      isOpen: false,
+      order: null,
+      motivo: INCIDENT_REASONS[0],
+      mensaje: "",
+    })
+  }
+
+  async function handleSubmitSupportRequest(event) {
+    event.preventDefault()
+
+    if (!supportModal.order || serviceCallOrderId) {
+      return
+    }
+
+    try {
+      setServiceCallOrderId(supportModal.order.id)
+
+      await createKitchenIncidentServiceCall(supportModal.order.rawId, {
+        motivo: supportModal.motivo,
+        mensaje: supportModal.mensaje,
+      })
+
+      showToast({
+        type: "success",
+        title: "Apoyo solicitado",
+        message: "El aviso fue enviado a salón para su atención.",
+      })
+
+      handleCloseSupportModal()
+    } catch (error) {
+      showToast({
+        type: "error",
+        title: "No se pudo pedir apoyo",
+        message: error.message || "No se pudo crear la incidencia de cocina.",
+      })
+    } finally {
+      setServiceCallOrderId("")
     }
   }
 
@@ -1004,8 +1137,10 @@ export default function KdsPage() {
                         order={block.order}
                         updatingOrderId={updatingOrderId}
                         updatingItemId={updatingItemId}
+                        serviceCallOrderId={serviceCallOrderId}
                         onAdvance={handleAdvanceStatus}
                         onToggleItem={handleToggleItem}
+                        onServiceAction={handleServiceAction}
                       />
                     )
                   }
@@ -1030,8 +1165,10 @@ export default function KdsPage() {
                         items={block.items}
                         updatingOrderId={updatingOrderId}
                         updatingItemId={updatingItemId}
+                        serviceCallOrderId={serviceCallOrderId}
                         onAdvance={handleAdvanceStatus}
                         onToggleItem={handleToggleItem}
+                        onServiceAction={handleServiceAction}
                       />
                     )
                   }
@@ -1043,6 +1180,95 @@ export default function KdsPage() {
           </div>
         )}
       </main>
+
+      {supportModal.isOpen && (
+        <div className="kds-modal-backdrop" role="presentation">
+          <section
+            className="kds-support-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="kds-support-modal-title"
+          >
+            <header className="kds-support-modal__header">
+              <div>
+                <p>Pedir apoyo</p>
+                <h2 id="kds-support-modal-title">
+                  Solicitar apoyo para {supportModal.order?.id}
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleCloseSupportModal}
+                disabled={Boolean(serviceCallOrderId)}
+                aria-label="Cerrar modal"
+              >
+                ×
+              </button>
+            </header>
+
+            <form
+              className="kds-support-modal__form"
+              onSubmit={handleSubmitSupportRequest}
+            >
+              <label>
+                Motivo
+                <select
+                  value={supportModal.motivo}
+                  onChange={(event) =>
+                    setSupportModal((currentModal) => ({
+                      ...currentModal,
+                      motivo: event.target.value,
+                    }))
+                  }
+                  disabled={Boolean(serviceCallOrderId)}
+                >
+                  {INCIDENT_REASONS.map((reason) => (
+                    <option key={reason} value={reason}>
+                      {reason}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                Mensaje opcional
+                <textarea
+                  value={supportModal.mensaje}
+                  onChange={(event) =>
+                    setSupportModal((currentModal) => ({
+                      ...currentModal,
+                      mensaje: event.target.value,
+                    }))
+                  }
+                  placeholder="Ejemplo: falta aclarar una nota, hay demora o se necesita apoyo con la comanda."
+                  rows={4}
+                  disabled={Boolean(serviceCallOrderId)}
+                />
+              </label>
+
+              <div className="kds-support-modal__actions">
+                <button
+                  className="kds-support-modal__cancel"
+                  type="button"
+                  onClick={handleCloseSupportModal}
+                  disabled={Boolean(serviceCallOrderId)}
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  className="kds-support-modal__submit"
+                  type="submit"
+                  disabled={Boolean(serviceCallOrderId)}
+                >
+                  {serviceCallOrderId ? "Enviando..." : "Enviar aviso"}
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
     </div>
   )
 }
