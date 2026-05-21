@@ -83,23 +83,23 @@ export function getNextOrderStatus(currentUiStatus) {
 }
 
 export function getNextItemStatus({ orderStatus, itemDone }) {
-  if (itemDone) {
+  if (orderStatus === "new") {
     return null
   }
 
-  if (orderStatus === "new") {
+  if (orderStatus === "done") {
     return null
+  }
+
+  if (itemDone) {
+    return "EN_PREPARACION"
   }
 
   return "LISTO"
 }
 
-export function canToggleKitchenItem({ orderStatus, itemDone }) {
-  if (itemDone) {
-    return false
-  }
-
-  return orderStatus !== "new"
+export function canToggleKitchenItem({ orderStatus }) {
+  return orderStatus === "process"
 }
 
 export function formatElapsedTime(minutes) {
