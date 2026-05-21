@@ -262,9 +262,10 @@ async function updateKitchenOrderStatus({
             else preparacion_inicio_at
           end,
           lista_at = case
-            when lista_at is null
-             and $3::varchar(30) = 'LISTA'
+            when $3::varchar(30) = 'LISTA'
               then now()
+            when $3::varchar(30) = 'EN_PREPARACION'
+              then null
             else lista_at
           end,
           updated_at = now()
