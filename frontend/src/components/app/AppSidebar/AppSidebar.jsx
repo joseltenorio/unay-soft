@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
 import {
+  BookOpen,
   BarChart3,
   Boxes,
   ChefHat,
@@ -52,6 +53,13 @@ const moduleNavigation = {
     icon: Boxes,
     group: "Operación",
     keywords: "inventario insumos stock almacén",
+  },
+  menu: {
+  label: "Carta",
+  path: "/app/menu",
+  icon: BookOpen,
+  group: "Operación",
+  keywords: "carta menu catalogo categorias productos platos",
   },
   bi: {
     label: "Reportes",

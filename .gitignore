@@ -13,12 +13,12 @@ build/
 .env.local
 .env.development.local
 .env.test.local
-.env.production.local
+.env.productoion.local
 */.env
 */.env.local
 */.env.development.local
 */.env.test.local
-*/.env.production.local
+*/.env.productoion.local
 
 # Logs
 logs/
@@ -58,6 +58,11 @@ coverage/
 *.sqlite3
 *.db
 
+<<<<<<< Updated upstream
 # Production artifacts
 *.local
 repomix-output*
+=======
+# productoion artifacts
+*.local
+>>>>>>> Stashed changes
