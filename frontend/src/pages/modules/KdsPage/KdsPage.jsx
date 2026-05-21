@@ -371,6 +371,8 @@ function ItemRow({ order, item, isLast, updatingItemId, onToggleItem }) {
 }
 
 function FooterActions({ order, updatingOrderId, onAdvance }) {
+  const hasPendingItems = order.items.some((item) => !item.done)
+  const isFinishBlocked = order.status === "process" && hasPendingItems
   const isUpdating = updatingOrderId === order.id
   const isDone = order.status === "done"
 
@@ -385,7 +387,12 @@ function FooterActions({ order, updatingOrderId, onAdvance }) {
         className={`kds-action-button kds-action-button--${order.status}`}
         type="button"
         onClick={() => onAdvance(order.id)}
-        disabled={isDone || isUpdating}
+        disabled={isDone || isUpdating || isFinishBlocked}
+        title={
+          isFinishBlocked
+            ? "Marca todos los ítems como listos antes de finalizar"
+            : undefined
+        }
       >
         {isUpdating ? "Actualizando..." : getPrimaryAction(order.status)}
       </button>
