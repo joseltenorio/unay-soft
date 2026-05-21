@@ -454,25 +454,6 @@ async function syncOrderStatusFromItems({ client, idOrden, idEstablecimiento }) 
     return
   }
 
-  if (summary.ready_items === summary.total_items) {
-    await client.query(
-      `
-        update orden
-        set
-          estado = 'LISTA',
-          lista_at = case
-            when lista_at is null then now()
-            else lista_at
-          end,
-          updated_at = now()
-        where id_orden = $1;
-      `,
-      [idOrden],
-    )
-
-    return
-  }
-
   if (summary.in_preparation_items > 0) {
     await client.query(
       `
