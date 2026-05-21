@@ -502,7 +502,7 @@ values
 ('76666666-6666-6666-6666-666666666666', '11111111-1111-1111-1111-111111111111', '63333333-3333-3333-3333-333333333333', 6, 'Barra 1', 2, 'LIBRE', true);
 
 -- =========================================================
--- 8. Categorías y Productos
+-- 8. Categorías y productos
 -- =========================================================
 
 insert into categoria (
@@ -539,7 +539,7 @@ values
   'Ceviche Clásico',
   'Pescado fresco, limón, ají limo, cebolla, camote y choclo.',
   38.00,
-  '/assets/images/products/ceviche-clasico.jpg',
+  '/assets/images/productos/ceviche-clasico.jpg',
   true,
   95,
   true
@@ -551,7 +551,7 @@ values
   'Ceviche Mixto',
   'Pescado y mariscos con leche de tigre tradicional.',
   46.00,
-  '/assets/images/products/ceviche-mixto.jpg',
+  '/assets/images/productos/ceviche-mixto.jpg',
   true,
   90,
   true
@@ -563,7 +563,7 @@ values
   'Arroz con Mariscos',
   'Arroz norteño con mixtura de mariscos y salsa criolla.',
   48.00,
-  '/assets/images/products/arroz-mariscos.jpg',
+  '/assets/images/productos/arroz-mariscos.jpg',
   true,
   88,
   true
@@ -575,7 +575,7 @@ values
   'Jalea Mixta',
   'Pescados y mariscos fritos acompañados con yuca y salsa tártara.',
   52.00,
-  '/assets/images/products/jalea-mixta.jpg',
+  '/assets/images/productos/jalea-mixta.jpg',
   true,
   84,
   true
@@ -587,7 +587,7 @@ values
   'Causa Acevichada',
   'Causa de papa amarilla con topping acevichado y crema especial.',
   32.00,
-  '/assets/images/products/causa-acevichada.jpg',
+  '/assets/images/productos/causa-acevichada.jpg',
   true,
   80,
   true
@@ -599,7 +599,7 @@ values
   'Chicha Morada',
   'Bebida tradicional de maíz morado, piña y especias.',
   9.00,
-  '/assets/images/products/chicha-morada.jpg',
+  '/assets/images/productos/chicha-morada.jpg',
   true,
   70,
   true
@@ -611,7 +611,7 @@ values
   'Limonada Frozen',
   'Limonada helada preparada al momento.',
   12.00,
-  '/assets/images/products/limonada-frozen.jpg',
+  '/assets/images/productos/limonada-frozen.jpg',
   true,
   72,
   true

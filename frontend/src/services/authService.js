@@ -28,6 +28,8 @@ export async function loginRequest({ identifier, password, remember }) {
 
   storage.setItem(TOKEN_KEY, data.token)
   storage.setItem(USER_KEY, JSON.stringify(data.user))
+  storage.setItem(PERMISSIONS_KEY, JSON.stringify(data.permissions || []))  // ✅ agrega esto
+  storage.setItem(MODULES_KEY, JSON.stringify(data.modules || []))        
 
   const otherStorage = remember ? sessionStorage : localStorage
   otherStorage.removeItem(TOKEN_KEY)

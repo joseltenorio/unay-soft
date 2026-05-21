@@ -61,7 +61,7 @@ join permiso p on p.id_permiso = rp.id_permiso
 join modulo m on m.id_modulo = p.id_modulo
 order by r.nombre, m.orden_display, p.accion;
 
--- Productos por categoría
+-- productos por categoría
 select
   c.nombre as categoria,
   p.nombre as producto,

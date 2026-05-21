@@ -18,6 +18,7 @@ import InventoryPage from "./pages/modules/InventoryPage/InventoryPage"
 import BiPage from "./pages/modules/BiPage/BiPage"
 import SecurityPage from "./pages/modules/SecurityPage/SecurityPage"
 import EstablishmentPage from "./pages/modules/EstablishmentPage/EstablishmentPage"
+import CartaPage from "./pages/modules/CartaPage/CartaPage"
 
 import AppLayout from "./components/layout/AppLayout/AppLayout"
 
@@ -82,6 +83,15 @@ function App() {
             />
 
             <Route
+               path="menu"
+                element={
+                <PermissionRoute permission="carta.gestionar">
+                  <CartaPage />
+                  </PermissionRoute>
+                }
+                />
+
+            <Route
               path="bi"
               element={
                 <PermissionRoute permission="bi.ver">
@@ -107,6 +117,16 @@ function App() {
                 </PermissionRoute>
               }
             />
+            
+            <Route
+              path="carta"
+              element={
+                <PermissionRoute permission="carta.ver">
+                  <CartaPage />
+                </PermissionRoute>
+              }
+            />
+
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
