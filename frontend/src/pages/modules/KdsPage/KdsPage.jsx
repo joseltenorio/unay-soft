@@ -1,6 +1,6 @@
 // frontend/src/pages/modules/KdsPage/KdsPage.jsx
 
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   Bell,
   Check,
@@ -13,9 +13,29 @@ import {
 } from "lucide-react"
 
 import logoUmari from "../../../assets/icons/logo-umari-dark.svg"
+import useToast from "../../../components/common/Toast/useToast"
+
+import {
+  createKitchenIncidentServiceCall,
+  createReadyOrderServiceCall,
+  getKitchenOrders,
+  updateKitchenItemStatus,
+  updateKitchenOrderStatus,
+} from "../../../services/kdsService"
+
+import {
+  canToggleKitchenItem,
+  getNextItemStatus,
+  getNextOrderStatus,
+  mapKitchenOrdersToBoard,
+} from "../../../utils/kdsMapper"
+
 import "./KdsPage.css"
 
 const TIME_THRESHOLDS = { fresh: 5, normal: 10, warn: 15 }
+const READY_ORDER_MANUAL_HIDE_DELAY_MS = 3000
+const READY_ORDER_AUTO_NOTIFY_DELAY_MS = 10000
+const BOARD_BOTTOM_SAFE_GAP = 58
 
 const H = {
   headerBase: 62,
@@ -30,237 +50,23 @@ const H = {
   minSecond: 2,
 }
 
-const MOCK_ORDERS = [
-  {
-    id: "#001",
-    table: "M12",
-    waiter: "Andrea",
-    elapsedMinutes: 17,
-    status: "process",
-    items: [
-      {
-        id: 13,
-        name: "Sudado de mero",
-        quantity: 1,
-        notes: ["Bien caliente"],
-        done: false,
-      },
-      {
-        id: 14,
-        name: "Arroz blanco",
-        quantity: 2,
-        notes: [],
-        done: true,
-      },
-      {
-        id: 15,
-        name: "Limonada frozen",
-        quantity: 2,
-        notes: ["Extra menta"],
-        done: false,
-      },
-      {
-        id: 16,
-        name: "Ceviche clásico",
-        quantity: 1,
-        notes: ["Sin ají"],
-        done: false,
-      },
-      {
-        id: 17,
-        name: "Jalea mixta",
-        quantity: 1,
-        notes: ["Sin yuyo"],
-        done: false,
-      },
-      {
-        id: 18,
-        name: "Chaufa de mariscos",
-        quantity: 2,
-        notes: [],
-        done: false,
-      },
-      {
-        id: 19,
-        name: "Leche de tigre",
-        quantity: 1,
-        notes: ["Picante normal"],
-        done: false,
-      },
-      {
-        id: 20,
-        name: "Causa acevichada",
-        quantity: 1,
-        notes: ["Sin palta"],
-        done: false,
-      },
-      {
-        id: 21,
-        name: "Tiradito",
-        quantity: 2,
-        notes: ["Salsa aparte"],
-        done: false,
-      },
-      {
-        id: 22,
-        name: "Parihuela",
-        quantity: 1,
-        notes: ["Bien caliente"],
-        done: false,
-      },
-      {
-        id: 23,
-        name: "Arroz con mariscos",
-        quantity: 1,
-        notes: ["Extra limón"],
-        done: false,
-      },
-      {
-        id: 24,
-        name: "Chicharrón de pescado",
-        quantity: 1,
-        notes: ["Mayonesa aparte"],
-        done: false,
-      },
-    ],
-  },
-  {
-    id: "#003",
-    table: "M2",
-    waiter: "Luis",
-    elapsedMinutes: 7,
-    status: "done",
-    items: [
-      {
-        id: 11,
-        name: "Ceviche mixto",
-        quantity: 1,
-        notes: ["Sin cancha"],
-        done: true,
-      },
-      {
-        id: 12,
-        name: "Inca Kola",
-        quantity: 2,
-        notes: [],
-        done: true,
-      },
-    ],
-  },
-  {
-    id: "#004",
-    table: "M23",
-    waiter: "Sofía",
-    elapsedMinutes: 11,
-    status: "process",
-    items: [
-      {
-        id: 9,
-        name: "Parihuela",
-        quantity: 2,
-        notes: ["Bien caliente"],
-        done: true,
-      },
-      {
-        id: 10,
-        name: "Chaufa de mariscos",
-        quantity: 1,
-        notes: ["Sin langostino"],
-        done: false,
-      },
-    ],
-  },
-  {
-    id: "#006",
-    table: "M8",
-    waiter: "Carlos",
-    elapsedMinutes: 8,
-    status: "process",
-    items: [
-      {
-        id: 6,
-        name: "Tiradito de pescado",
-        quantity: 3,
-        notes: ["Salsa aparte"],
-        done: true,
-      },
-      {
-        id: 7,
-        name: "Causa acevichada",
-        quantity: 1,
-        notes: ["Sin palta"],
-        done: false,
-      },
-      {
-        id: 8,
-        name: "Maracuyá frozen",
-        quantity: 2,
-        notes: [],
-        done: false,
-      },
-    ],
-  },
-  {
-    id: "#008",
-    table: "M1",
-    waiter: "Andrea",
-    elapsedMinutes: 2,
-    status: "new",
-    items: [
-      {
-        id: 4,
-        name: "Leche de tigre",
-        quantity: 1,
-        notes: ["Picante normal"],
-        done: false,
-      },
-      {
-        id: 5,
-        name: "Jalea mixta",
-        quantity: 1,
-        notes: ["Sin yuyo"],
-        done: false,
-      },
-    ],
-  },
-  {
-    id: "#009",
-    table: "M4",
-    waiter: "Luis",
-    elapsedMinutes: 4,
-    status: "new",
-    items: [
-      {
-        id: 1,
-        name: "Ceviche clásico",
-        quantity: 2,
-        notes: ["Sin ají", "Sin cebolla"],
-        done: false,
-      },
-      {
-        id: 2,
-        name: "Chicha morada",
-        quantity: 1,
-        notes: ["Sin hielo"],
-        done: false,
-      },
-      {
-        id: 3,
-        name: "Arroz con mariscos",
-        quantity: 1,
-        notes: ["Extra limón"],
-        done: false,
-      },
-    ],
-  },
-]
-
 const STATUS_FILTERS = [
   { id: "all", label: "Todos" },
   { id: "new", label: "Nuevos" },
   { id: "process", label: "En proceso" },
   { id: "done", label: "Listos" },
 ]
+
+const SUPPORT_REASONS = [
+  "Venir a cocina",
+  "Falta insumo",
+  "Comanda confusa",
+  "Corrección",
+  "Demora",
+]
+
+const getServiceActionLabel = (status) =>
+  status === "done" ? "Llamar mesero" : "Pedir apoyo"
 
 const getTimeUrgencyClass = (minutes) =>
   minutes <= TIME_THRESHOLDS.fresh
@@ -271,8 +77,7 @@ const getTimeUrgencyClass = (minutes) =>
         ? "time--warn"
         : "time--critical"
 
-const formatElapsed = (minutes) =>
-  `${String(Math.floor(minutes)).padStart(2, "0")}:00`
+const formatElapsed = (order) => order.elapsedLabel || `${order.elapsedMinutes}m`
 
 const getStatusLabel = (status) =>
   ({
@@ -285,7 +90,7 @@ const getPrimaryAction = (status) =>
   ({
     new: "Iniciar",
     process: "Finalizar",
-    done: "Entregado",
+    done: "Listo",
   })[status] ?? "Actualizar"
 
 const getFilterCount = (orders, filterId) =>
@@ -505,7 +310,7 @@ function HeaderBand({ order }) {
 
           <span className={`kds-card-time ${timeClass}`}>
             <Clock3 size={12} strokeWidth={2.5} />
-            {formatElapsed(order.elapsedMinutes)}
+            {formatElapsed(order)}
           </span>
         </div>
 
@@ -530,7 +335,12 @@ function HeaderBand({ order }) {
   )
 }
 
-function ItemRow({ order, item, isLast, onToggleItem }) {
+function ItemRow({ order, item, isLast, updatingItemId, onToggleItem }) {
+  const isUpdating = updatingItemId === item.id
+  const isBlockedBeforeStart = order.status === "new" && !item.done
+  const isBlockedAfterReady = order.status === "done"
+  const isDisabled = isUpdating || isBlockedBeforeStart || isBlockedAfterReady
+    
   return (
     <div className={`kds-card-item${isLast ? " kds-card-item--last" : ""}`}>
       <button
@@ -540,10 +350,21 @@ function ItemRow({ order, item, isLast, onToggleItem }) {
             : "kds-check-button"
         }
         type="button"
-        aria-label={`${item.done ? "Desmarcar" : "Marcar"} ${item.name}`}
+        aria-label={
+          isBlockedBeforeStart
+            ? `Inicia la comanda antes de marcar ${item.name}`
+            : `${item.done ? "Listo" : "Marcar"} ${item.name}`
+        }
+        title={
+          isBlockedBeforeStart
+            ? "Primero inicia la preparación de la comanda"
+            : undefined
+        }
         onClick={() => onToggleItem(order.id, item.id)}
+        disabled={isDisabled}
       >
         {item.done && <Check size={12} strokeWidth={3} />}
+        {isUpdating && !item.done && <span className="kds-check-button__loader" />}
       </button>
 
       <div className="kds-card-item__main">
@@ -565,27 +386,100 @@ function ItemRow({ order, item, isLast, onToggleItem }) {
   )
 }
 
-function FooterActions({ order, onAdvance }) {
+function FooterActions({
+  order,
+  updatingOrderId,
+  serviceCallOrderId,
+  notifiedReadyOrderIds,
+  onAdvance,
+  onServiceAction,
+  onAbortReady,
+}) {
+  const hasPendingItems = order.items.some((item) => !item.done)
+  const isFinishBlocked = order.status === "process" && hasPendingItems
+  const isUpdating = updatingOrderId === order.id
+  const isServiceCallSubmitting = serviceCallOrderId === order.id
+  const isDone = order.status === "done"
+  const wasReadyNotified = notifiedReadyOrderIds.includes(order.rawId)
+
   return (
     <footer className="kds-card-footer">
-      <button className="kds-waiter-button" type="button">
+      <button
+        className={
+          isDone
+            ? "kds-waiter-button kds-waiter-button--ready"
+            : "kds-waiter-button"
+        }
+        type="button"
+        onClick={() => onServiceAction(order.id)}
+        disabled={isServiceCallSubmitting || wasReadyNotified}
+        aria-busy={isServiceCallSubmitting}
+      >
         <PhoneCall size={15} strokeWidth={2.2} />
-        Llamar mesero
+        {isServiceCallSubmitting
+          ? "Enviando..."
+          : wasReadyNotified
+            ? "Mesero avisado"
+            : getServiceActionLabel(order.status)}
       </button>
 
-      <button
-        className={`kds-action-button kds-action-button--${order.status}`}
-        type="button"
-        onClick={() => onAdvance(order.id)}
-        disabled={order.status === "done"}
-      >
-        {getPrimaryAction(order.status)}
-      </button>
+      {isDone ? (
+        <button
+          className="kds-abort-ready-button"
+          type="button"
+          onClick={() => onAbortReady(order.id)}
+          disabled={isUpdating || isServiceCallSubmitting || wasReadyNotified}
+          title={
+            wasReadyNotified
+              ? "No se puede reabrir una comanda ya notificada al mesero"
+              : "Volver la comanda a preparación"
+          }
+        >
+          {isUpdating ? (
+            <span className="kds-action-button__spinner" aria-hidden="true" />
+          ) : (
+            "Reabrir"
+          )}
+        </button>
+      ) : (
+        <button
+          className={`kds-action-button kds-action-button--${order.status}`}
+          type="button"
+          onClick={() => onAdvance(order.id)}
+          disabled={isUpdating || isFinishBlocked}
+          title={
+            isFinishBlocked
+              ? "Marca todos los ítems como listos antes de finalizar"
+              : undefined
+          }
+          aria-label={
+            isUpdating
+              ? "Actualizando estado de comanda"
+              : getPrimaryAction(order.status)
+          }
+        >
+          {isUpdating ? (
+            <span className="kds-action-button__spinner" aria-hidden="true" />
+          ) : (
+            getPrimaryAction(order.status)
+          )}
+        </button>
+      )}
     </footer>
   )
 }
 
-function CardComplete({ order, onAdvance, onToggleItem }) {
+function CardComplete({
+  order,
+  updatingOrderId,
+  updatingItemId,
+  serviceCallOrderId,
+  notifiedReadyOrderIds,
+  onAdvance,
+  onToggleItem,
+  onServiceAction,
+  onAbortReady,
+}) {
   return (
     <article className={`kds-order-card kds-order-card--${order.status}`}>
       <HeaderBand order={order} />
@@ -597,18 +491,27 @@ function CardComplete({ order, onAdvance, onToggleItem }) {
             order={order}
             item={item}
             isLast={index === order.items.length - 1}
+            updatingItemId={updatingItemId}
             onToggleItem={onToggleItem}
           />
         ))}
       </div>
 
-      <FooterActions order={order} onAdvance={onAdvance} />
+      <FooterActions
+        order={order}
+        updatingOrderId={updatingOrderId}
+        serviceCallOrderId={serviceCallOrderId}
+        notifiedReadyOrderIds={notifiedReadyOrderIds}
+        onAdvance={onAdvance}
+        onServiceAction={onServiceAction}
+        onAbortReady={onAbortReady}
+      />
     </article>
   )
 }
 
-function CardStart({ order, items, onToggleItem }) {
-  return (
+function CardStart({ order, items, updatingItemId, onToggleItem }) {
+    return (
     <article
       className={`kds-order-card kds-order-card--${order.status} kds-order-card--split-start`}
     >
@@ -621,6 +524,7 @@ function CardStart({ order, items, onToggleItem }) {
             order={order}
             item={item}
             isLast={false}
+            updatingItemId={updatingItemId}
             onToggleItem={onToggleItem}
           />
         ))}
@@ -655,8 +559,19 @@ function SplitContinuationStrip({ order }) {
   )
 }
 
-function CardEnd({ order, items, onAdvance, onToggleItem }) {
-  return (
+function CardEnd({
+  order,
+  items,
+  updatingOrderId,
+  updatingItemId,
+  serviceCallOrderId,
+  notifiedReadyOrderIds,
+  onAdvance,
+  onToggleItem,
+  onServiceAction,
+  onAbortReady,
+}) {
+    return (
     <article
       className={`kds-order-card kds-order-card--${order.status} kds-order-card--split-end`}
     >
@@ -669,19 +584,31 @@ function CardEnd({ order, items, onAdvance, onToggleItem }) {
             order={order}
             item={item}
             isLast={index === items.length - 1}
+            updatingItemId={updatingItemId}
             onToggleItem={onToggleItem}
           />
         ))}
       </div>
 
-      <FooterActions order={order} onAdvance={onAdvance} />
+      <FooterActions
+        order={order}
+        updatingOrderId={updatingOrderId}
+        serviceCallOrderId={serviceCallOrderId}
+        notifiedReadyOrderIds={notifiedReadyOrderIds}
+        onAdvance={onAdvance}
+        onServiceAction={onServiceAction}
+        onAbortReady={onAbortReady}
+      />
     </article>
   )
 }
 
 export default function KdsPage() {
   const [activeFilter, setActiveFilter] = useState("all")
-  const [orders, setOrders] = useState(MOCK_ORDERS)
+  const [orders, setOrders] = useState([])
+  const [isLoadingOrders, setIsLoadingOrders] = useState(true)
+  const [ordersError, setOrdersError] = useState("")
+  const [lastUpdatedAt, setLastUpdatedAt] = useState(null)
   const [boardHeight, setBoardHeight] = useState(600)
   const [searchTerm, setSearchTerm] = useState("")
   const [showQuickFilters, setShowQuickFilters] = useState(false)
@@ -691,6 +618,18 @@ export default function KdsPage() {
     pendingItems: false,
     oldestFirst: true,
   })
+  const [updatingOrderId, setUpdatingOrderId] = useState("")
+  const [updatingItemId, setUpdatingItemId] = useState("")
+  const [hiddenReadyOrderIds, setHiddenReadyOrderIds] = useState([])
+  const [serviceCallOrderId, setServiceCallOrderId] = useState("")
+  const [supportModal, setSupportModal] = useState({
+    isOpen: false,
+    order: null,
+    motivo: SUPPORT_REASONS[0],
+  })  
+  
+  const [notifiedReadyOrderIds, setNotifiedReadyOrderIds] = useState([])
+  const { showToast } = useToast()
 
   const hasActiveQuickFilters =
     quickFilters.criticalOnly ||
@@ -698,32 +637,82 @@ export default function KdsPage() {
     quickFilters.pendingItems ||
     !quickFilters.oldestFirst
 
+  async function loadKitchenOrders({ showLoading = false } = {}) {
+    try {
+      if (showLoading) {
+        setIsLoadingOrders(true)
+      }
+
+      setOrdersError("")
+
+      const kitchenOrders = await getKitchenOrders()
+      const boardOrders = mapKitchenOrdersToBoard(kitchenOrders)
+
+      setOrders(boardOrders)
+      setLastUpdatedAt(new Date())
+    } catch (error) {
+      setOrdersError(
+        error.message || "No se pudieron cargar las comandas de cocina.",
+      )
+    } finally {
+      setIsLoadingOrders(false)
+    }
+  }
+
+  useEffect(() => {
+    loadKitchenOrders({ showLoading: true })
+
+    const intervalId = window.setInterval(() => {
+      loadKitchenOrders()
+    }, 30000)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [])
+
+
   useEffect(() => {
     function measure() {
-      const topbar = document.querySelector(".kds-topbar")
       const toolbar = document.querySelector(".kds-board-toolbar")
 
-      const topbarHeight = topbar ? topbar.getBoundingClientRect().height : 70
-      const toolbarHeight = toolbar
-        ? toolbar.getBoundingClientRect().height
-        : 50
+      const toolbarBottom = toolbar
+        ? toolbar.getBoundingClientRect().bottom
+        : 0
 
-      setBoardHeight(
-        Math.max(window.innerHeight - topbarHeight - toolbarHeight - 46, 320),
+      const nextBoardHeight = Math.max(
+        window.innerHeight - toolbarBottom - BOARD_BOTTOM_SAFE_GAP,
+        320,
       )
+
+      setBoardHeight(nextBoardHeight)
     }
 
-    measure()
+    const measureFrame = window.requestAnimationFrame(measure)
+
     window.addEventListener("resize", measure)
 
-    return () => window.removeEventListener("resize", measure)
-  }, [])
+    return () => {
+      window.cancelAnimationFrame(measureFrame)
+      window.removeEventListener("resize", measure)
+    }
+  }, [showQuickFilters])
+
+  const visibleOrders = useMemo(
+    () =>
+      orders.filter(
+        (order) =>
+          order.status !== "done" ||
+          !hiddenReadyOrderIds.includes(order.rawId),
+      ),
+    [orders, hiddenReadyOrderIds],
+  )
 
   const filteredOrders = useMemo(() => {
     let result =
       activeFilter === "all"
-        ? orders
-        : orders.filter((order) => order.status === activeFilter)
+        ? visibleOrders
+        : visibleOrders.filter((order) => order.status === activeFilter)
 
     result = result.filter((order) => orderMatchesSearch(order, searchTerm))
 
@@ -744,46 +733,281 @@ export default function KdsPage() {
         ? b.elapsedMinutes - a.elapsedMinutes
         : a.elapsedMinutes - b.elapsedMinutes,
     )
-  }, [activeFilter, orders, searchTerm, quickFilters])
+  }, [activeFilter, visibleOrders, searchTerm, quickFilters])
 
   const columns = useMemo(
     () => buildColumns(filteredOrders, boardHeight),
     [filteredOrders, boardHeight],
   )
 
-  function handleAdvanceStatus(orderId) {
-    setOrders((currentOrders) =>
-      currentOrders.map((order) => {
-        if (order.id !== orderId) {
-          return order
-        }
+  async function handleAdvanceStatus(orderId) {
+    const selectedOrder = orders.find((order) => order.id === orderId)
 
-        const nextStatus = {
-          new: "process",
-          process: "done",
-          done: "done",
-        }[order.status]
+    if (!selectedOrder || updatingOrderId) {
+      return
+    }
 
-        return { ...order, status: nextStatus }
-      }),
-    )
+    const nextStatus = getNextOrderStatus(selectedOrder.status)
+
+    if (!nextStatus) {
+      return
+    }
+
+    try {
+      setUpdatingOrderId(orderId)
+
+      await updateKitchenOrderStatus(selectedOrder.rawId, nextStatus)
+      await loadKitchenOrders()
+    } catch (error) {
+      showToast({
+        type: "error",
+        title: "No se pudo actualizar",
+        message: error.message || "No se pudo actualizar el estado de la comanda.",
+      })
+    } finally {
+      setUpdatingOrderId("")
+    }
   }
 
-  function handleToggleItem(orderId, itemId) {
-    setOrders((currentOrders) =>
-      currentOrders.map((order) => {
-        if (order.id !== orderId) {
-          return order
+  const hideReadyOrder = useCallback(
+    (rawOrderId, delay = READY_ORDER_MANUAL_HIDE_DELAY_MS) => {
+      window.setTimeout(() => {
+        setHiddenReadyOrderIds((currentIds) =>
+          currentIds.includes(rawOrderId)
+            ? currentIds
+            : [...currentIds, rawOrderId],
+        )
+      }, delay)
+    },
+    [],
+  )
+
+  const notifyReadyOrder = useCallback(
+    async (order, { auto = false } = {}) => {
+      if (!order || serviceCallOrderId) {
+        return
+      }
+
+      try {
+        setServiceCallOrderId(order.id)
+
+        await createReadyOrderServiceCall(order.rawId)
+
+        setNotifiedReadyOrderIds((currentIds) =>
+          currentIds.includes(order.rawId)
+            ? currentIds
+            : [...currentIds, order.rawId],
+        )
+
+        if (!auto) {
+          showToast({
+            type: "success",
+            title: "Mesero notificado",
+            message: "El pedido listo fue enviado a los avisos de cocina.",
+          })
         }
 
-        return {
-          ...order,
-          items: order.items.map((item) =>
-            item.id === itemId ? { ...item, done: !item.done } : item,
-          ),
-        }
-      }),
-    )
+        hideReadyOrder(order.rawId, READY_ORDER_MANUAL_HIDE_DELAY_MS)
+      } catch (error) {
+        showToast({
+          type: "error",
+          title: "No se pudo llamar al mesero",
+          message: error.message || "No se pudo crear el aviso de pedido listo.",
+        })
+      } finally {
+        setServiceCallOrderId("")
+      }
+    },
+    [hideReadyOrder, serviceCallOrderId, showToast],
+  )
+
+  useEffect(() => {
+    const timeoutIds = []
+
+    orders.forEach((order) => {
+      if (
+        order.status !== "done" ||
+        !order.rawId ||
+        hiddenReadyOrderIds.includes(order.rawId) ||
+        notifiedReadyOrderIds.includes(order.rawId)
+      ) {
+        return
+      }
+
+      const readyTime = order.readyAt ? new Date(order.readyAt).getTime() : Date.now()
+      const elapsedReadyTime = Date.now() - readyTime
+      const remainingDelay = Math.max(
+        READY_ORDER_AUTO_NOTIFY_DELAY_MS - elapsedReadyTime,
+        0,
+      )
+
+      const timeoutId = window.setTimeout(() => {
+        notifyReadyOrder(order, { auto: true })
+      }, remainingDelay)
+
+      timeoutIds.push(timeoutId)
+    })
+
+    return () => {
+      timeoutIds.forEach((timeoutId) => window.clearTimeout(timeoutId))
+    }
+  }, [
+    orders,
+    hiddenReadyOrderIds,
+    notifiedReadyOrderIds,
+    notifyReadyOrder,
+  ])
+
+  async function handleServiceAction(orderId) {
+    const selectedOrder = orders.find((order) => order.id === orderId)
+
+    if (!selectedOrder || serviceCallOrderId) {
+      return
+    }
+
+    if (selectedOrder.status === "done") {
+      await notifyReadyOrder(selectedOrder)
+      return
+    }
+
+    setSupportModal({
+      isOpen: true,
+      order: selectedOrder,
+      motivo: SUPPORT_REASONS[0],
+    })
+  }
+
+  function handleCloseSupportModal() {
+    if (serviceCallOrderId) {
+      return
+    }
+
+    setSupportModal({
+      isOpen: false,
+      order: null,
+      motivo: SUPPORT_REASONS[0],
+    })
+  }
+
+  async function handleSubmitSupportRequest(event) {
+    event.preventDefault()
+
+    if (!supportModal.order || serviceCallOrderId) {
+      return
+    }
+
+    try {
+      setServiceCallOrderId(supportModal.order.id)
+
+      await createKitchenIncidentServiceCall(supportModal.order.rawId, {
+        motivo: supportModal.motivo,
+      })
+
+      showToast({
+        type: "success",
+        title: "Apoyo solicitado",
+        message: `Se envió el aviso: ${supportModal.motivo}.`,
+      })
+
+      setSupportModal({
+        isOpen: false,
+        order: null,
+        motivo: SUPPORT_REASONS[0],
+      })
+    } catch (error) {
+      showToast({
+        type: "error",
+        title: "No se pudo pedir apoyo",
+        message: error.message || "No se pudo crear la incidencia de cocina.",
+      })
+    } finally {
+      setServiceCallOrderId("")
+    }
+  }
+
+  async function handleAbortReady(orderId) {
+    const selectedOrder = orders.find((order) => order.id === orderId)
+
+    if (!selectedOrder || updatingOrderId || serviceCallOrderId) {
+      return
+    }
+
+    try {
+      setUpdatingOrderId(orderId)
+
+      await updateKitchenOrderStatus(selectedOrder.rawId, "EN_PREPARACION")
+
+      setHiddenReadyOrderIds((currentIds) =>
+        currentIds.filter((currentId) => currentId !== selectedOrder.rawId),
+      )
+
+      setNotifiedReadyOrderIds((currentIds) =>
+        currentIds.filter((currentId) => currentId !== selectedOrder.rawId),
+      )
+
+      await loadKitchenOrders()
+
+      showToast({
+        type: "success",
+        title: "Listo abortado",
+        message: "La comanda volvió a preparación.",
+      })
+    } catch (error) {
+      showToast({
+        type: "error",
+        title: "No se pudo abortar el listo",
+        message: error.message || "No se pudo volver la comanda a preparación.",
+      })
+    } finally {
+      setUpdatingOrderId("")
+    }
+  }
+
+  async function handleToggleItem(orderId, itemId) {
+    const selectedOrder = orders.find((order) => order.id === orderId)
+
+    if (!selectedOrder || updatingItemId) {
+      return
+    }
+
+    const selectedItem = selectedOrder.items.find((item) => item.id === itemId)
+
+    if (!selectedItem) {
+      return
+    }
+
+    if (
+      !canToggleKitchenItem({
+        orderStatus: selectedOrder.status,
+        itemDone: selectedItem.done,
+      })
+    ) {
+      return
+    }
+
+    const nextStatus = getNextItemStatus({
+      orderStatus: selectedOrder.status,
+      itemDone: selectedItem.done,
+    })
+
+    if (!nextStatus) {
+      return
+    }
+
+    try {
+      setUpdatingItemId(itemId)
+
+      await updateKitchenItemStatus(selectedItem.rawId, nextStatus)
+      await loadKitchenOrders()
+    } catch (error) {
+      showToast({
+        type: "error",
+        title: "No se pudo actualizar",
+        message: error.message || "No se pudo actualizar el estado del ítem.",
+      })
+    } finally {
+      setUpdatingItemId("")
+    }
   }
 
   function handleToggleQuickFilter(filterKey) {
@@ -882,7 +1106,7 @@ export default function KdsPage() {
               >
                 {filter.label}
                 <span className="kds-filter-tab__count">
-                  {getFilterCount(orders, filter.id)}
+                  {getFilterCount(visibleOrders, filter.id)}
                 </span>
               </button>
             ))}
@@ -940,6 +1164,24 @@ export default function KdsPage() {
               </div>
             )}
 
+            {lastUpdatedAt && (
+              <span className="kds-last-update">
+                Actualizado {lastUpdatedAt.toLocaleTimeString("es-PE", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            )}
+
+            <button
+              className="kds-secondary-button"
+              type="button"
+              onClick={() => loadKitchenOrders({ showLoading: true })}
+              disabled={isLoadingOrders}
+            >
+              {isLoadingOrders ? "Actualizando..." : "Actualizar"}
+            </button>
+
             <button
               className={
                 showQuickFilters || hasActiveQuickFilters
@@ -958,10 +1200,26 @@ export default function KdsPage() {
           </div>
         </section>
 
-        {filteredOrders.length === 0 ? (
+        {isLoadingOrders && orders.length === 0 ? (
+          <section className="kds-state-card">
+            <strong>Cargando comandas de cocina...</strong>
+            <p>Estamos consultando las órdenes activas del monitor KDS.</p>
+          </section>
+        ) : ordersError ? (
+          <section className="kds-state-card kds-state-card--error">
+            <strong>No se pudieron cargar las comandas</strong>
+            <p>{ordersError}</p>
+            <button
+              type="button"
+              onClick={() => loadKitchenOrders({ showLoading: true })}
+            >
+              Reintentar
+            </button>
+          </section>
+        ) : filteredOrders.length === 0 ? (
           <div className="kds-board-empty">
             <UtensilsCrossed size={28} />
-            <p>Sin comandas en esta categoría</p>
+            <p>No hay comandas para los filtros seleccionados</p>
           </div>
         ) : (
           <div className="kds-board" style={{ height: `${boardHeight}px` }}>
@@ -987,8 +1245,14 @@ export default function KdsPage() {
                       <CardComplete
                         key={key}
                         order={block.order}
+                        updatingOrderId={updatingOrderId}
+                        updatingItemId={updatingItemId}
+                        serviceCallOrderId={serviceCallOrderId}
+                        notifiedReadyOrderIds={notifiedReadyOrderIds}
                         onAdvance={handleAdvanceStatus}
                         onToggleItem={handleToggleItem}
+                        onServiceAction={handleServiceAction}
+                        onAbortReady={handleAbortReady}
                       />
                     )
                   }
@@ -999,6 +1263,7 @@ export default function KdsPage() {
                         key={key}
                         order={block.order}
                         items={block.items}
+                        updatingItemId={updatingItemId}
                         onToggleItem={handleToggleItem}
                       />
                     )
@@ -1010,8 +1275,14 @@ export default function KdsPage() {
                         key={key}
                         order={block.order}
                         items={block.items}
+                        updatingOrderId={updatingOrderId}
+                        updatingItemId={updatingItemId}
+                        serviceCallOrderId={serviceCallOrderId}
+                        notifiedReadyOrderIds={notifiedReadyOrderIds}
                         onAdvance={handleAdvanceStatus}
                         onToggleItem={handleToggleItem}
+                        onServiceAction={handleServiceAction}
+                        onAbortReady={handleAbortReady}
                       />
                     )
                   }
@@ -1023,6 +1294,96 @@ export default function KdsPage() {
           </div>
         )}
       </main>
+
+      {supportModal.isOpen && (
+        <div className="kds-modal-backdrop" role="presentation">
+          <section
+            className="kds-support-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="kds-support-modal-title"
+          >
+            <header className="kds-support-modal__header">
+              <div>
+                <p>Solicitud de apoyo</p>
+
+                <h2 id="kds-support-modal-title">
+                  ¿Por qué necesitas apoyo?
+                </h2>
+
+                <span>
+                  Comanda {supportModal.order?.id} · {supportModal.order?.table}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleCloseSupportModal}
+                disabled={Boolean(serviceCallOrderId)}
+                aria-label="Cerrar modal"
+              >
+                ×
+              </button>
+            </header>
+
+            <form
+              className="kds-support-modal__form"
+              onSubmit={handleSubmitSupportRequest}
+            >
+              <fieldset className="kds-support-reasons">
+                <legend>Selecciona un motivo para avisar a salón</legend>
+
+                <div className="kds-support-reasons__grid">
+                  {SUPPORT_REASONS.map((reason) => {
+                    const isSelected = supportModal.motivo === reason
+
+                    return (
+                      <button
+                        key={reason}
+                        className={
+                          isSelected
+                            ? "kds-support-reason kds-support-reason--selected"
+                            : "kds-support-reason"
+                        }
+                        type="button"
+                        onClick={() =>
+                          setSupportModal((currentModal) => ({
+                            ...currentModal,
+                            motivo: reason,
+                          }))
+                        }
+                        disabled={Boolean(serviceCallOrderId)}
+                        aria-pressed={isSelected}
+                      >
+                        {reason}
+                      </button>
+                    )
+                  })}
+                </div>
+              </fieldset>
+
+              <div className="kds-support-modal__actions">
+                <button
+                  className="kds-support-modal__cancel"
+                  type="button"
+                  onClick={handleCloseSupportModal}
+                  disabled={Boolean(serviceCallOrderId)}
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  className="kds-support-modal__submit"
+                  type="submit"
+                  disabled={Boolean(serviceCallOrderId)}
+                >
+                  {serviceCallOrderId ? "Enviando..." : "Enviar aviso"}
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
     </div>
   )
 }

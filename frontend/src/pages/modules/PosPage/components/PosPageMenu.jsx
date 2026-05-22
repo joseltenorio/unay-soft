@@ -26,23 +26,13 @@ export default function PosPageMenu({
   const [productQuantities, setProductQuantities] =
     useState({})
 
-
-
-  // ========================================
   // TOTAL
-  // ========================================
 
   const total = orderItems.reduce(
     (accumulator, item) =>
       accumulator + (item.price * item.quantity),
     0,
   )
-
-
-
-  // ========================================
-  // TEMP QUANTITY
-  // ========================================
 
   function getTempQuantity(productId) {
 
@@ -74,11 +64,6 @@ export default function PosPageMenu({
   }
 
 
-
-  // ========================================
-  // ADD PRODUCT
-  // ========================================
-
   function handleProductAdd(product) {
 
     const quantityToAdd =
@@ -98,14 +83,9 @@ export default function PosPageMenu({
   }
 
 
-
   return (
 
     <section className="pos-menu">
-
-      {/* ======================================== */}
-      {/* LEFT */}
-      {/* ======================================== */}
 
       <div className="pos-menu-content">
 
@@ -134,12 +114,6 @@ export default function PosPageMenu({
 
         </header>
 
-
-
-        {/* ======================================== */}
-        {/* CATEGORIES */}
-        {/* ======================================== */}
-
         <div className="pos-menu-categories">
 
           {categories.map((category) => (
@@ -166,12 +140,6 @@ export default function PosPageMenu({
 
         </div>
 
-
-
-        {/* ======================================== */}
-        {/* PRODUCTS */}
-        {/* ======================================== */}
-
         <div className="pos-products-grid">
 
           {products.map((product) => (
@@ -180,10 +148,6 @@ export default function PosPageMenu({
               key={product.id}
               className="pos-product-card"
             >
-              {/* ======================================== */}
-              {/* EMOJI */}
-              {/* ======================================== */}
-
               <div className="pos-product-emoji">
 
                 {product.emoji}
@@ -209,8 +173,6 @@ export default function PosPageMenu({
                 </small>
 
               </div>
-
-
 
               <div className="pos-product-actions">
 
@@ -266,12 +228,6 @@ export default function PosPageMenu({
 
       </div>
 
-
-
-      {/* ======================================== */}
-      {/* RIGHT */}
-      {/* ======================================== */}
-
       <aside className="pos-order-panel">
 
         <div className="pos-order-header">
@@ -304,12 +260,6 @@ export default function PosPageMenu({
 
         </div>
 
-
-
-        {/* ======================================== */}
-        {/* EMPTY */}
-        {/* ======================================== */}
-
         {orderItems.length === 0 ? (
 
           <div className="pos-order-empty">
@@ -323,10 +273,6 @@ export default function PosPageMenu({
         ) : (
 
           <div className="pos-order-items">
-
-            {/* ======================================== */}
-            {/* ITEMS */}
-            {/* ======================================== */}
 
             {orderItems.map((item) => {
 
@@ -385,8 +331,6 @@ export default function PosPageMenu({
 
                   </div>
 
-
-
                   <div className="pos-order-item-actions">
 
                     <div className="pos-quantity-controls">
@@ -419,9 +363,6 @@ export default function PosPageMenu({
               )
             })}
 
-            {/* NOTES */}
-            {/* ======================================== */}
-
             <div className="pos-order-notes">
 
               <label>
@@ -449,11 +390,6 @@ export default function PosPageMenu({
         )}
 
 
-
-        {/* ======================================== */}
-        {/* SUMMARY */}
-        {/* ======================================== */}
-
         <div className="pos-order-summary">
 
           <div className="pos-order-row">
@@ -469,12 +405,6 @@ export default function PosPageMenu({
           </div>
 
         </div>
-
-
-
-        {/* ======================================== */}
-        {/* ACTIONS */}
-        {/* ======================================== */}
 
         <div className="pos-order-actions">
 

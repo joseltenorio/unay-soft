@@ -27,7 +27,7 @@ Actualmente cuenta con:
 - Sidebar con módulos visibles según permisos del usuario.
 - Rutas internas protegidas por sesión y por permisos.
 - Página interna principal protegida en `/app`.
-- Páginas iniciales para los módulos POS, KDS, Caja, Inventario, BI y Seguridad.
+- Páginas iniciales para los módulos POS, Caja, Inventario, BI y Seguridad.
 - Página de acceso no autorizado para usuarios sin permisos suficientes.
 - Módulo de Seguridad con mantenimiento de usuarios para el perfil Administrador.
 - CRUD de usuarios desde el módulo de Seguridad:
@@ -41,12 +41,37 @@ Actualmente cuenta con:
   - Identidad visual.
   - Configuración de IGV y moneda.
 - Endpoints protegidos para consultar y actualizar la configuración del establecimiento.
+- Módulo KDS conectado a datos reales del backend:
+  - Listado de comandas activas de cocina.
+  - Visualización de mesa, número de orden, productos, cantidades, notas y tiempos.
+  - Filtros por estado de preparación.
+  - Búsqueda por comanda, mesa, mesero, producto o nota.
+  - Indicadores visuales de urgencia por tiempo transcurrido.
+  - Cambio de estado de comanda a preparación.
+  - Cambio de estado de comanda a lista.
+  - Actualización de ítems de cocina.
+  - Bloqueo de acciones inválidas desde la interfaz.
+  - Ocultamiento de comandas listas después de completar preparación.
+  - Acción contextual para solicitar apoyo o llamar al mesero según el estado de la comanda.
+- Flujo de avisos de cocina hacia salón:
+  - Registro de avisos de pedido listo.
+  - Registro de incidencias de cocina.
+  - Pestaña de avisos dentro del módulo POS / Salón.
+  - Consulta periódica de avisos pendientes mediante polling.
+  - Atención de avisos desde salón.
+  - Confirmación de entrega desde POS.
+  - Cambio de comanda de `LISTA` a `ENTREGADA`.
+  - Cambio de ítems de `LISTO` a `ENTREGADO`.
+  - Registro de tiempos de entrega.
+- Endpoints protegidos para consultar y actualizar estados del monitor de cocina.
+- Endpoints protegidos para registrar avisos de servicio, atenderlos y confirmar entregas.
 - Scripts SQL para estructura, datos iniciales y validación de la base de datos.
 - Colecciones/pruebas en Postman para validación de endpoints principales.
 
 Pendiente de desarrollo:
 
-- Desarrollar la lógica funcional completa de los módulos POS, KDS, Caja, Inventario y BI.
+- Desarrollar la lógica funcional completa de los módulos Caja, Inventario y BI.
+- Completar la lógica funcional completa de venta dentro del módulo POS.
 - Implementar funcionalidades avanzadas de roles y permisos.
 - Mejorar validaciones visuales y manejo de errores por formulario.
 - Implementar carga real de archivos o integración con almacenamiento externo para logos e imágenes.
@@ -96,6 +121,7 @@ unay-soft/
 │  │  │  └─ styles/
 │  │  ├─ components/
 │  │  │  ├─ app/
+│  │  │  ├─ common/
 │  │  │  ├─ layout/
 │  │  │  └─ sections/
 │  │  ├─ pages/
@@ -176,6 +202,8 @@ PORT=3000
 DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DATABASE
 JWT_SECRET=change_this_secret
 JWT_EXPIRES_IN=2h
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
 ```
 
 Ejecutar el backend:
@@ -269,6 +297,10 @@ La base de datos incluye entidades para:
 - Salón y mesas.
 - Carta y productos.
 - Órdenes y comandas.
+- Estados de preparación de cocina.
+- Tiempos de preparación de comandas e ítems.
+- Notificaciones de servicio entre cocina y salón.
+- Tiempos de atención y entrega de comandas e ítems.
 - Pagos y caja.
 - Inventario.
 - Auditoría y sesiones.
@@ -321,7 +353,12 @@ Ejemplos de permisos utilizados:
 ```txt
 dashboard.ver
 pos.ver
+pos.ver_avisos_cocina
+pos.atender_avisos_cocina
+pos.confirmar_entrega
 kds.ver
+kds.actualizar_estado
+kds.notificar_servicio
 cashier.ver
 inventory.ver
 bi.ver
@@ -350,6 +387,8 @@ Características actuales:
 - Colapso del sidebar.
 - Cierre de sesión desde la zona interna.
 - Página `/app/unauthorized` para accesos no permitidos.
+- Vista KDS optimizada como pantalla operativa de cocina.
+- Vista POS con pestañas internas para separar venta y avisos de cocina.
 
 ---
 
@@ -412,6 +451,126 @@ La configuración del establecimiento se ubica dentro del grupo Administración 
 
 ---
 
+## Monitor de cocina
+
+El módulo KDS permite visualizar y gestionar el flujo de preparación de comandas en cocina.
+
+Funcionalidades actuales:
+
+- Visualización de comandas activas de cocina.
+- Consulta de órdenes reales desde el backend.
+- Visualización de número de orden, mesa, productos, cantidades y notas de cocina.
+- Visualización de tiempo transcurrido desde el ingreso de la comanda.
+- Indicadores visuales de urgencia según antigüedad.
+- Filtros por estado:
+  - Nuevos.
+  - En proceso.
+  - Listos.
+- Búsqueda por comanda, mesa, mesero, producto o nota.
+- Filtros rápidos por criticidad, notas, pendientes y orden temporal.
+- Cambio de comanda de `ABIERTA` a `EN_PREPARACION`.
+- Cambio de comanda de `EN_PREPARACION` a `LISTA`.
+- Cambio de ítems de cocina a `LISTO`.
+- Registro de tiempos de preparación.
+- Acción contextual para:
+  - Pedir apoyo en comandas abiertas o en preparación.
+  - Llamar al mesero en comandas listas.
+- Bloqueo de checks cuando la comanda aún no inició preparación.
+- Bloqueo de finalización mientras existan ítems pendientes.
+- Feedback visual durante acciones de actualización.
+- Mensajes mediante toast para errores operativos.
+- Ocultamiento de comandas listas después de completar preparación.
+- Exclusión de comandas listas antiguas al refrescar el tablero.
+
+Endpoints principales relacionados:
+
+```txt
+GET   /api/kds/orders
+PATCH /api/kds/orders/:id/status
+PATCH /api/kds/items/:id/status
+POST  /api/kds/orders/:id/service-calls
+```
+
+Permisos principales:
+
+```txt
+kds.ver
+kds.actualizar_estado
+kds.notificar_servicio
+```
+
+Alcance actual del monitor:
+
+- Preparación de cocina.
+- Seguimiento visual de comandas.
+- Actualización de estados de preparación.
+- Registro básico de tiempos de cocina.
+- Notificación a salón cuando una comanda está lista.
+- Solicitud de apoyo a salón ante incidencias de cocina.
+
+No incluye:
+
+- Confirmación de entrega desde cocina.
+- Cobro o liquidación de cuentas.
+- Impresión.
+- WebSockets.
+
+---
+
+## POS / Salón y avisos de cocina
+
+El módulo POS / Salón funciona como punto de atención para el personal de salón. Actualmente cuenta con una estructura base por pestañas internas para separar la venta de los avisos enviados desde cocina.
+
+Pestañas actuales:
+
+- Venta.
+- Avisos de cocina.
+
+La pestaña de venta se mantiene como vista base para el desarrollo posterior del flujo completo de toma de pedidos. La pestaña de avisos de cocina permite atender la comunicación operativa enviada desde el KDS.
+
+Funcionalidades actuales de avisos de cocina:
+
+- Listado de avisos pendientes enviados desde cocina.
+- Diferenciación entre pedidos listos e incidencias de cocina.
+- Visualización de orden, mesa, productos, cantidades, notas y hora del aviso.
+- Actualización manual mediante botón de refresco.
+- Consulta periódica de avisos pendientes mediante polling.
+- Atención de incidencias de cocina.
+- Confirmación de entrega de pedidos listos.
+- Ocultamiento de avisos después de ser atendidos o entregados.
+- Feedback visual mediante toasts ante acciones exitosas o errores.
+
+Endpoints principales relacionados:
+
+```txt
+GET   /api/kds/service-calls
+PATCH /api/kds/service-calls/:id/attend
+PATCH /api/kds/orders/:id/delivered
+```
+
+Permisos principales:
+
+```txt
+pos.ver
+pos.ver_avisos_cocina
+pos.atender_avisos_cocina
+pos.confirmar_entrega
+```
+
+Flujo operativo actual:
+
+1. Cocina prepara una comanda desde el KDS.
+2. Cocina marca la comanda como `LISTA`.
+3. Cocina llama al mesero desde el KDS.
+4. El aviso aparece en POS / Salón, dentro de la pestaña Avisos de cocina.
+5. El personal de salón confirma la entrega.
+6. La comanda pasa de `LISTA` a `ENTREGADA`.
+7. Los ítems pasan de `LISTO` a `ENTREGADO`.
+
+También se permite registrar incidencias desde cocina cuando una comanda está abierta o en preparación. Estas incidencias aparecen en la pestaña Avisos de cocina y pueden marcarse como atendidas desde salón.
+
+---
+
 ## Rutas principales del frontend
 
 Rutas públicas:
@@ -448,6 +607,10 @@ Rutas internas:
 5. Si un usuario intenta ingresar a una ruta sin permiso, el sistema muestra `/app/unauthorized`.
 6. El perfil Administrador puede acceder al módulo de Seguridad y administrar usuarios.
 7. El perfil Administrador puede acceder al módulo de Establecimiento y actualizar la configuración general del negocio.
+8. El personal autorizado de cocina puede acceder al KDS y gestionar estados de preparación de comandas.
+9. Cocina puede solicitar apoyo o llamar al mesero según el estado de la comanda.
+10. El personal autorizado de salón puede revisar avisos de cocina desde `/app/pos`.
+11. El personal autorizado de salón puede atender incidencias o confirmar entregas de pedidos listos.
 
 ---
 
@@ -462,7 +625,7 @@ Flujo recomendado:
 3. Copiar el token JWT obtenido.
 4. Usar el token como Bearer Token en endpoints protegidos.
 5. Validar `/api/auth/me`.
-6. Probar endpoints protegidos de usuarios, roles y establecimiento.
+6. Probar endpoints protegidos de usuarios, roles, establecimiento y KDS.
 7. Verificar respuestas esperadas ante permisos insuficientes o token inválido.
 
 Ejemplos de endpoints protegidos:
@@ -475,7 +638,29 @@ PATCH  /api/users/:id/status
 GET    /api/roles
 GET    /api/establishment
 PUT    /api/establishment
+GET    /api/kds/orders
+PATCH  /api/kds/orders/:id/status
+PATCH  /api/kds/items/:id/status
+POST   /api/kds/orders/:id/service-calls
+GET    /api/kds/service-calls
+PATCH  /api/kds/service-calls/:id/attend
+PATCH  /api/kds/orders/:id/delivered
 ```
+
+Las pruebas del monitor de cocina y avisos de servicio cubren:
+
+- Login de usuario autorizado.
+- Listado de comandas activas de cocina.
+- Cambio de comanda a preparación.
+- Cambio de ítems de cocina a listo.
+- Cambio de comanda a lista.
+- Registro de aviso de pedido listo.
+- Registro de incidencia de cocina.
+- Listado de avisos pendientes de cocina.
+- Atención de avisos desde salón.
+- Confirmación de entrega desde POS.
+- Rechazo de acciones sin permisos suficientes.
+- Rechazo de estados no permitidos.
 
 ---
 
@@ -506,6 +691,17 @@ feat(security): connect user CRUD actions
 db(establishment): add establishment module permissions
 feat(establishment): add protected configuration endpoints
 feat(establishment): add establishment settings page
+feat(kds): add protected kitchen orders API
+feat(kds): persist kitchen preparation status
+feat(kds): connect kitchen board to real orders
+fix(kds): prevent item completion before preparation starts
+fix(kds): auto-hide completed kitchen orders
+fix(kds): keep completed orders hidden after refresh
+db(kds): add service notification tracking
+feat(kds): add service notification endpoints
+test(kds): add service notification validation cases
+feat(kds): add contextual waiter call actions
+feat(pos): show kitchen service notifications
 fix(auth): prevent login loading feedback layout shift
 docs: update project documentation
 ```
@@ -524,6 +720,8 @@ Ejemplos adecuados:
 - Un commit para proteger rutas por permiso.
 - Un commit para implementar el mantenimiento de usuarios.
 - Un commit para agregar la configuración del establecimiento.
+- Un commit para agregar endpoints protegidos de un módulo.
+- Un commit para conectar una pantalla con datos reales del backend.
 - Un commit para corregir un comportamiento visual específico.
 - Un commit para actualizar documentación.
 

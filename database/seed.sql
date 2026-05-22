@@ -246,7 +246,7 @@ values
   'Gestión de Salón',
   'pos',
   'Registro de pedidos, mesas y atención en salón.',
-  '/dashboard/pos',
+  '/app/pos',
   'icon-pos.svg',
   5,
   true
@@ -255,8 +255,8 @@ values
   '46666666-6666-6666-6666-666666666666',
   'Monitor de Cocina',
   'kds',
-  'Control de preparación y despacho de pedidos.',
-  '/dashboard/kds',
+  'Control de preparación de pedidos en cocina.',
+  '/app/kds',
   'icon-kds.svg',
   6,
   true
@@ -266,7 +266,7 @@ values
   'Control de Insumos',
   'inventory',
   'Gestión de insumos, stock, movimientos y alertas.',
-  '/dashboard/inventory',
+  '/app/inventory',
   'icon-inventory.svg',
   7,
   true
@@ -276,7 +276,7 @@ values
   'Caja y Pagos',
   'cashier',
   'Apertura, cierre de caja y registro de pagos.',
-  '/dashboard/cashier',
+  '/app/cashier',
   'cashier',
   8,
   true
@@ -286,7 +286,7 @@ values
   'Business Intelligence',
   'bi',
   'Indicadores, reportes y análisis del negocio.',
-  '/dashboard/bi',
+  '/app/bi',
   'icon-bi.svg',
   9,
   true
@@ -296,11 +296,11 @@ values
   'Usuarios y Seguridad',
   'security',
   'Gestión de usuarios, roles y permisos.',
-  '/dashboard/security',
+  '/app/security',
   'shield',
   10,
   true
-);
+),
 (
   '4bbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
   'Establecimiento',
@@ -310,7 +310,7 @@ values
   'store',
   11,
   true
-)
+);
 
 -- =========================================================
 -- 5. Permisos
@@ -338,10 +338,14 @@ values
 ('56666666-6666-6666-6666-666666666666', '45555555-5555-5555-5555-555555555555', 'crear_orden', 'pos.crear_orden', 'Permite registrar órdenes.', true),
 ('57777777-7777-7777-7777-777777777777', '45555555-5555-5555-5555-555555555555', 'actualizar_orden', 'pos.actualizar_orden', 'Permite actualizar órdenes.', true),
 ('58888888-8888-8888-8888-888888888888', '45555555-5555-5555-5555-555555555555', 'anular_orden', 'pos.anular_orden', 'Permite anular órdenes.', true),
+('5ab33333-3333-3333-3333-333333333333', '45555555-5555-5555-5555-555555555555', 'ver_avisos_cocina', 'pos.ver_avisos_cocina', 'Permite visualizar avisos enviados desde cocina.', true),
+('5ab44444-4444-4444-4444-444444444444', '45555555-5555-5555-5555-555555555555', 'atender_avisos_cocina', 'pos.atender_avisos_cocina', 'Permite marcar avisos de cocina como atendidos.', true),
+('5ab55555-5555-5555-5555-555555555555', '45555555-5555-5555-5555-555555555555', 'confirmar_entrega', 'pos.confirmar_entrega', 'Permite confirmar la entrega de pedidos listos al cliente.', true),
 
 -- KDS
 ('59999999-9999-9999-9999-999999999999', '46666666-6666-6666-6666-666666666666', 'ver', 'kds.ver', 'Permite visualizar pedidos en cocina.', true),
 ('5aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '46666666-6666-6666-6666-666666666666', 'actualizar_estado', 'kds.actualizar_estado', 'Permite actualizar estado de preparación.', true),
+('5ab66666-6666-6666-6666-666666666666', '46666666-6666-6666-6666-666666666666', 'notificar_servicio', 'kds.notificar_servicio', 'Permite notificar a salón que un pedido está listo o que cocina requiere apoyo.', true),
 
 -- Inventario
 ('5bbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '47777777-7777-7777-7777-777777777777', 'ver', 'inventory.ver', 'Permite visualizar inventario.', true),
@@ -358,11 +362,11 @@ values
 -- Seguridad
 ('50000000-0000-0000-0000-000000000002', '4aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'ver', 'security.ver', 'Permite visualizar seguridad.', true),
 ('50000000-0000-0000-0000-000000000003', '4aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'gestionar_usuarios', 'security.gestionar_usuarios', 'Permite crear, editar o desactivar usuarios.', true),
-('50000000-0000-0000-0000-000000000004', '4aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'gestionar_roles', 'security.gestionar_roles', 'Permite administrar roles y permisos.', true);
+('50000000-0000-0000-0000-000000000004', '4aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'gestionar_roles', 'security.gestionar_roles', 'Permite administrar roles y permisos.', true),
 
---Establecimiento
+-- Establecimiento
 ('5ab11111-1111-1111-1111-111111111111', '4bbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'ver', 'establishment.ver', 'Permite visualizar la configuración del establecimiento.', true),
-('5ab22222-2222-2222-2222-222222222222', '4bbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'editar', 'establishment.editar', 'Permite editar datos fiscales, parámetros de venta e identidad visual del establecimiento.', true)
+('5ab22222-2222-2222-2222-222222222222', '4bbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'editar', 'establishment.editar', 'Permite editar datos fiscales, parámetros de venta e identidad visual del establecimiento.', true);
 
 -- =========================================================
 -- 6. Asignación de Permisos y Roles
@@ -390,8 +394,12 @@ where codigo in (
   'pos.crear_orden',
   'pos.actualizar_orden',
   'pos.anular_orden',
+  'pos.ver_avisos_cocina',
+  'pos.atender_avisos_cocina',
+  'pos.confirmar_entrega',
   'kds.ver',
   'kds.actualizar_estado',
+  'kds.notificar_servicio',
   'inventory.ver',
   'inventory.registrar_movimiento',
   'cashier.ver',
@@ -428,7 +436,10 @@ where codigo in (
   'dashboard.ver',
   'pos.ver',
   'pos.crear_orden',
-  'pos.actualizar_orden'
+  'pos.actualizar_orden',
+  'pos.ver_avisos_cocina',
+  'pos.atender_avisos_cocina',
+  'pos.confirmar_entrega'
 );
 
 -- Cocina: KDS
@@ -442,7 +453,8 @@ where codigo in (
   'login.acceder',
   'dashboard.ver',
   'kds.ver',
-  'kds.actualizar_estado'
+  'kds.actualizar_estado',
+  'kds.notificar_servicio'
 );
 
 -- =========================================================
@@ -767,6 +779,9 @@ insert into orden (
   total,
   observaciones,
   abierta_at,
+  enviada_cocina_at,
+  preparacion_inicio_at,
+  lista_at,
   cerrada_at
 )
 values
@@ -782,6 +797,9 @@ values
   99.12,
   'Mesa solicita ají aparte.',
   now() - interval '25 minutes',
+  now() - interval '24 minutes',
+  now() - interval '20 minutes',
+  null,
   null
 ),
 (
@@ -796,6 +814,9 @@ values
   118.00,
   'Cliente solicitó boleta electrónica.',
   now() - interval '1 hour',
+  now() - interval '58 minutes',
+  now() - interval '55 minutes',
+  now() - interval '35 minutes',
   now() - interval '20 minutes'
 ),
 (
@@ -810,6 +831,9 @@ values
   56.64,
   'Pedido para recoger en barra.',
   now() - interval '18 minutes',
+  now() - interval '17 minutes',
+  now() - interval '15 minutes',
+  now() - interval '2 minutes',
   null
 );
 
@@ -822,7 +846,9 @@ insert into item_orden (
   precio_unitario,
   subtotal,
   notas_cocina,
-  estado_cocina
+  estado_cocina,
+  preparacion_inicio_at,
+  listo_at
 )
 values
 (
@@ -834,7 +860,9 @@ values
   38.00,
   38.00,
   'Sin culantro.',
-  'EN_PREPARACION'
+  'EN_PREPARACION',
+  now() - interval '20 minutes',
+  null
 ),
 (
   'f2222222-2222-2222-2222-222222222222',
@@ -845,7 +873,9 @@ values
   46.00,
   46.00,
   'Picante medio.',
-  'PENDIENTE'
+  'PENDIENTE',
+  null,
+  null
 ),
 (
   'f3333333-3333-3333-3333-333333333333',
@@ -856,7 +886,9 @@ values
   52.00,
   52.00,
   'Bien crocante.',
-  'ENTREGADO'
+  'ENTREGADO',
+  now() - interval '55 minutes',
+  now() - interval '35 minutes'
 ),
 (
   'f4444444-4444-4444-4444-444444444444',
@@ -867,7 +899,9 @@ values
   48.00,
   48.00,
   'Sin arvejas.',
-  'ENTREGADO'
+  'ENTREGADO',
+  now() - interval '55 minutes',
+  now() - interval '35 minutes'
 ),
 (
   'f5555555-5555-5555-5555-555555555555',
@@ -878,7 +912,9 @@ values
   48.00,
   48.00,
   'Empacar para llevar.',
-  'LISTO'
+  'LISTO',
+  now() - interval '15 minutes',
+  now() - interval '3 minutes'
 );
 
 insert into item_orden_adicional (

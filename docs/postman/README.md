@@ -1,8 +1,8 @@
 # Postman Collection
 
-Esta carpeta contiene la colección de Postman utilizada para probar los endpoints principales del backend de Umarí OS.
+Esta carpeta contiene la colección de Postman utilizada para validar los endpoints principales del backend de Umarí OS.
 
-La colección está organizada por módulos para facilitar la validación de autenticación, autorización por perfiles, roles, mantenimiento de usuarios y configuración del establecimiento.
+La colección está organizada por módulos para facilitar la validación de autenticación, autorización por perfiles, roles, mantenimiento de usuarios, configuración del establecimiento, monitor de cocina y notificaciones de servicio.
 
 ---
 
@@ -16,7 +16,7 @@ umari-os-api.postman_collection.json
 
 ## Requisitos previos
 
-Antes de ejecutar la colección, asegúrate de tener el backend levantado localmente.
+Antes de ejecutar la colección, el backend debe estar levantado localmente.
 
 Desde la carpeta del backend:
 
@@ -31,7 +31,7 @@ El backend debe estar disponible en:
 http://localhost:3000
 ```
 
-También debes tener configurado el archivo de variables de entorno:
+También debe existir el archivo de variables de entorno:
 
 ```txt
 backend/.env
@@ -57,16 +57,17 @@ Umari OS API
 ├─ Auth
 │  ├─ Login - Admin
 │  ├─ Auth - Me
-│  ├─ Login - Cajero
-│  ├─ Login - User
-│  └─ Login - Mesero
+│  ├─ Login - Cashier
+│  ├─ Login - Waiter
+│  ├─ Login - Kitchen
+│  └─ Login - User
 │
 ├─ Authorization / Profiles
 │  ├─ Permission - Admin Check
-│  ├─ Cajero - Caja Permitido
-│  ├─ Cajero - POS Denegado
-│  ├─ Mesero - Caja Denegado
-│  └─ Mesero - POS Permitido
+│  ├─ Cashier - Cashier Area Allowed
+│  ├─ Cashier - POS Area Denied
+│  ├─ Waiter - Cashier Area Denied
+│  └─ Waiter - POS Area Allowed
 │
 ├─ Roles
 │  └─ Admin Roles
@@ -78,90 +79,145 @@ Umari OS API
 │  ├─ Edit Status User
 │  └─ Create User No Permission
 │
-└─ Establishment
-   ├─ Get Establishment
-   ├─ Update Establishment
+├─ Establishment
+│  ├─ Get Establishment
+│  └─ Update Establishment
+│
+├─ KDS - Kitchen Monitor
+│  ├─ List Kitchen Orders
+│  ├─ List Kitchen Orders Without Token
+│  ├─ List Kitchen Orders Denied
+│  ├─ Change Order Status to In Preparation
+│  ├─ Change Order Status to Ready
+│  ├─ Change Item Status to In Preparation
+│  ├─ Change Item Status to Ready
+│  ├─ Reject Item Ready Before Order Starts
+│  ├─ Reject Order Invalid Status
+│  ├─ Reject Item Invalid Status
+│  ├─ Reject Order Status Without Body
+│  ├─ Reject Missing Order
+│  └─ Reject Missing Item
+│
+└─ KDS - Service Notifications
+   ├─ Create Ready Order Service Call
+   ├─ Create Kitchen Incident Service Call
+   ├─ List Kitchen Service Calls
+   ├─ Attend Kitchen Service Call
+   ├─ Confirm Delivered Order
+   ├─ Reject Service Call Without Token
+   ├─ Reject Service Call Without Permission
+   ├─ Reject Service Calls List Without Permission
+   ├─ Reject Attend Service Call Without Permission
+   ├─ Reject Delivered Order Without Permission
+   ├─ Reject Delivered Order Not Ready
+   ├─ Reject Missing Service Call
+   ├─ Reject Missing Service Call Type
+   └─ Reject Invalid Service Call Type
 ```
 
 ---
 
 ## Variables recomendadas
 
-Se recomienda configurar variables en Postman para evitar repetir valores manualmente y para que la colección exportada no contenga credenciales, tokens o IDs reales.
+La colección utiliza variables de Postman para evitar valores fijos dentro de las peticiones y para permitir que el archivo exportado no contenga credenciales, tokens o IDs reales.
 
-Variables sugeridas:
+Las variables están definidas en inglés y con formato `snake_case`.
 
 ```txt
-BASE_URL = http://localhost:3000/api
+base_url = http://localhost:3000/api
 
-AUTH_TOKEN = JWT_DEL_USUARIO_AUTENTICADO
-ADMIN_TOKEN = JWT_DEL_ADMIN
-CAJERO_TOKEN = JWT_DEL_CAJERO
-MESERO_TOKEN = JWT_DEL_MESERO
-USER_TOKEN = JWT_DE_USUARIO_SIN_PERMISO
+auth_token =
+admin_token =
+cashier_token =
+waiter_token =
+kds_token =
+user_token =
 
-ADMIN_IDENTIFIER = IDENTIFICADOR_DEL_ADMIN
-ADMIN_PASSWORD = PASSWORD_DEL_ADMIN
+admin_identifier =
+admin_password =
 
-CAJERO_IDENTIFIER = IDENTIFICADOR_DEL_CAJERO
-CAJERO_PASSWORD = PASSWORD_DEL_CAJERO
+cashier_identifier =
+cashier_password =
 
-MESERO_IDENTIFIER = IDENTIFICADOR_DEL_MESERO
-MESERO_PASSWORD = PASSWORD_DEL_MESERO
+waiter_identifier =
+waiter_password =
 
-USER_IDENTIFIER = IDENTIFICADOR_DEL_USUARIO_SIN_PERMISO
-USER_PASSWORD = PASSWORD_DEL_USUARIO_SIN_PERMISO
+kds_identifier =
+kds_password =
 
-CREATE_USER_NOMBRES = NOMBRES_DEL_USUARIO
-CREATE_USER_APELLIDOS = APELLIDOS_DEL_USUARIO
-CREATE_USER_EMAIL = EMAIL_DEL_USUARIO
-CREATE_USER_USERNAME = USERNAME_DEL_USUARIO
-CREATE_USER_CELULAR = CELULAR_DEL_USUARIO
-CREATE_USER_PASSWORD = PASSWORD_DEL_USUARIO
-CREATE_USER_ROLE_ID = ID_DEL_ROL
+user_identifier =
+user_password =
 
-EDIT_USER_ID = ID_DEL_USUARIO_A_EDITAR
-EDIT_USER_NOMBRES = NOMBRES_ACTUALIZADOS
-EDIT_USER_APELLIDOS = APELLIDOS_ACTUALIZADOS
-EDIT_USER_EMAIL = EMAIL_ACTUALIZADO
-EDIT_USER_USERNAME = USERNAME_ACTUALIZADO
-EDIT_USER_CELULAR = CELULAR_ACTUALIZADO
-EDIT_USER_ROLE_ID = ID_DEL_ROL
-EDIT_USER_ESTADO = true
+create_user_first_name =
+create_user_last_name =
+create_user_email =
+create_user_username =
+create_user_mobile =
+create_user_password =
+create_user_role_id =
+create_user_status = true
 
-STATUS_USER_ID = ID_DEL_USUARIO
-STATUS_USER_ESTADO = true
+edit_user_id =
+edit_user_first_name =
+edit_user_last_name =
+edit_user_email =
+edit_user_username =
+edit_user_mobile =
+edit_user_role_id =
+edit_user_status = true
 
-ESTABLISHMENT_NOMBRE_COMERCIAL = NOMBRE_COMERCIAL
-ESTABLISHMENT_RAZON_SOCIAL = RAZON_SOCIAL
-ESTABLISHMENT_RUC = RUC_DEL_ESTABLECIMIENTO
-ESTABLISHMENT_DIRECCION = DIRECCION_DEL_ESTABLECIMIENTO
-ESTABLISHMENT_TELEFONO = TELEFONO_DEL_ESTABLECIMIENTO
-ESTABLISHMENT_EMAIL = EMAIL_DEL_ESTABLECIMIENTO
-ESTABLISHMENT_LOGO_URL = URL_DEL_LOGO
-ESTABLISHMENT_IGV_PORCENTAJE = 18
-ESTABLISHMENT_MONEDA_CODIGO = PEN
-ESTABLISHMENT_MONEDA_SIMBOLO = S/.
+status_user_id =
+status_user_status = true
+
+establishment_trade_name =
+establishment_legal_name =
+establishment_ruc =
+establishment_address =
+establishment_phone =
+establishment_email =
+establishment_logo_url =
+establishment_igv_percentage = 18
+establishment_currency_code = PEN
+establishment_currency_symbol = S/.
+
+order_id =
+item_id =
+open_order_id =
+open_order_item_id =
+ready_order_id =
+service_call_id =
+incident_service_call_id =
+incident_reason = Apoyo requerido
+incident_message = Se requiere apoyo en cocina.
+
+invalid_order_id = 00000000-0000-0000-0000-000000000000
+invalid_item_id = 00000000-0000-0000-0000-000000000000
+invalid_service_call_id = 00000000-0000-0000-0000-000000000000
+invalid_service_call_id = 00000000-0000-0000-0000-000000000000
 ```
 
-Ejemplo de uso en una petición:
+---
+
+## Uso de variables
+
+Ejemplo de endpoint parametrizado:
 
 ```txt
-{{BASE_URL}}/users
+{{base_url}}/users
 ```
 
 Ejemplo de header para rutas protegidas:
 
 ```txt
-Authorization: Bearer {{AUTH_TOKEN}}
+Authorization: Bearer {{admin_token}}
 ```
 
 Ejemplo de body parametrizado para login:
 
 ```json
 {
-  "identifier": "{{ADMIN_IDENTIFIER}}",
-  "password": "{{ADMIN_PASSWORD}}"
+  "identifier": "{{admin_identifier}}",
+  "password": "{{admin_password}}"
 }
 ```
 
@@ -169,13 +225,13 @@ Ejemplo de body parametrizado para editar usuario:
 
 ```json
 {
-  "nombres": "{{EDIT_USER_NOMBRES}}",
-  "apellidos": "{{EDIT_USER_APELLIDOS}}",
-  "email": "{{EDIT_USER_EMAIL}}",
-  "username": "{{EDIT_USER_USERNAME}}",
-  "celular": "{{EDIT_USER_CELULAR}}",
-  "id_rol": "{{EDIT_USER_ROLE_ID}}",
-  "estado": {{EDIT_USER_ESTADO}}
+  "nombres": "{{edit_user_first_name}}",
+  "apellidos": "{{edit_user_last_name}}",
+  "email": "{{edit_user_email}}",
+  "username": "{{edit_user_username}}",
+  "celular": "{{edit_user_mobile}}",
+  "id_rol": "{{edit_user_role_id}}",
+  "estado": {{edit_user_status}}
 }
 ```
 
@@ -183,26 +239,60 @@ Ejemplo de body parametrizado para actualizar establecimiento:
 
 ```json
 {
-  "nombre_comercial": "{{ESTABLISHMENT_NOMBRE_COMERCIAL}}",
-  "razon_social": "{{ESTABLISHMENT_RAZON_SOCIAL}}",
-  "ruc": "{{ESTABLISHMENT_RUC}}",
-  "direccion": "{{ESTABLISHMENT_DIRECCION}}",
-  "telefono": "{{ESTABLISHMENT_TELEFONO}}",
-  "email": "{{ESTABLISHMENT_EMAIL}}",
-  "logo_url": "{{ESTABLISHMENT_LOGO_URL}}",
-  "igv_porcentaje": {{ESTABLISHMENT_IGV_PORCENTAJE}},
-  "moneda_codigo": "{{ESTABLISHMENT_MONEDA_CODIGO}}",
-  "moneda_simbolo": "{{ESTABLISHMENT_MONEDA_SIMBOLO}}"
+  "nombre_comercial": "{{establishment_trade_name}}",
+  "razon_social": "{{establishment_legal_name}}",
+  "ruc": "{{establishment_ruc}}",
+  "direccion": "{{establishment_address}}",
+  "telefono": "{{establishment_phone}}",
+  "email": "{{establishment_email}}",
+  "logo_url": "{{establishment_logo_url}}",
+  "igv_porcentaje": {{establishment_igv_percentage}},
+  "moneda_codigo": "{{establishment_currency_code}}",
+  "moneda_simbolo": "{{establishment_currency_symbol}}"
 }
 ```
 
-Los valores booleanos y numéricos deben colocarse sin comillas.
+Ejemplo de body para actualizar el estado de una comanda de cocina:
+
+```json
+{
+  "status": "EN_PREPARACION"
+}
+```
+
+Ejemplo de body para actualizar el estado de un ítem de cocina:
+
+```json
+{
+  "status": "LISTO"
+}
+```
+
+Ejemplo de body para crear un aviso de pedido listo:
+
+```json
+{
+  "type": "PEDIDO_LISTO"
+}
+```
+
+Ejemplo de body para crear una incidencia de cocina:
+
+```json
+{
+  "type": "INCIDENCIA_COCINA",
+  "motivo": "{{incident_reason}}",
+  "mensaje": "{{incident_message}}"
+}
+```
+
+Los valores booleanos y numéricos deben enviarse sin comillas.
 
 Ejemplos:
 
 ```txt
-"estado": {{EDIT_USER_ESTADO}}
-"igv_porcentaje": {{ESTABLISHMENT_IGV_PORCENTAJE}}
+"estado": {{edit_user_status}}
+"igv_porcentaje": {{establishment_igv_percentage}}
 ```
 
 ---
@@ -223,7 +313,7 @@ Endpoint:
 GET /api/health
 ```
 
-Esta prueba permite confirmar que el backend está activo.
+Esta prueba confirma que el backend está activo.
 
 ---
 
@@ -243,16 +333,16 @@ POST /api/auth/login
 
 Esta petición devuelve un token JWT de administrador.
 
-El token debe guardarse en la variable:
+El token debe guardarse en:
 
 ```txt
-AUTH_TOKEN
+admin_token
 ```
 
 También puede guardarse en:
 
 ```txt
-ADMIN_TOKEN
+auth_token
 ```
 
 ---
@@ -271,7 +361,7 @@ Endpoint:
 GET /api/auth/me
 ```
 
-Esta prueba valida que el token enviado pertenece a un usuario autenticado y permite revisar la información del usuario, sus permisos y módulos disponibles.
+Esta prueba valida el usuario autenticado, sus permisos y sus módulos disponibles.
 
 ---
 
@@ -283,7 +373,7 @@ Ejecutar:
 Authorization / Profiles / Permission - Admin Check
 ```
 
-Esta prueba permite confirmar que el usuario administrador tiene acceso a rutas protegidas por permisos.
+Esta prueba confirma que el usuario administrador accede correctamente a rutas protegidas por permisos.
 
 ---
 
@@ -298,13 +388,13 @@ Authorization / Profiles
 Casos incluidos:
 
 ```txt
-Cajero - Caja Permitido
-Cajero - POS Denegado
-Mesero - Caja Denegado
-Mesero - POS Permitido
+Cashier - Cashier Area Allowed
+Cashier - POS Area Denied
+Waiter - Cashier Area Denied
+Waiter - POS Area Allowed
 ```
 
-Estas pruebas permiten validar que cada perfil solo accede a los módulos autorizados.
+Estas pruebas validan que cada perfil acceda únicamente a las áreas permitidas.
 
 ---
 
@@ -322,7 +412,7 @@ Endpoint:
 GET /api/roles
 ```
 
-Esta prueba permite listar los roles disponibles para el mantenimiento de usuarios.
+Esta prueba lista los roles disponibles para el mantenimiento de usuarios.
 
 Debe ejecutarse con un token de administrador.
 
@@ -344,8 +434,6 @@ POST   /api/users
 PUT    /api/users/:id
 PATCH  /api/users/:id/status
 ```
-
-Estas pruebas permiten validar el mantenimiento de usuarios del sistema.
 
 Operaciones incluidas:
 
@@ -374,8 +462,6 @@ GET /api/establishment
 PUT /api/establishment
 ```
 
-Estas pruebas permiten validar la consulta y actualización de la configuración global del establecimiento.
-
 Operaciones incluidas:
 
 ```txt
@@ -395,6 +481,108 @@ establishment.editar
 
 ---
 
+### 9. Probar monitor de cocina
+
+Ejecutar las pruebas de la carpeta:
+
+```txt
+KDS - Kitchen Monitor
+```
+
+Endpoints principales:
+
+```txt
+GET   /api/kds/orders
+PATCH /api/kds/orders/:id/status
+PATCH /api/kds/items/:id/status
+```
+
+Operaciones incluidas:
+
+```txt
+Listar comandas activas de cocina
+Guardar automáticamente IDs de comanda e ítem
+Cambiar comanda a EN_PREPARACION
+Cambiar comanda a LISTA
+Cambiar ítem a EN_PREPARACION
+Cambiar ítem a LISTO
+Validar rechazo de listado sin token
+Validar rechazo de listado sin permiso
+Validar rechazo de actualización sin permiso
+Validar rechazo de estados no permitidos
+Validar rechazo de body sin status
+Validar rechazo de comanda inexistente
+Validar rechazo de ítem inexistente
+```
+
+Debe ejecutarse con un usuario que tenga los permisos correspondientes:
+
+```txt
+kds.ver
+kds.actualizar_estado
+```
+
+Para pruebas negativas de autorización, debe usarse un usuario sin permisos del monitor de cocina.
+
+---
+
+### 10. Probar notificaciones de servicio y entrega
+
+Ejecutar las pruebas de la carpeta:
+
+```txt
+KDS - Service Notifications
+```
+
+Endpoints principales:
+
+```txt
+POST  /api/kds/orders/:id/service-calls
+GET   /api/kds/service-calls
+PATCH /api/kds/service-calls/:id/attend
+PATCH /api/kds/orders/:id/delivered
+```
+
+Operaciones incluidas:
+
+```txt
+Crear aviso de pedido listo para salón
+Crear incidencia de cocina con motivo y mensaje
+Listar avisos pendientes de cocina
+Marcar aviso como atendido
+Confirmar entrega de una comanda lista
+Validar rechazo de creación sin token
+Validar rechazo de creación sin permiso
+Validar rechazo de listado sin permiso
+Validar rechazo de atención sin permiso
+Validar rechazo de confirmación de entrega sin permiso
+Validar rechazo de entrega cuando la comanda no está LISTA
+Validar rechazo de aviso inexistente
+Validar rechazo de tipo de aviso faltante o inválido
+```
+
+Debe ejecutarse con usuarios que tengan los permisos correspondientes:
+
+```txt
+kds.notificar_servicio
+pos.ver_avisos_cocina
+pos.atender_avisos_cocina
+pos.confirmar_entrega
+```
+
+Para el flujo positivo, cocina crea el aviso y salón confirma la entrega.
+
+El cambio de entrega esperado es:
+
+```txt
+orden: LISTA -> ENTREGADA
+item_orden: LISTO -> ENTREGADO
+```
+
+La colección usa `ready_order_id` para confirmar entregas y `service_call_id` para atender avisos.
+
+---
+
 ## Descripción de carpetas
 
 ### Health
@@ -404,6 +592,19 @@ Contiene la prueba básica para verificar que el backend está activo.
 ### Auth
 
 Contiene las pruebas de inicio de sesión y validación de sesión autenticada.
+
+Los logins guardan tokens en variables de colección para que puedan reutilizarse en las rutas protegidas.
+
+Variables de token usadas:
+
+```txt
+admin_token
+cashier_token
+waiter_token
+kds_token
+user_token
+auth_token
+```
 
 ### Authorization / Profiles
 
@@ -425,6 +626,60 @@ Contiene las pruebas principales de configuración del establecimiento.
 
 Incluye operaciones de consulta y actualización de datos fiscales, parámetros de venta e identidad visual.
 
+### KDS - Kitchen Monitor
+
+Contiene las pruebas principales del monitor de cocina.
+
+Incluye operaciones de consulta de comandas activas, actualización de estado de comanda, actualización de estado de ítems y validaciones de permisos.
+
+Los estados permitidos para comanda en estas pruebas son:
+
+```txt
+ABIERTA
+EN_PREPARACION
+LISTA
+```
+
+Los estados permitidos para ítems de cocina en estas pruebas son:
+
+```txt
+PENDIENTE
+EN_PREPARACION
+LISTO
+```
+
+No se incluyen pruebas de entrega, despacho o cierre final de atención en esta carpeta.
+
+### KDS - Service Notifications
+
+Contiene las pruebas de notificación de servicio entre cocina y salón.
+
+Incluye creación de avisos de pedido listo, registro de incidencias de cocina, listado de avisos pendientes, atención de avisos y confirmación de entrega.
+
+Los tipos permitidos para avisos de servicio son:
+
+```txt
+PEDIDO_LISTO
+INCIDENCIA_COCINA
+```
+
+Los estados permitidos para avisos de servicio son:
+
+```txt
+PENDIENTE
+ATENDIDA
+CANCELADA
+```
+
+Los estados usados para confirmar entrega son:
+
+```txt
+orden: ENTREGADA
+item_orden: ENTREGADO
+```
+
+Esta carpeta no implementa pagos, caja, impresión, aplicación móvil ni comunicación por WebSockets.
+
 ---
 
 ## Consideraciones de seguridad
@@ -437,9 +692,42 @@ Contraseñas reales
 Credenciales personales
 Datos sensibles de conexión
 Datos privados del establecimiento
+IDs reales innecesarios
+URLs con credenciales
+Variables de entorno locales
 ```
 
 La colección debe trabajar con datos de prueba y variables locales de Postman.
+
+Los valores sensibles deben mantenerse vacíos en la colección exportada.
+
+Variables que deben quedar vacías antes de subir la colección:
+
+```txt
+admin_identifier
+admin_password
+cashier_identifier
+cashier_password
+waiter_identifier
+waiter_password
+kds_identifier
+kds_password
+user_identifier
+user_password
+admin_token
+cashier_token
+waiter_token
+kds_token
+user_token
+auth_token
+order_id
+item_id
+open_order_id
+open_order_item_id
+ready_order_id
+service_call_id
+incident_service_call_id
+```
 
 ---
 
@@ -451,11 +739,58 @@ Antes de exportar la colección desde Postman:
 2. Eliminar requests vacíos o temporales.
 3. Confirmar que no existan tokens reales guardados en los headers.
 4. Confirmar que no existan contraseñas reales en los bodies.
-5. Confirmar que las URLs usen `{{BASE_URL}}`.
-6. Confirmar que los IDs de usuarios, roles y establecimiento estén parametrizados.
-7. Exportar la colección actualizada.
-8. Reemplazar el archivo:
+5. Confirmar que las URLs usen `{{base_url}}`.
+6. Confirmar que los IDs de usuarios, roles, órdenes e ítems estén parametrizados.
+7. Confirmar que las variables sensibles estén vacías.
+8. Exportar la colección actualizada.
+9. Abrir el archivo exportado y buscar posibles secretos antes de commitear.
+10. Reemplazar el archivo:
 
 ```txt
 docs/postman/umari-os-api.postman_collection.json
+```
+
+Búsquedas recomendadas en el archivo exportado:
+
+```txt
+eyJ
+Bearer
+password
+token
+postgresql
+supabase
+DATABASE_URL
+JWT_SECRET
+```
+
+Si aparece un token, contraseña real o cadena de conexión real, no se debe subir el archivo hasta limpiarlo.
+
+---
+
+## Archivo de entorno local
+
+No se recomienda subir un environment local de Postman con valores reales.
+
+Si se desea documentar las variables necesarias, se puede crear un archivo de ejemplo sin credenciales ni tokens reales:
+
+```txt
+umari-os-api.example.postman_environment.json
+```
+
+Este archivo debe contener únicamente variables vacías o valores de ejemplo no sensibles.
+
+Ejemplo permitido:
+
+```txt
+base_url = http://localhost:3000/api
+invalid_order_id = 00000000-0000-0000-0000-000000000000
+invalid_item_id = 00000000-0000-0000-0000-000000000000
+```
+
+Ejemplos no permitidos:
+
+```txt
+admin_password = contraseña_real
+admin_token = token_real
+DATABASE_URL = cadena_real_de_conexion
 ```
