@@ -1104,7 +1104,8 @@ export default function PosPage() {
         {activeTab === POS_TABS.SALE && (
           <section className="pos-sale-panel">
 
-            //MESAS
+            {/* MENU */}
+
             {!selectedTable && (
 
               <PosPageTables
@@ -1117,7 +1118,8 @@ export default function PosPage() {
 
             )}
 
-            //MENU
+            {/* MENU */}
+
             {selectedTable && (
 
               <PosPageMenu

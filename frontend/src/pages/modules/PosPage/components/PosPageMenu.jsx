@@ -265,7 +265,7 @@ export default function PosPageMenu({
           <div className="pos-order-empty">
 
             <p>
-              Todavía no agregaste productos
+              🍽️ Todavía no agregaste productos
             </p>
 
           </div>

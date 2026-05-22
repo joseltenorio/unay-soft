@@ -22,11 +22,6 @@ export default function PosPageTables({
 
         <div>
 
-          <p className="pos-tables-subtitle">
-            POS / Salón
-          </p>
-
-
           {/* ======================================== */}
           {/* PISOS DINAMICOS */}
           {/* ======================================== */}

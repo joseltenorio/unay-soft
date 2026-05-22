@@ -7,7 +7,7 @@
   /* ======================================== */
 
   --pos-primary: #325358;
-
+  
   --pos-primary-hover: #274248;
 
   --pos-background: #f8fafc;
@@ -39,14 +39,10 @@
 
 .pos-tables {
   display: flex;
-
-  flex-direction: column;
-
+  flex-direction: column;  
+  width: 100%;
   gap: 32px;
 }
-
-
-
 /* ======================================== */
 /* HEADER */
 /* ======================================== */
