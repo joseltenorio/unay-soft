@@ -1,8 +1,0 @@
-$kind: http-request
-url: http://localhost:3000/api/roles
-method: GET
-auth:
-  type: bearer
-  credentials:
-    token: "{{AUTH_TOKEN}}"
-order: 1000
