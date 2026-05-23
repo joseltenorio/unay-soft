@@ -1,5 +1,4 @@
 // frontend/src/pages/AppHome/AppHome.jsx
-// Dashboard estilo Reztro — Sprint 3
 
 import { Link } from "react-router-dom"
 import { useEffect, useMemo, useState } from "react"
@@ -21,8 +20,6 @@ import {
 import { getUsers } from "../../services/userService"
 
 import "./AppHome.css"
-
-// ─── Datos de ejemplo (reemplazar con fetch) ──────────────────────────────────
 
 const SALES_DATA = [
   { day: "Lun", ingresos: 3200 },
@@ -83,8 +80,6 @@ const ACTIVITY = [
   { id: 3, icon: UserPlus,       color: "green", title: "Usuario nuevo registrado",     sub: "Admin · Jose Tenorio",         time: "hace 22 min" },
   { id: 4, icon: AlertTriangle,  color: "coral", title: "Stock bajo: Pescado fresco",   sub: "Inventario · alerta automática",time: "hace 35 min" },
 ]
-
-// ─── Contenido por rol ────────────────────────────────────────────────────────
 
 const roleContent = {
   Administrador: {
@@ -168,8 +163,6 @@ function getInitials(user) {
   return (a + b).toUpperCase()
 }
 
-// ─── Tooltip personalizado ────────────────────────────────────────────────────
-
 function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null
   return (
@@ -181,8 +174,6 @@ function CustomTooltip({ active, payload, label }) {
     </div>
   )
 }
-
-// ─── Componente principal ─────────────────────────────────────────────────────
 
 export default function AppHome() {
   const user        = useMemo(() => getCurrentUser(), [])
@@ -245,8 +236,6 @@ export default function AppHome() {
 
   return (
     <div className="ah">
-
-      {/* ── Topbar ── */}
       <div className="ah__topbar">
         <div className="ah__topbar-left">
           <div className="ah__avatar">{getInitials(user)}</div>
@@ -274,7 +263,6 @@ export default function AppHome() {
         </div>
       </div>
 
-      {/* ── KPIs ── */}
       <div className="ah__kpis">
         {kpis.map((kpi) => {
           const Icon = kpi.icon
@@ -299,10 +287,7 @@ export default function AppHome() {
         })}
       </div>
 
-      {/* ── Grid principal ── */}
       <div className="ah__grid2">
-
-        {/* Gráfico de ingresos */}
         <div className="ah__card">
           <div className="ah__card-header">
             <div>
@@ -342,7 +327,6 @@ export default function AppHome() {
           </ResponsiveContainer>
         </div>
 
-        {/* Actividad reciente */}
         <div className="ah__card">
           <div className="ah__card-header">
             <div>
@@ -370,7 +354,6 @@ export default function AppHome() {
         </div>
       </div>
 
-      {/* ── Tabla de pedidos ── */}
       <div className="ah__card">
         <div className="ah__card-header">
           <div>
@@ -414,9 +397,8 @@ export default function AppHome() {
         </div>
       </div>
 
-      {/* ── Paneles por rol ── */}
-      <div className="ah__panels">
 
+      <div className="ah__panels">
         <div className="ah__panel">
           <div className="ah__panel-hdr">
             <span className="ah__panel-num">01</span>
