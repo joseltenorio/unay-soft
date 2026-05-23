@@ -1,7 +1,6 @@
+// frontend/src/services/cartaService.js
 
 import { apiPrivateRequest } from "./api"
-
-// ─── Categorías ───────────────────────────────────────────────────────────────
 
 export async function getCategorias() {
   const data = await apiPrivateRequest("/categorias")
@@ -39,8 +38,6 @@ export async function deleteCategoria(id) {
   })
   return data.categoria
 }
-
-// ─── Productos ────────────────────────────────────────────────────────────────
 
 export async function getProductos() {
   const data = await apiPrivateRequest("/productos")
