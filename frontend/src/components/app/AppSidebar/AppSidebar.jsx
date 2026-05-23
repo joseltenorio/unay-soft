@@ -3,8 +3,8 @@
 import { useMemo, useState } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
 import {
-  BookOpen,
   BarChart3,
+  BookOpen,
   Boxes,
   ChefHat,
   Home,
@@ -14,9 +14,10 @@ import {
   Store,
   Utensils,
   Wallet,
+  Menu,
 } from "lucide-react"
 
-import logoUmari from "../../../assets/icons/logo-umari.svg"
+import logoUmari from "../../../assets/icons/logo-umari-black.svg"
 import {
   getCurrentModules,
   getCurrentUser,
@@ -55,25 +56,25 @@ const moduleNavigation = {
     keywords: "inventario insumos stock almacén",
   },
   menu: {
-  label: "Carta",
-  path: "/app/menu",
-  icon: BookOpen,
-  group: "Operación",
-  keywords: "carta menu catalogo categorias productos platos",
+    label: "Carta",
+    path: "/app/menu",
+    icon: BookOpen,
+    group: "Operación",
+    keywords: "carta menu menú catalogo catálogo categorias categorías productos platos",
   },
   bi: {
     label: "Reportes",
     path: "/app/bi",
     icon: BarChart3,
     group: "Análisis",
-    keywords: "reportes bi indicadores ventas analítica",
+    keywords: "reportes bi indicadores ventas analítica analytics",
   },
   security: {
     label: "Usuarios",
     path: "/app/security",
     icon: ShieldUser,
     group: "Administración",
-    keywords: "usuarios seguridad roles permisos admin administrador",
+    keywords: "usuarios seguridad roles permisos administrador",
   },
   establishment: {
     label: "Establecimiento",
@@ -81,11 +82,19 @@ const moduleNavigation = {
     icon: Store,
     group: "Administración",
     keywords:
-      "establecimiento local negocio configuracion configuración ruc razon social igv moneda logo",
+      "establecimiento local negocio configuración configuracion ruc razón social igv moneda logo",
   },
 }
 
 const groupOrder = ["Principal", "Operación", "Análisis", "Administración"]
+
+function normalizeText(value = "") {
+  return value
+    .toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+}
 
 function getInitials(user) {
   const firstName = user?.nombres?.trim()?.charAt(0) || "U"
@@ -94,11 +103,10 @@ function getInitials(user) {
   return `${firstName}${lastName}`.toUpperCase()
 }
 
-function normalizeText(value) {
-  return value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+function getDisplayName(user) {
+  const fullName = `${user?.nombres || ""} ${user?.apellidos || ""}`.trim()
+
+  return fullName || user?.username || "Usuario"
 }
 
 function getNavigationGroups(modules, searchTerm) {
@@ -112,7 +120,7 @@ function getNavigationGroups(modules, searchTerm) {
       path: "/app",
       icon: Home,
       group: "Principal",
-      keywords: "inicio home centro operativo principal",
+      keywords: "inicio home principal panel centro operativo",
     },
     ...Object.entries(moduleNavigation)
       .filter(([moduleCode]) => availableCodes.has(moduleCode))
@@ -149,6 +157,9 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
     [modules, searchTerm],
   )
 
+  const displayName = getDisplayName(user)
+  const roleName = user?.rol || "Sin rol"
+
   function handleLogout() {
     logout()
     navigate("/login", { replace: true })
@@ -163,154 +174,137 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
   return (
     <aside
       className={isCollapsed ? "app-sidebar app-sidebar--collapsed" : "app-sidebar"}
-      aria-label="Navegación interna"
+      aria-label="Navegación principal"
     >
-      <div className="app-sidebar__brand">
-        <div className="app-sidebar__brand-pill">
-          <span className="app-sidebar__logo" aria-hidden="true">
-            <img src={logoUmari} alt="" />
-          </span>
+      <button
+        type="button"
+        className="app-sidebar__toggle"
+        onClick={onToggleCollapse}
+        aria-label={isCollapsed ? "Expandir menú" : "Colapsar menú"}
+        title={isCollapsed ? "Expandir menú" : "Colapsar menú"}
+      >
+        <Menu size={16} strokeWidth={2.4} />
+      </button>
 
-          {!isCollapsed && (
-            <strong className="app-sidebar__brand-name">Umarí OS</strong>
-          )}
-        </div>
+      <div className="app-sidebar__content">
+        <div className="app-sidebar__top">
+          <NavLink
+            to="/app"
+            end
+            className="app-sidebar__brand"
+            title={isCollapsed ? "Umarí OS" : undefined}
+            onClick={() => setSearchTerm("")}
+          >
+            <img src={logoUmari} alt="Umarí" className="app-sidebar__logo" />
 
-        <button
-          className="app-sidebar__collapse-button"
-          type="button"
-          onClick={onToggleCollapse}
-          aria-label={isCollapsed ? "Expandir menú" : "Contraer menú"}
-          title={isCollapsed ? "Expandir menú" : "Contraer menú"}
-        >
-          {isCollapsed ? "›" : "‹"}
-        </button>
-      </div>
+            {!isCollapsed && (
+              <span className="app-sidebar__brand-name">Umarí OS</span>
+            )}
+          </NavLink>
 
-      <div className="app-sidebar__search">
-        <span aria-hidden="true">
-          <Search size={17} strokeWidth={2.4} />
-        </span>
-
-        {!isCollapsed && (
-          <input
-            type="search"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Buscar módulo..."
-            aria-label="Buscar módulo"
-          />
-        )}
-
-        {isCollapsed && (
-          <button
-            className="app-sidebar__search-button"
-            type="button"
+          <div
+            className="app-sidebar__search"
             onClick={handleSearchClick}
-            aria-label="Expandir para buscar módulos"
-            title="Buscar módulos"
-          />
-        )}
-      </div>
+            title={isCollapsed ? "Buscar módulo" : undefined}
+          >
+            <Search className="app-sidebar__search-icon" size={19} strokeWidth={2.2} />
 
-      <nav className="app-sidebar__nav">
-        {navigationGroups.length > 0 ? (
-          navigationGroups.map((group) => (
-            <section className="app-sidebar__group" key={group.name}>
-              <p
-                className="app-sidebar__group-title"
-                aria-hidden={isCollapsed ? "true" : undefined}
-              >
-                {group.name}
-              </p>
-
-              <div className="app-sidebar__items">
-                {group.items.map((item) => {
-                  const ItemIcon = item.icon
-
-                  return (
-                    <NavLink
-                      end={item.path === "/app"}
-                      className={({ isActive }) =>
-                        isActive
-                          ? "app-sidebar__item app-sidebar__item--active"
-                          : "app-sidebar__item"
-                      }
-                      key={item.path}
-                      to={item.path}
-                      title={isCollapsed ? item.label : undefined}
-                      onClick={() => setSearchTerm("")}
-                    >
-                      <span className="app-sidebar__item-icon" aria-hidden="true">
-                        <ItemIcon size={18} strokeWidth={2.25} />
-                      </span>
-
-                      {!isCollapsed && (
-                        <span className="app-sidebar__item-label">
-                          {item.label}
-                        </span>
-                      )}
-                    </NavLink>
-                  )
-                })}
-              </div>
-            </section>
-          ))
-        ) : (
-          !isCollapsed && (
-            <p className="app-sidebar__empty">No se encontraron módulos.</p>
-          )
-        )}
-      </nav>
-
-      <div className="app-sidebar__footer">
-        <div
-          className="app-sidebar__profile"
-          title={
-            isCollapsed
-              ? `${user?.rol || "Sin rol"} · ${user?.nombres || "Usuario"} ${
-                  user?.apellidos || ""
-                }`
-              : undefined
-          }
-        >
-          <div className="app-sidebar__avatar" aria-hidden="true">
-            {getInitials(user)}
+            {!isCollapsed && (
+              <input
+                type="search"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Buscar"
+                className="app-sidebar__search-input"
+                aria-label="Buscar módulo"
+              />
+            )}
           </div>
 
-          {!isCollapsed && (
-            <>
-              <div className="app-sidebar__profile-info">
-                <span>{user?.rol || "Sin rol"}</span>
-                <strong>
-                  {user?.nombres || "Usuario"} {user?.apellidos || ""}
-                </strong>
-              </div>
+          <nav className="app-sidebar__nav" aria-label="Módulos internos">
+            {navigationGroups.length > 0 ? (
+              navigationGroups.map((group) => (
+                <section className="app-sidebar__section" key={group.name}>
+                  <h2 className="app-sidebar__section-title">
+                    {isCollapsed ? "..." : group.name}
+                  </h2>
 
-              <button
-                className="app-sidebar__profile-menu"
-                type="button"
-                aria-label="Opciones de cuenta"
-                title="Opciones de cuenta"
-              >
-                ⋯
-              </button>
-            </>
-          )}
+                  <div className="app-sidebar__section-links">
+                    {group.items.map((item) => {
+                      const ItemIcon = item.icon
+
+                      return (
+                        <NavLink
+                          key={item.path}
+                          to={item.path}
+                          end={item.path === "/app"}
+                          className={({ isActive }) =>
+                            isActive
+                              ? "app-sidebar__link app-sidebar__link--active"
+                              : "app-sidebar__link"
+                          }
+                          title={isCollapsed ? item.label : undefined}
+                          onClick={() => setSearchTerm("")}
+                        >
+                          <ItemIcon
+                            className="app-sidebar__link-icon"
+                            size={20}
+                            strokeWidth={2.1}
+                          />
+
+                          {!isCollapsed && (
+                            <span className="app-sidebar__link-label">
+                              {item.label}
+                            </span>
+                          )}
+                        </NavLink>
+                      )
+                    })}
+                  </div>
+                </section>
+              ))
+            ) : (
+              !isCollapsed && (
+                <p className="app-sidebar__empty">No se encontraron módulos.</p>
+              )
+            )}
+          </nav>
         </div>
 
-        <button
-          className="app-sidebar__logout"
-          type="button"
-          onClick={handleLogout}
-          title={isCollapsed ? "Cerrar sesión" : undefined}
-        >
-          <span aria-hidden="true">
-            <LogOut size={17} strokeWidth={2.4} />
-          </span>
+        <div className="app-sidebar__footer">
+          <div className="app-sidebar__divider" />
 
-          {!isCollapsed && "Cerrar sesión"}
-        </button>
+          <div
+            className="app-sidebar__profile"
+            title={isCollapsed ? `${roleName} · ${displayName}` : undefined}
+          >
+            <div className="app-sidebar__avatar" aria-hidden="true">
+              {getInitials(user)}
+            </div>
+
+            {!isCollapsed && (
+              <div className="app-sidebar__profile-content">
+                <span className="app-sidebar__profile-role">
+                  {roleName.toUpperCase()}
+                </span>
+                <strong className="app-sidebar__profile-name">
+                  {displayName}
+                </strong>
+              </div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="app-sidebar__logout"
+            onClick={handleLogout}
+            title={isCollapsed ? "Cerrar sesión" : undefined}
+          >
+            <LogOut className="app-sidebar__logout-icon" size={20} strokeWidth={2.1} />
+
+            {!isCollapsed && <span>Cerrar sesión</span>}
+          </button>
+        </div>
       </div>
     </aside>
   )
