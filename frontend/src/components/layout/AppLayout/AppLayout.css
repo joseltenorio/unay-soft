@@ -6,6 +6,8 @@
   display: grid;
   grid-template-columns: 264px minmax(0, 1fr);
 
+  overflow: visible;
+
   background:
     radial-gradient(
       circle at top right,
@@ -29,6 +31,9 @@
 }
 
 .app-layout__content {
+  position: relative;
+  z-index: 1;
+
   min-width: 0;
   padding: 32px;
 

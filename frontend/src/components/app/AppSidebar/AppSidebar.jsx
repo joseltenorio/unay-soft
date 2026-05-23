@@ -147,7 +147,9 @@ function getNavigationGroups(modules, searchTerm) {
 
 export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
   const navigate = useNavigate()
+
   const [searchTerm, setSearchTerm] = useState("")
+  const [sidebarTooltip, setSidebarTooltip] = useState(null)
 
   const user = useMemo(() => getCurrentUser(), [])
   const modules = useMemo(() => getCurrentModules(), [])
@@ -171,6 +173,22 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
     }
   }
 
+  function showCollapsedTooltip(event, label) {
+    if (!isCollapsed || !label) return
+
+    const rect = event.currentTarget.getBoundingClientRect()
+
+    setSidebarTooltip({
+      label,
+      top: rect.top + rect.height / 2,
+      left: rect.right + 12,
+    })
+  }
+
+  function hideCollapsedTooltip() {
+    setSidebarTooltip(null)
+  }
+
   return (
     <aside
       className={isCollapsed ? "app-sidebar app-sidebar--collapsed" : "app-sidebar"}
@@ -181,7 +199,20 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
         className="app-sidebar__toggle"
         onClick={onToggleCollapse}
         aria-label={isCollapsed ? "Expandir menú" : "Colapsar menú"}
-        title={isCollapsed ? "Expandir menú" : "Colapsar menú"}
+        onMouseEnter={(event) =>
+          showCollapsedTooltip(
+            event,
+            isCollapsed ? "Expandir menú" : "Colapsar menú",
+          )
+        }
+        onMouseLeave={hideCollapsedTooltip}
+        onFocus={(event) =>
+          showCollapsedTooltip(
+            event,
+            isCollapsed ? "Expandir menú" : "Colapsar menú",
+          )
+        }
+        onBlur={hideCollapsedTooltip}
       >
         <Menu size={16} strokeWidth={2.4} />
       </button>
@@ -192,8 +223,12 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
             to="/app"
             end
             className="app-sidebar__brand"
-            title={isCollapsed ? "Umarí OS" : undefined}
+            aria-label="Ir al inicio de Umarí OS"
             onClick={() => setSearchTerm("")}
+            onMouseEnter={(event) => showCollapsedTooltip(event, "Umarí OS")}
+            onMouseLeave={hideCollapsedTooltip}
+            onFocus={(event) => showCollapsedTooltip(event, "Umarí OS")}
+            onBlur={hideCollapsedTooltip}
           >
             <img src={logoUmari} alt="Umarí" className="app-sidebar__logo" />
 
@@ -205,7 +240,13 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
           <div
             className="app-sidebar__search"
             onClick={handleSearchClick}
-            title={isCollapsed ? "Buscar módulo" : undefined}
+            role={isCollapsed ? "button" : undefined}
+            tabIndex={isCollapsed ? 0 : undefined}
+            aria-label="Buscar módulo"
+            onMouseEnter={(event) => showCollapsedTooltip(event, "Buscar módulo")}
+            onMouseLeave={hideCollapsedTooltip}
+            onFocus={(event) => showCollapsedTooltip(event, "Buscar módulo")}
+            onBlur={hideCollapsedTooltip}
           >
             <Search className="app-sidebar__search-icon" size={19} strokeWidth={2.2} />
 
@@ -243,8 +284,16 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
                               ? "app-sidebar__link app-sidebar__link--active"
                               : "app-sidebar__link"
                           }
-                          title={isCollapsed ? item.label : undefined}
+                          aria-label={item.label}
                           onClick={() => setSearchTerm("")}
+                          onMouseEnter={(event) =>
+                            showCollapsedTooltip(event, item.label)
+                          }
+                          onMouseLeave={hideCollapsedTooltip}
+                          onFocus={(event) =>
+                            showCollapsedTooltip(event, item.label)
+                          }
+                          onBlur={hideCollapsedTooltip}
                         >
                           <ItemIcon
                             className="app-sidebar__link-icon"
@@ -276,7 +325,11 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
 
           <div
             className="app-sidebar__profile"
-            title={isCollapsed ? `${roleName} · ${displayName}` : undefined}
+            aria-label={`${roleName} · ${displayName}`}
+            onMouseEnter={(event) =>
+              showCollapsedTooltip(event, `${roleName} · ${displayName}`)
+            }
+            onMouseLeave={hideCollapsedTooltip}
           >
             <div className="app-sidebar__avatar" aria-hidden="true">
               {getInitials(user)}
@@ -298,7 +351,13 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
             type="button"
             className="app-sidebar__logout"
             onClick={handleLogout}
-            title={isCollapsed ? "Cerrar sesión" : undefined}
+            aria-label="Cerrar sesión"
+            onMouseEnter={(event) =>
+              showCollapsedTooltip(event, "Cerrar sesión")
+            }
+            onMouseLeave={hideCollapsedTooltip}
+            onFocus={(event) => showCollapsedTooltip(event, "Cerrar sesión")}
+            onBlur={hideCollapsedTooltip}
           >
             <LogOut className="app-sidebar__logout-icon" size={20} strokeWidth={2.1} />
 
@@ -306,6 +365,19 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
           </button>
         </div>
       </div>
+
+      {sidebarTooltip && (
+        <div
+          className="app-sidebar__floating-tooltip"
+          style={{
+            top: `${sidebarTooltip.top}px`,
+            left: `${sidebarTooltip.left}px`,
+          }}
+          role="tooltip"
+        >
+          {sidebarTooltip.label}
+        </div>
+      )}
     </aside>
   )
 }
