@@ -4,7 +4,7 @@
   min-height: 100vh;
 
   display: grid;
-  grid-template-columns: 292px minmax(0, 1fr);
+  grid-template-columns: 264px minmax(0, 1fr);
 
   background:
     radial-gradient(
@@ -19,7 +19,7 @@
 }
 
 .app-layout--sidebar-collapsed {
-  grid-template-columns: 92px minmax(0, 1fr);
+  grid-template-columns: 80px minmax(0, 1fr);
 }
 
 .app-layout--kds {
