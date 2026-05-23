@@ -1,4 +1,5 @@
 // backend/src/controllers/producto.controller.js
+
 const {
   getProductos,
   createProducto,

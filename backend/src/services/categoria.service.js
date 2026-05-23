@@ -96,8 +96,8 @@ async function updateCategoria(idEstablecimiento, idCategoria, data) {
   ])
   return rows[0]
 }
+
 async function deleteCategoria(idEstablecimiento, idCategoria) {
-  // Verifica que no tenga productos activos
   const { rows: productos } = await pool.query(
     `SELECT COUNT(*) FROM producto 
      WHERE id_categoria = $1 AND estado = true`,

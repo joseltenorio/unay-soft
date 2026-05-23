@@ -1,5 +1,4 @@
 // backend/src/controllers/categoria.controller.js
-// Corregido: usa orden_display para coincidir con el schema real
 
 const {
   getCategorias,
