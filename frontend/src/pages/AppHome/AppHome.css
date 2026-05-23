@@ -1,9 +1,4 @@
-/* frontend/src/pages/AppHome/AppHome.css
-   Dashboard estilo Reztro — Sprint 3
-   Usa las variables del sistema de diseño Umarí OS
-*/
-
-/* ── Shell ──────────────────────────────────────────────────── */
+/* frontend/src/pages/AppHome/AppHome.css */
 
 .ah {
   width: min(100%, 1180px);
@@ -17,8 +12,6 @@
 
   color: var(--color-app-text);
 }
-
-/* ── Topbar ─────────────────────────────────────────────────── */
 
 .ah__topbar {
   display: flex;
@@ -139,8 +132,6 @@
   transform: translateY(-1px);
 }
 
-/* ── KPIs ───────────────────────────────────────────────────── */
-
 .ah__kpis {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -217,8 +208,6 @@
   color: var(--color-app-text-muted);
 }
 
-/* ── Cards ──────────────────────────────────────────────────── */
-
 .ah__card {
   padding: 22px;
 
@@ -275,15 +264,11 @@
   color: var(--color-app-accent-strong);
 }
 
-/* ── Grid 2 columnas ────────────────────────────────────────── */
-
 .ah__grid2 {
   display: grid;
   grid-template-columns: 1fr 320px;
   gap: 16px;
 }
-
-/* ── Leyenda ────────────────────────────────────────────────── */
 
 .ah__legend {
   display: flex;
@@ -309,8 +294,6 @@
 
 .ah__leg-sq--dark { background: #031926; }
 .ah__leg-sq--teal { background: #77aca2; }
-
-/* ── Tooltip ────────────────────────────────────────────────── */
 
 .ah-tooltip {
   padding: 8px 12px;
@@ -340,8 +323,6 @@
   color: var(--color-app-text);
   letter-spacing: -0.03em;
 }
-
-/* ── Actividad ──────────────────────────────────────────────── */
 
 .ah__activity {
   display: flex;
@@ -397,8 +378,6 @@
   padding-top: 2px;
   flex-shrink: 0;
 }
-
-/* ── Tabla ──────────────────────────────────────────────────── */
 
 .ah__table-wrap {
   overflow-x: auto;
@@ -469,8 +448,6 @@
 .ah__status--paid   { background: rgba(52,95,101,0.12);   color: #2a5c62; }
 .ah__status--cancel { background: rgba(200,82,77,0.10);   color: #a0403d; }
 
-/* ── Paneles por rol ────────────────────────────────────────── */
-
 .ah__panels {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -528,8 +505,6 @@
   letter-spacing: -0.02em;
   color: var(--color-app-text);
 }
-
-/* ── Listas ─────────────────────────────────────────────────── */
 
 .ah__plist {
   list-style: none;
@@ -624,8 +599,6 @@
   font-weight: 950;
 }
 
-/* ── Access panel ───────────────────────────────────────────── */
-
 .ah__access {
   display: grid;
   gap: 8px;
@@ -658,8 +631,6 @@
   letter-spacing: -0.03em;
   color: var(--color-app-text);
 }
-
-/* ── Responsive ─────────────────────────────────────────────── */
 
 @media (max-width: 1024px) {
   .ah__kpis {
