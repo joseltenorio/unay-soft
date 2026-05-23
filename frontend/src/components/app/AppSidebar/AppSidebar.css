@@ -5,17 +5,18 @@
   --sidebar-collapsed-width: 80px;
   --sidebar-inner-width: 216px;
   --sidebar-control-size: 40px;
+  --sidebar-transition: 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  --sidebar-fast-transition: 180ms ease;
 
   position: sticky;
   top: 0;
   z-index: 40;
 
-  width: var(--sidebar-open-width);
+  width: 100%;
   height: 100vh;
   min-height: 720px;
 
   flex-shrink: 0;
-
   overflow: visible;
 
   background: #ffffff;
@@ -30,11 +31,13 @@
     "Segoe UI",
     sans-serif;
 
-  transition: width 180ms ease;
+  transition:
+    background-color var(--sidebar-fast-transition),
+    border-color var(--sidebar-fast-transition);
 }
 
 .app-sidebar--collapsed {
-  width: var(--sidebar-collapsed-width);
+  width: 100%;
 }
 
 .app-sidebar__content {
@@ -48,6 +51,10 @@
   gap: 18px;
 
   overflow: visible;
+
+  transition:
+    padding var(--sidebar-transition),
+    gap var(--sidebar-transition);
 }
 
 .app-sidebar--collapsed .app-sidebar__content {
@@ -60,10 +67,15 @@
   min-height: 0;
 
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 10px;
 
   overflow: visible;
+
+  transition:
+    width var(--sidebar-transition),
+    gap var(--sidebar-transition);
 }
 
 .app-sidebar--collapsed .app-sidebar__top {
@@ -82,6 +94,14 @@
 
   color: #0b0b0b;
   text-decoration: none;
+
+  overflow: hidden;
+
+  transition:
+    width var(--sidebar-transition),
+    padding var(--sidebar-transition),
+    gap var(--sidebar-transition),
+    color var(--sidebar-fast-transition);
 }
 
 .app-sidebar--collapsed .app-sidebar__brand {
@@ -106,6 +126,16 @@
   letter-spacing: 0.2px;
 
   white-space: nowrap;
+  overflow: hidden;
+
+  transition:
+    opacity var(--sidebar-fast-transition),
+    transform var(--sidebar-transition);
+}
+
+.app-sidebar--collapsed .app-sidebar__brand-name {
+  opacity: 0;
+  transform: translateX(-6px);
 }
 
 .app-sidebar__toggle {
@@ -131,15 +161,17 @@
   box-shadow: 0 6px 16px rgba(15, 30, 34, 0.08);
 
   transition:
-    transform 160ms ease,
-    border-color 160ms ease,
-    background-color 160ms ease;
+    transform var(--sidebar-fast-transition),
+    border-color var(--sidebar-fast-transition),
+    background-color var(--sidebar-fast-transition),
+    box-shadow var(--sidebar-fast-transition);
 }
 
 .app-sidebar__toggle:hover {
   transform: translateX(1px);
   border-color: #efefef;
   background: #f9f9f9;
+  box-shadow: 0 8px 20px rgba(15, 30, 34, 0.12);
 }
 
 .app-sidebar__search {
@@ -156,6 +188,20 @@
   background: #ffffff;
 
   color: #9d9d9d;
+  overflow: hidden;
+
+  transition:
+    width var(--sidebar-transition),
+    padding var(--sidebar-transition),
+    gap var(--sidebar-transition),
+    border-color var(--sidebar-fast-transition),
+    background-color var(--sidebar-fast-transition),
+    color var(--sidebar-fast-transition);
+}
+
+.app-sidebar__search:hover {
+  border-color: #eeeeee;
+  background: #fdfdfd;
 }
 
 .app-sidebar--collapsed .app-sidebar__search {
@@ -199,6 +245,7 @@
   margin-right: -4px;
 
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 15.25px;
 
@@ -206,7 +253,14 @@
   overflow-y: auto;
 
   scrollbar-width: thin;
-  scrollbar-color: rgba(15, 30, 34, 0.22) transparent;
+  scrollbar-color: rgba(15, 30, 34, 0.2) transparent;
+
+  transition:
+    width var(--sidebar-transition),
+    max-height var(--sidebar-transition),
+    padding var(--sidebar-transition),
+    margin var(--sidebar-transition),
+    gap var(--sidebar-transition);
 }
 
 .app-sidebar__nav::-webkit-scrollbar {
@@ -239,6 +293,10 @@
   display: flex;
   flex-direction: column;
   gap: 15.25px;
+
+  transition:
+    width var(--sidebar-transition),
+    gap var(--sidebar-transition);
 }
 
 .app-sidebar--collapsed .app-sidebar__section {
@@ -259,6 +317,15 @@
   line-height: 12px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
+
+  overflow: hidden;
+  white-space: nowrap;
+
+  transition:
+    width var(--sidebar-transition),
+    padding var(--sidebar-transition),
+    color var(--sidebar-fast-transition),
+    opacity var(--sidebar-fast-transition);
 }
 
 .app-sidebar--collapsed .app-sidebar__section-title {
@@ -273,6 +340,8 @@
   display: flex;
   flex-direction: column;
   gap: 15.25px;
+
+  transition: gap var(--sidebar-transition);
 }
 
 .app-sidebar--collapsed .app-sidebar__section-links {
@@ -294,10 +363,15 @@
   border-radius: 8px;
   background: transparent;
 
+  overflow: hidden;
+
   transition:
-    color 160ms ease,
-    background-color 160ms ease,
-    transform 160ms ease;
+    width var(--sidebar-transition),
+    padding var(--sidebar-transition),
+    gap var(--sidebar-transition),
+    color var(--sidebar-fast-transition),
+    background-color var(--sidebar-fast-transition),
+    transform var(--sidebar-fast-transition);
 }
 
 .app-sidebar__link:hover {
@@ -333,6 +407,16 @@
   letter-spacing: 0.35px;
 
   white-space: nowrap;
+  overflow: hidden;
+
+  transition:
+    opacity var(--sidebar-fast-transition),
+    transform var(--sidebar-transition);
+}
+
+.app-sidebar--collapsed .app-sidebar__link-label {
+  opacity: 0;
+  transform: translateX(-6px);
 }
 
 .app-sidebar__empty {
@@ -350,10 +434,15 @@
   width: var(--sidebar-inner-width);
 
   display: flex;
+  flex: 0 0 auto;
   flex-direction: column;
   gap: 10px;
 
   overflow: visible;
+
+  transition:
+    width var(--sidebar-transition),
+    gap var(--sidebar-transition);
 }
 
 .app-sidebar--collapsed .app-sidebar__footer {
@@ -367,6 +456,8 @@
 
   border-radius: 2px;
   background: #f6f6f6;
+
+  transition: width var(--sidebar-transition);
 }
 
 .app-sidebar--collapsed .app-sidebar__divider {
@@ -380,6 +471,12 @@
   display: flex;
   align-items: center;
   gap: 12px;
+
+  overflow: hidden;
+
+  transition:
+    width var(--sidebar-transition),
+    gap var(--sidebar-transition);
 }
 
 .app-sidebar--collapsed .app-sidebar__profile {
@@ -404,6 +501,11 @@
   font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.02em;
+
+  transition:
+    width var(--sidebar-transition),
+    height var(--sidebar-transition),
+    font-size var(--sidebar-transition);
 }
 
 .app-sidebar--collapsed .app-sidebar__avatar {
@@ -418,6 +520,17 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+
+  overflow: hidden;
+
+  transition:
+    opacity var(--sidebar-fast-transition),
+    transform var(--sidebar-transition);
+}
+
+.app-sidebar--collapsed .app-sidebar__profile-content {
+  opacity: 0;
+  transform: translateX(-6px);
 }
 
 .app-sidebar__profile-role {
@@ -466,10 +579,14 @@
   line-height: 20px;
 
   cursor: pointer;
+  overflow: hidden;
 
   transition:
-    background-color 160ms ease,
-    color 160ms ease;
+    width var(--sidebar-transition),
+    padding var(--sidebar-transition),
+    gap var(--sidebar-transition),
+    background-color var(--sidebar-fast-transition),
+    color var(--sidebar-fast-transition);
 }
 
 .app-sidebar__logout:hover {
@@ -491,6 +608,20 @@
   flex-shrink: 0;
 }
 
+.app-sidebar__logout span {
+  white-space: nowrap;
+  overflow: hidden;
+
+  transition:
+    opacity var(--sidebar-fast-transition),
+    transform var(--sidebar-transition);
+}
+
+.app-sidebar--collapsed .app-sidebar__logout span {
+  opacity: 0;
+  transform: translateX(-6px);
+}
+
 .app-sidebar__floating-tooltip {
   position: fixed;
   z-index: 9999;
@@ -510,6 +641,7 @@
   white-space: nowrap;
 
   pointer-events: none;
+  animation: appSidebarTooltipIn 120ms ease both;
 }
 
 .app-sidebar__floating-tooltip::before {
@@ -523,6 +655,27 @@
 
   background: #000000;
   transform: translateY(-50%) rotate(45deg);
+}
+
+@keyframes appSidebarTooltipIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-sidebar,
+  .app-sidebar *,
+  .app-sidebar__floating-tooltip {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+  }
 }
 
 @media (max-width: 920px) {
@@ -556,5 +709,15 @@
     width: 100%;
     max-height: 340px;
     align-items: stretch;
+  }
+
+  .app-sidebar__footer,
+  .app-sidebar--collapsed .app-sidebar__footer {
+    width: 100%;
+  }
+
+  .app-sidebar__divider,
+  .app-sidebar--collapsed .app-sidebar__divider {
+    width: 100%;
   }
 }
