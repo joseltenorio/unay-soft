@@ -15,6 +15,9 @@ export default function RequirePermission({
   children,
 }) {
   const permissions = getCurrentPermissions()
+  console.log("PERMISOS:", permissions)
+  console.log("PERMISO REQUERIDO:", permission)
+  console.log("TIENE PERMISO:", hasPermission(permissions, permission))
 
   let isAllowed = true
 
