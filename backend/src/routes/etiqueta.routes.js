@@ -1,3 +1,5 @@
+// backend/src/routes/etiqueta.routes.js
+
 const express = require("express")
 const { listEtiquetas } = require("../controllers/etiqueta.controller")
 const { authenticateToken } = require("../middlewares/auth.middleware")

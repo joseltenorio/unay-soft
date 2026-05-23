@@ -1,4 +1,5 @@
 // backend/src/services/producto.service.js
+
 const { pool } = require("../config/database")
 
 async function getProductos(idEstablecimiento) {

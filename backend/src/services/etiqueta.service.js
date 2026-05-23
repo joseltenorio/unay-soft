@@ -1,3 +1,5 @@
+// backend/src/services/etiqueta.service.js
+
 const { pool } = require("../config/database")
 
 async function getEtiquetas() {

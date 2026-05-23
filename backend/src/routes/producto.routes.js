@@ -1,5 +1,4 @@
 // backend/src/routes/producto.routes.js
-// Corregido: usa authenticateToken y authorizePermission (igual que user.routes.js)
 
 const express = require("express")
 const router = express.Router()

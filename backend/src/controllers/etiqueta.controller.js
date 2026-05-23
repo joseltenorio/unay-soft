@@ -1,3 +1,5 @@
+// backend/src/controllers/etiqueta.controller.js
+
 const { getEtiquetas } = require("../services/etiqueta.service")
 
 async function listEtiquetas(req, res) {
