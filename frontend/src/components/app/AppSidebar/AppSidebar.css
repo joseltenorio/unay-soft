@@ -8,12 +8,15 @@
 
   position: sticky;
   top: 0;
+  z-index: 40;
 
   width: var(--sidebar-open-width);
   height: 100vh;
   min-height: 720px;
 
   flex-shrink: 0;
+
+  overflow: visible;
 
   background: #ffffff;
   border-right: 1px solid rgba(0, 0, 0, 0.1);
@@ -42,7 +45,9 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 24px;
+  gap: 18px;
+
+  overflow: visible;
 }
 
 .app-sidebar--collapsed .app-sidebar__content {
@@ -52,10 +57,13 @@
 
 .app-sidebar__top {
   width: var(--sidebar-inner-width);
+  min-height: 0;
 
   display: flex;
   flex-direction: column;
   gap: 10px;
+
+  overflow: visible;
 }
 
 .app-sidebar--collapsed .app-sidebar__top {
@@ -104,7 +112,7 @@
   position: absolute;
   top: 34px;
   right: -14px;
-  z-index: 5;
+  z-index: 45;
 
   width: 28px;
   height: 28px;
@@ -185,18 +193,43 @@
 
 .app-sidebar__nav {
   width: var(--sidebar-inner-width);
+  max-height: calc(100vh - 245px);
   padding-top: 6px;
+  padding-right: 4px;
+  margin-right: -4px;
 
   display: flex;
   flex-direction: column;
   gap: 15.25px;
 
+  overflow-x: hidden;
   overflow-y: auto;
+
   scrollbar-width: thin;
+  scrollbar-color: rgba(15, 30, 34, 0.22) transparent;
+}
+
+.app-sidebar__nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.app-sidebar__nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-sidebar__nav::-webkit-scrollbar-thumb {
+  background: rgba(15, 30, 34, 0.18);
+  border-radius: 999px;
+}
+
+.app-sidebar__nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 30, 34, 0.32);
 }
 
 .app-sidebar--collapsed .app-sidebar__nav {
   width: var(--sidebar-control-size);
+  padding-right: 0;
+  margin-right: 0;
   align-items: center;
 }
 
@@ -278,8 +311,6 @@
 }
 
 .app-sidebar--collapsed .app-sidebar__link {
-  position: relative;
-
   width: var(--sidebar-control-size);
   height: var(--sidebar-control-size);
   padding: 0;
@@ -321,6 +352,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+
+  overflow: visible;
 }
 
 .app-sidebar--collapsed .app-sidebar__footer {
@@ -445,8 +478,6 @@
 }
 
 .app-sidebar--collapsed .app-sidebar__logout {
-  position: relative;
-
   width: var(--sidebar-control-size);
   height: var(--sidebar-control-size);
   padding: 0;
@@ -460,13 +491,9 @@
   flex-shrink: 0;
 }
 
-.app-sidebar--collapsed .app-sidebar__link:hover::after,
-.app-sidebar--collapsed .app-sidebar__logout:hover::after {
-  content: attr(title);
-  position: absolute;
-  left: calc(100% + 12px);
-  top: 50%;
-  z-index: 20;
+.app-sidebar__floating-tooltip {
+  position: fixed;
+  z-index: 9999;
 
   transform: translateY(-50%);
 
@@ -478,21 +505,21 @@
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
 
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1;
   white-space: nowrap;
+
+  pointer-events: none;
 }
 
-.app-sidebar--collapsed .app-sidebar__link:hover::before,
-.app-sidebar--collapsed .app-sidebar__logout:hover::before {
+.app-sidebar__floating-tooltip::before {
   content: "";
   position: absolute;
-  left: calc(100% + 5px);
+  left: -5px;
   top: 50%;
-  z-index: 19;
 
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
 
   background: #000000;
   transform: translateY(-50%) rotate(45deg);
@@ -519,7 +546,15 @@
     padding: 18px 24px;
   }
 
-  .app-sidebar__nav {
+  .app-sidebar__top,
+  .app-sidebar--collapsed .app-sidebar__top {
+    width: 100%;
+  }
+
+  .app-sidebar__nav,
+  .app-sidebar--collapsed .app-sidebar__nav {
+    width: 100%;
     max-height: 340px;
+    align-items: stretch;
   }
 }
