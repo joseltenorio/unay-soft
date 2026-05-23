@@ -80,14 +80,6 @@ async function loginUser(identifier, password) {
 `
 const { rows: modulesRows } = await pool.query(modulesQuery, [user.id_rol])
 const modules = modulesRows.map((m) => ({ codigo: m.codigo }))
-const permissionsQuery = `
-  SELECT p.codigo
-  FROM permiso p
-  INNER JOIN rol_permiso rp ON rp.id_permiso = p.id_permiso
-  WHERE rp.id_rol = $1
-`
-const { rows: permissionsRows } = await pool.query(permissionsQuery, [user.id_rol])
-const permissions = permissionsRows.map((p) => p.codigo)
   return {
     token,
     user: {

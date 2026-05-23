@@ -85,7 +85,7 @@ function App() {
             <Route
                path="menu"
                 element={
-                <PermissionRoute permission="carta.ver">
+                <PermissionRoute permission="carta.gestionar">
                   <CartaPage />
                   </PermissionRoute>
                 }
