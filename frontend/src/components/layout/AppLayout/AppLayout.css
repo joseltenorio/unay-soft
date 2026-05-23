@@ -1,10 +1,14 @@
 /* frontend/src/components/layout/AppLayout/AppLayout.css */
 
 .app-layout {
+  --app-sidebar-width: 264px;
+  --app-sidebar-collapsed-width: 80px;
+  --app-layout-transition: 280ms cubic-bezier(0.22, 1, 0.36, 1);
+
   min-height: 100vh;
 
   display: grid;
-  grid-template-columns: 264px minmax(0, 1fr);
+  grid-template-columns: var(--app-sidebar-width) minmax(0, 1fr);
 
   overflow: visible;
 
@@ -17,11 +21,12 @@
     var(--color-brand-feature);
 
   color: var(--color-text-on-light);
-  transition: grid-template-columns var(--transition-fast);
+
+  transition: grid-template-columns var(--app-layout-transition);
 }
 
 .app-layout--sidebar-collapsed {
-  grid-template-columns: 80px minmax(0, 1fr);
+  grid-template-columns: var(--app-sidebar-collapsed-width) minmax(0, 1fr);
 }
 
 .app-layout--kds {

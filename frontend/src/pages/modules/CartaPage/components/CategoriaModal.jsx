@@ -12,15 +12,12 @@ export default function CategoriaModal({ data, onSave, onClose }) {
   return (
     <div className="pm-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="pm">
-
-        {/* Header */}
         <div className="pm__header">
           <div className="pm__header-left">
             <div className="pm__icon-wrap">
               <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
             </div>
             <div>
-              {/*<p className="pm__eyebrow">{data ? "EDITAR CATEGORÍA" : "NUEVA CATEGORÍA"}</p>*/}
               <h2 className="pm__title">{data ? "Editar categoría" : "Crear nueva categoría"}</h2>
               <p className="pm__subtitle">{data ? "Modifica la información de la categoría." : "Completa los campos para agregar una nueva categoría."}</p>
             </div>
@@ -28,10 +25,7 @@ export default function CategoriaModal({ data, onSave, onClose }) {
           <button className="pm__close" type="button" onClick={onClose}>✕</button>
         </div>
 
-        {/* Form */}
         <form className="pm__form" onSubmit={handleSubmit}>
-
-          {/* Nombre */}
           <div className="pm__field">
             <label className="pm__label">Nombre de la categoría <span className="pm__required">*</span></label>
             <div className="pm__input-wrap">
@@ -47,7 +41,6 @@ export default function CategoriaModal({ data, onSave, onClose }) {
             </div>
           </div>
 
-          {/* Descripción */}
           <div className="pm__field">
             <label className="pm__label">Descripción <span className="pm__optional">(opcional)</span></label>
             <div className="pm__input-wrap pm__input-wrap--textarea">
@@ -62,7 +55,6 @@ export default function CategoriaModal({ data, onSave, onClose }) {
             </div>
           </div>
 
-          {/* Acciones */}
           <div className="pm__actions">
             <button type="button" className="pm__btn-cancel" onClick={onClose}>Cancelar</button>
             <button type="submit" className="pm__btn-save">
