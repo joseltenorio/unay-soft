@@ -15,6 +15,7 @@ import {
   Utensils,
   Wallet,
   Menu,
+  X,
 } from "lucide-react"
 
 import logoUmari from "../../../assets/icons/logo-umari-black.svg"
@@ -145,11 +146,20 @@ function getNavigationGroups(modules, searchTerm) {
     .filter((group) => group.items.length > 0)
 }
 
-export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
+export default function AppSidebar({
+  isCollapsed = false,
+  onToggleCollapse,
+  variant = "default",
+  isOpen = true,
+  onClose,
+}) {
   const navigate = useNavigate()
 
   const [searchTerm, setSearchTerm] = useState("")
   const [sidebarTooltip, setSidebarTooltip] = useState(null)
+
+  const isDrawer = variant === "drawer"
+  const shouldCollapse = !isDrawer && isCollapsed
 
   const user = useMemo(() => getCurrentUser(), [])
   const modules = useMemo(() => getCurrentModules(), [])
@@ -163,18 +173,30 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
   const roleName = user?.rol || "Sin rol"
 
   function handleLogout() {
+    if (isDrawer && onClose) {
+      onClose()
+    }
+
     logout()
     navigate("/login", { replace: true })
   }
 
   function handleSearchClick() {
-    if (isCollapsed) {
+    if (shouldCollapse && onToggleCollapse) {
       onToggleCollapse()
     }
   }
 
+  function handleNavigationClick() {
+    setSearchTerm("")
+
+    if (isDrawer && onClose) {
+      onClose()
+    }
+  }
+
   function showCollapsedTooltip(event, label) {
-    if (!isCollapsed || !label) return
+    if (!shouldCollapse || !label) return
 
     const rect = event.currentTarget.getBoundingClientRect()
 
@@ -191,30 +213,48 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
 
   return (
     <aside
-      className={isCollapsed ? "app-sidebar app-sidebar--collapsed" : "app-sidebar"}
-      aria-label="Navegación principal"
+      id={isDrawer ? "kds-navigation-drawer" : undefined}
+      className={[
+        "app-sidebar",
+        shouldCollapse ? "app-sidebar--collapsed" : "",
+        isDrawer ? "app-sidebar--drawer" : "",
+        isDrawer && isOpen ? "app-sidebar--drawer-open" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      aria-label={isDrawer ? "Navegación de cocina" : "Navegación principal"}
     >
       <button
         type="button"
         className="app-sidebar__toggle"
-        onClick={onToggleCollapse}
-        aria-label={isCollapsed ? "Expandir menú" : "Colapsar menú"}
+        onClick={isDrawer ? onClose : onToggleCollapse}
+        aria-label={
+          isDrawer
+            ? "Cerrar navegación"
+            : shouldCollapse
+              ? "Expandir menú"
+              : "Colapsar menú"
+        }
         onMouseEnter={(event) =>
           showCollapsedTooltip(
             event,
-            isCollapsed ? "Expandir menú" : "Colapsar menú",
+            shouldCollapse ? "Expandir menú" : "Colapsar menú",
           )
         }
         onMouseLeave={hideCollapsedTooltip}
         onFocus={(event) =>
           showCollapsedTooltip(
             event,
-            isCollapsed ? "Expandir menú" : "Colapsar menú",
+            shouldCollapse ? "Expandir menú" : "Colapsar menú",
           )
         }
         onBlur={hideCollapsedTooltip}
       >
-        <Menu size={16} strokeWidth={2.4} />
+        {isDrawer ? (
+          <X size={16} strokeWidth={2.4} />
+        ) : (
+          <Menu size={16} strokeWidth={2.4} />
+        )}
       </button>
 
       <div className="app-sidebar__content">
@@ -224,7 +264,7 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
             end
             className="app-sidebar__brand"
             aria-label="Ir al inicio de Umarí OS"
-            onClick={() => setSearchTerm("")}
+            onClick={handleNavigationClick}
             onMouseEnter={(event) => showCollapsedTooltip(event, "Umarí OS")}
             onMouseLeave={hideCollapsedTooltip}
             onFocus={(event) => showCollapsedTooltip(event, "Umarí OS")}
@@ -232,7 +272,7 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
           >
             <img src={logoUmari} alt="Umarí" className="app-sidebar__logo" />
 
-            {!isCollapsed && (
+            {!shouldCollapse && (
               <span className="app-sidebar__brand-name">Umarí OS</span>
             )}
           </NavLink>
@@ -240,17 +280,21 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
           <div
             className="app-sidebar__search"
             onClick={handleSearchClick}
-            role={isCollapsed ? "button" : undefined}
-            tabIndex={isCollapsed ? 0 : undefined}
+            role={shouldCollapse ? "button" : undefined}
+            tabIndex={shouldCollapse ? 0 : undefined}
             aria-label="Buscar módulo"
             onMouseEnter={(event) => showCollapsedTooltip(event, "Buscar módulo")}
             onMouseLeave={hideCollapsedTooltip}
             onFocus={(event) => showCollapsedTooltip(event, "Buscar módulo")}
             onBlur={hideCollapsedTooltip}
           >
-            <Search className="app-sidebar__search-icon" size={19} strokeWidth={2.2} />
+            <Search
+              className="app-sidebar__search-icon"
+              size={19}
+              strokeWidth={2.2}
+            />
 
-            {!isCollapsed && (
+            {!shouldCollapse && (
               <input
                 type="search"
                 value={searchTerm}
@@ -267,7 +311,7 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
               navigationGroups.map((group) => (
                 <section className="app-sidebar__section" key={group.name}>
                   <h2 className="app-sidebar__section-title">
-                    {isCollapsed ? "..." : group.name}
+                    {shouldCollapse ? "..." : group.name}
                   </h2>
 
                   <div className="app-sidebar__section-links">
@@ -285,7 +329,7 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
                               : "app-sidebar__link"
                           }
                           aria-label={item.label}
-                          onClick={() => setSearchTerm("")}
+                          onClick={handleNavigationClick}
                           onMouseEnter={(event) =>
                             showCollapsedTooltip(event, item.label)
                           }
@@ -301,7 +345,7 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
                             strokeWidth={2.1}
                           />
 
-                          {!isCollapsed && (
+                          {!shouldCollapse && (
                             <span className="app-sidebar__link-label">
                               {item.label}
                             </span>
@@ -313,7 +357,7 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
                 </section>
               ))
             ) : (
-              !isCollapsed && (
+              !shouldCollapse && (
                 <p className="app-sidebar__empty">No se encontraron módulos.</p>
               )
             )}
@@ -335,7 +379,7 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
               {getInitials(user)}
             </div>
 
-            {!isCollapsed && (
+            {!shouldCollapse && (
               <div className="app-sidebar__profile-content">
                 <span className="app-sidebar__profile-role">
                   {roleName.toUpperCase()}
@@ -359,9 +403,13 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse }) {
             onFocus={(event) => showCollapsedTooltip(event, "Cerrar sesión")}
             onBlur={hideCollapsedTooltip}
           >
-            <LogOut className="app-sidebar__logout-icon" size={20} strokeWidth={2.1} />
+            <LogOut
+              className="app-sidebar__logout-icon"
+              size={20}
+              strokeWidth={2.1}
+            />
 
-            {!isCollapsed && <span>Cerrar sesión</span>}
+            {!shouldCollapse && <span>Cerrar sesión</span>}
           </button>
         </div>
       </div>

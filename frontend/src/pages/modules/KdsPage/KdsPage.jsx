@@ -13,7 +13,9 @@ import {
 } from "lucide-react"
 
 import logoUmari from "../../../assets/icons/logo-umari-dark.svg"
+import AppSidebar from "../../../components/app/AppSidebar/AppSidebar"
 import useToast from "../../../components/common/Toast/useToast"
+import { getCurrentUser } from "../../../services/authService"
 
 import {
   createKitchenIncidentServiceCall,
@@ -97,6 +99,19 @@ const getFilterCount = (orders, filterId) =>
   filterId === "all"
     ? orders.length
     : orders.filter((order) => order.status === filterId).length
+
+function getKdsInitials(user) {
+  const firstName = user?.nombres?.trim()?.charAt(0) || "U"
+  const lastName = user?.apellidos?.trim()?.charAt(0) || ""
+
+  return `${firstName}${lastName}`.toUpperCase()
+}
+
+function getKdsDisplayName(user) {
+  const fullName = `${user?.nombres || ""} ${user?.apellidos || ""}`.trim()
+
+  return fullName || user?.username || "Usuario"
+}
 
 function orderMatchesSearch(order, searchTerm) {
   const normalizedSearch = searchTerm.trim().toLowerCase()
@@ -340,7 +355,7 @@ function ItemRow({ order, item, isLast, updatingItemId, onToggleItem }) {
   const isBlockedBeforeStart = order.status === "new" && !item.done
   const isBlockedAfterReady = order.status === "done"
   const isDisabled = isUpdating || isBlockedBeforeStart || isBlockedAfterReady
-    
+
   return (
     <div className={`kds-card-item${isLast ? " kds-card-item--last" : ""}`}>
       <button
@@ -511,7 +526,7 @@ function CardComplete({
 }
 
 function CardStart({ order, items, updatingItemId, onToggleItem }) {
-    return (
+  return (
     <article
       className={`kds-order-card kds-order-card--${order.status} kds-order-card--split-start`}
     >
@@ -571,7 +586,7 @@ function CardEnd({
   onServiceAction,
   onAbortReady,
 }) {
-    return (
+  return (
     <article
       className={`kds-order-card kds-order-card--${order.status} kds-order-card--split-end`}
     >
@@ -612,6 +627,7 @@ export default function KdsPage() {
   const [boardHeight, setBoardHeight] = useState(600)
   const [searchTerm, setSearchTerm] = useState("")
   const [showQuickFilters, setShowQuickFilters] = useState(false)
+  const [isNavigationDrawerOpen, setIsNavigationDrawerOpen] = useState(false)
   const [quickFilters, setQuickFilters] = useState({
     criticalOnly: false,
     withNotes: false,
@@ -626,10 +642,15 @@ export default function KdsPage() {
     isOpen: false,
     order: null,
     motivo: SUPPORT_REASONS[0],
-  })  
-  
+  })
   const [notifiedReadyOrderIds, setNotifiedReadyOrderIds] = useState([])
+
   const { showToast } = useToast()
+
+  const currentUser = useMemo(() => getCurrentUser(), [])
+  const currentUserName = getKdsDisplayName(currentUser)
+  const currentUserRole = currentUser?.rol || "Cocina"
+  const currentUserInitials = getKdsInitials(currentUser)
 
   const hasActiveQuickFilters =
     quickFilters.criticalOnly ||
@@ -660,17 +681,37 @@ export default function KdsPage() {
   }
 
   useEffect(() => {
-    loadKitchenOrders({ showLoading: true })
+    const initialLoadId = window.setTimeout(() => {
+      loadKitchenOrders()
+    }, 0)
 
     const intervalId = window.setInterval(() => {
       loadKitchenOrders()
     }, 30000)
 
     return () => {
+      window.clearTimeout(initialLoadId)
       window.clearInterval(intervalId)
     }
   }, [])
 
+  useEffect(() => {
+    if (!isNavigationDrawerOpen) {
+      return undefined
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape") {
+        setIsNavigationDrawerOpen(false)
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown)
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [isNavigationDrawerOpen])
 
   useEffect(() => {
     function measure() {
@@ -1032,6 +1073,9 @@ export default function KdsPage() {
             className="kds-menu-button"
             type="button"
             aria-label="Abrir navegación"
+            aria-controls="kds-navigation-drawer"
+            aria-expanded={isNavigationDrawerOpen}
+            onClick={() => setIsNavigationDrawerOpen(true)}
           >
             <Menu size={21} />
           </button>
@@ -1073,16 +1117,34 @@ export default function KdsPage() {
 
           <div className="kds-user-summary" aria-label="Usuario actual">
             <div className="kds-user-avatar" aria-hidden="true">
-              CA
+              {currentUserInitials}
             </div>
 
             <div>
-              <strong>Chef Agus</strong>
-              <span>Cocina</span>
+              <strong>{currentUserName}</strong>
+              <span>{currentUserRole}</span>
             </div>
           </div>
         </div>
       </header>
+
+      {isNavigationDrawerOpen && (
+        <div className="kds-navigation-layer" role="presentation">
+          <button
+            className="kds-navigation-backdrop"
+            type="button"
+            aria-label="Cerrar navegación"
+            onClick={() => setIsNavigationDrawerOpen(false)}
+          />
+
+          <AppSidebar
+            variant="drawer"
+            isCollapsed={false}
+            isOpen={isNavigationDrawerOpen}
+            onClose={() => setIsNavigationDrawerOpen(false)}
+          />
+        </div>
+      )}
 
       <main className="kds-shell">
         <section className="kds-board-toolbar">
