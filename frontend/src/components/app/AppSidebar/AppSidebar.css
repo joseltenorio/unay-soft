@@ -722,7 +722,6 @@
   }
 }
 
-/* Overlay drawer variant used by fullscreen modules such as KDS */
 .app-sidebar--drawer {
   position: fixed;
   top: 0;

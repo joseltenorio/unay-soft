@@ -627,6 +627,7 @@ export default function KdsPage() {
   const [boardHeight, setBoardHeight] = useState(600)
   const [searchTerm, setSearchTerm] = useState("")
   const [showQuickFilters, setShowQuickFilters] = useState(false)
+  const [isNavigationDrawerMounted, setIsNavigationDrawerMounted] = useState(false)
   const [isNavigationDrawerOpen, setIsNavigationDrawerOpen] = useState(false)
   const [quickFilters, setQuickFilters] = useState({
     criticalOnly: false,
@@ -651,6 +652,24 @@ export default function KdsPage() {
   const currentUserName = getKdsDisplayName(currentUser)
   const currentUserRole = currentUser?.rol || "Cocina"
   const currentUserInitials = getKdsInitials(currentUser)
+
+  const drawerAnimationDurationMs = 280
+
+  function openNavigationDrawer() {
+    setIsNavigationDrawerMounted(true)
+
+    window.requestAnimationFrame(() => {
+      setIsNavigationDrawerOpen(true)
+    })
+  }
+
+  function closeNavigationDrawer() {
+    setIsNavigationDrawerOpen(false)
+
+    window.setTimeout(() => {
+      setIsNavigationDrawerMounted(false)
+    }, drawerAnimationDurationMs)
+  }
 
   const hasActiveQuickFilters =
     quickFilters.criticalOnly ||
@@ -696,13 +715,13 @@ export default function KdsPage() {
   }, [])
 
   useEffect(() => {
-    if (!isNavigationDrawerOpen) {
+    if (!isNavigationDrawerMounted) {
       return undefined
     }
 
     function handleKeyDown(event) {
       if (event.key === "Escape") {
-        setIsNavigationDrawerOpen(false)
+        closeNavigationDrawer()
       }
     }
 
@@ -711,7 +730,7 @@ export default function KdsPage() {
     return () => {
       document.removeEventListener("keydown", handleKeyDown)
     }
-  }, [isNavigationDrawerOpen])
+  }, [isNavigationDrawerMounted])
 
   useEffect(() => {
     function measure() {
@@ -1075,7 +1094,7 @@ export default function KdsPage() {
             aria-label="Abrir navegación"
             aria-controls="kds-navigation-drawer"
             aria-expanded={isNavigationDrawerOpen}
-            onClick={() => setIsNavigationDrawerOpen(true)}
+            onClick={openNavigationDrawer}
           >
             <Menu size={21} />
           </button>
@@ -1128,20 +1147,27 @@ export default function KdsPage() {
         </div>
       </header>
 
-      {isNavigationDrawerOpen && (
-        <div className="kds-navigation-layer" role="presentation">
+      {isNavigationDrawerMounted && (
+        <div
+          className={
+            isNavigationDrawerOpen
+              ? "kds-navigation-layer kds-navigation-layer--open"
+              : "kds-navigation-layer"
+          }
+          role="presentation"
+        >
           <button
             className="kds-navigation-backdrop"
             type="button"
             aria-label="Cerrar navegación"
-            onClick={() => setIsNavigationDrawerOpen(false)}
+            onClick={closeNavigationDrawer}
           />
 
           <AppSidebar
             variant="drawer"
             isCollapsed={false}
             isOpen={isNavigationDrawerOpen}
-            onClose={() => setIsNavigationDrawerOpen(false)}
+            onClose={closeNavigationDrawer}
           />
         </div>
       )}
