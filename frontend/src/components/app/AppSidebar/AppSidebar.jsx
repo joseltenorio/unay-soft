@@ -15,7 +15,6 @@ import {
   Utensils,
   Wallet,
   Menu,
-  X,
 } from "lucide-react"
 
 import logoUmari from "../../../assets/icons/logo-umari-black.svg"
@@ -250,11 +249,7 @@ export default function AppSidebar({
         }
         onBlur={hideCollapsedTooltip}
       >
-        {isDrawer ? (
-          <X size={16} strokeWidth={2.4} />
-        ) : (
-          <Menu size={16} strokeWidth={2.4} />
-        )}
+        <Menu size={16} strokeWidth={2.4} />
       </button>
 
       <div className="app-sidebar__content">

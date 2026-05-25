@@ -106,9 +106,9 @@
   height: 100%;
 
   border: 0;
-  background: rgba(3, 25, 38, 0.48);
-  backdrop-filter: blur(2px);
-
+  background: rgba(3, 25, 38, 0.36);
+  backdrop-filter: blur(1.5px);
+  
   cursor: pointer;
   pointer-events: auto;
 
