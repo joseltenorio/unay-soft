@@ -89,6 +89,46 @@
   gap: 12px;
 }
 
+.kds-navigation-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+
+  pointer-events: none;
+}
+
+.kds-navigation-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 120;
+
+  width: 100%;
+  height: 100%;
+
+  border: 0;
+  background: rgba(3, 25, 38, 0.48);
+  backdrop-filter: blur(2px);
+
+  cursor: pointer;
+  pointer-events: auto;
+
+  animation: kdsBackdropIn 180ms ease both;
+}
+
+.kds-navigation-layer .app-sidebar--drawer {
+  pointer-events: auto;
+}
+
+@keyframes kdsBackdropIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 .kds-menu-button,
 .kds-notification-button {
   width: 44px;
