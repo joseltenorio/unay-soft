@@ -721,3 +721,106 @@
     width: 100%;
   }
 }
+
+.app-sidebar--drawer {
+  position: fixed;
+  inset: 18px auto 18px 18px;
+  z-index: 130;
+
+  width: var(--sidebar-open-width);
+  height: auto;
+  min-height: 0;
+  max-height: calc(100dvh - 36px);
+
+  border: 1px solid rgba(3, 25, 38, 0.1);
+  border-radius: 18px;
+
+  box-shadow:
+    0 28px 70px rgba(3, 25, 38, 0.24),
+    0 8px 22px rgba(3, 25, 38, 0.14);
+
+  transform: translateX(calc(-100% - 28px));
+  overflow: visible;
+
+  transition:
+    transform var(--sidebar-transition),
+    box-shadow var(--sidebar-fast-transition),
+    border-color var(--sidebar-fast-transition);
+}
+
+.app-sidebar--drawer-open {
+  transform: translateX(0);
+}
+
+.app-sidebar--drawer .app-sidebar__toggle {
+  top: 20px;
+  right: 18px;
+
+  width: 32px;
+  height: 32px;
+
+  border-color: rgba(15, 30, 34, 0.08);
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.app-sidebar--drawer .app-sidebar__toggle:hover {
+  transform: translateY(-1px);
+}
+
+.app-sidebar--drawer .app-sidebar__content {
+  height: 100%;
+  max-height: calc(100dvh - 36px);
+}
+
+.app-sidebar--drawer .app-sidebar__nav {
+  max-height: calc(100dvh - 285px);
+}
+
+@media (max-width: 920px) {
+  .app-sidebar--drawer,
+  .app-sidebar--drawer.app-sidebar--collapsed {
+    position: fixed;
+    inset: 12px;
+    z-index: 130;
+
+    width: auto;
+    height: auto;
+    min-height: 0;
+    max-height: calc(100dvh - 24px);
+
+    border: 1px solid rgba(3, 25, 38, 0.1);
+    border-radius: 18px;
+
+    transform: translateX(calc(-100% - 24px));
+    overflow: visible;
+  }
+
+  .app-sidebar--drawer-open,
+  .app-sidebar--drawer-open.app-sidebar--collapsed {
+    transform: translateX(0);
+  }
+
+  .app-sidebar--drawer .app-sidebar__toggle {
+    display: inline-flex;
+  }
+
+  .app-sidebar--drawer .app-sidebar__content {
+    height: 100%;
+    max-height: calc(100dvh - 24px);
+  }
+
+  .app-sidebar--drawer .app-sidebar__top,
+  .app-sidebar--drawer.app-sidebar--collapsed .app-sidebar__top,
+  .app-sidebar--drawer .app-sidebar__nav,
+  .app-sidebar--drawer.app-sidebar--collapsed .app-sidebar__nav,
+  .app-sidebar--drawer .app-sidebar__footer,
+  .app-sidebar--drawer.app-sidebar--collapsed .app-sidebar__footer {
+    width: var(--sidebar-inner-width);
+    align-items: stretch;
+  }
+
+  .app-sidebar--drawer .app-sidebar__nav {
+    max-height: calc(100dvh - 265px);
+  }
+}
