@@ -64,3 +64,12 @@ export async function getPosMenu() {
     products: (data.products || []).map(normalizeProduct),
   }
 }
+
+export async function createPosOrder(payload) {
+  const data = await apiPrivateRequest("/pos/orders", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  })
+
+  return data.order
+}
