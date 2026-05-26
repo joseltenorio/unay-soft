@@ -41,6 +41,16 @@ Actualmente cuenta con:
   - Identidad visual.
   - Configuración de IGV y moneda.
 - Endpoints protegidos para consultar y actualizar la configuración del establecimiento.
+- Módulo POS / Salón conectado parcialmente a datos reales del backend:
+  - Consulta de mesas reales por establecimiento.
+  - Consulta de productos disponibles para venta desde la carta interna.
+  - Registro de comandas reales desde salón.
+  - Creación de órdenes asociadas a mesa y usuario autenticado.
+  - Creación de ítems de orden con cantidades y precios calculados desde backend.
+  - Cálculo de subtotal, IGV y total de la comanda.
+  - Marcado de mesa como ocupada al registrar una comanda.
+  - Visualización de cuenta abierta por mesa con órdenes activas y total acumulado.
+  - Envío de nuevas comandas hacia el flujo del KDS sin reabrir órdenes listas o entregadas.
 - Módulo KDS conectado a datos reales del backend:
   - Listado de comandas activas de cocina.
   - Visualización de mesa, número de orden, productos, cantidades, notas y tiempos.
@@ -65,13 +75,17 @@ Actualmente cuenta con:
   - Registro de tiempos de entrega.
 - Endpoints protegidos para consultar y actualizar estados del monitor de cocina.
 - Endpoints protegidos para registrar avisos de servicio, atenderlos y confirmar entregas.
+- Endpoints protegidos para operación POS de salón:
+  - Listado de mesas y cuentas activas.
+  - Listado de productos disponibles para venta.
+  - Registro de nuevas comandas de salón.
 - Scripts SQL para estructura, datos iniciales y validación de la base de datos.
 - Colecciones/pruebas en Postman para validación de endpoints principales.
 
 Pendiente de desarrollo:
 
 - Desarrollar la lógica funcional completa de los módulos Caja, Inventario y BI.
-- Completar la lógica funcional completa de venta dentro del módulo POS.
+- Completar el monitoreo avanzado de cuentas abiertas, consumos adicionales y flujo posterior de caja.
 - Implementar funcionalidades avanzadas de roles y permisos.
 - Mejorar validaciones visuales y manejo de errores por formulario.
 - Implementar carga real de archivos o integración con almacenamiento externo para logos e imágenes.
@@ -519,14 +533,58 @@ No incluye:
 
 ## POS / Salón y avisos de cocina
 
-El módulo POS / Salón funciona como punto de atención para el personal de salón. Actualmente cuenta con una estructura base por pestañas internas para separar la venta de los avisos enviados desde cocina.
+El módulo POS / Salón funciona como punto de atención para el personal de salón. Actualmente separa el flujo de venta y el seguimiento de avisos enviados desde cocina.
 
 Pestañas actuales:
 
 - Venta.
 - Avisos de cocina.
 
-La pestaña de venta se mantiene como vista base para el desarrollo posterior del flujo completo de toma de pedidos. La pestaña de avisos de cocina permite atender la comunicación operativa enviada desde el KDS.
+Funcionalidades actuales de venta:
+
+- Consulta de mesas reales del establecimiento.
+- Visualización de zonas o ambientes del salón.
+- Identificación visual de mesas libres y mesas con cuenta abierta.
+- Consulta de productos disponibles desde la carta interna.
+- Filtros por categoría y búsqueda de productos.
+- Armado de pedido actual por mesa.
+- Registro de cantidades por producto.
+- Registro de observaciones generales de la comanda.
+- Envío de comanda a cocina mediante backend.
+- Creación de orden e ítems reales en base de datos.
+- Cálculo de subtotal, IGV y total desde backend.
+- Visualización de órdenes activas por mesa.
+- Resumen de cuenta abierta con estados de órdenes y total acumulado.
+
+Endpoints principales relacionados con venta:
+
+```txt
+GET  /api/pos/tables
+GET  /api/pos/menu
+POST /api/pos/orders
+```
+
+Permisos principales relacionados con venta:
+
+```txt
+pos.ver
+pos.actualizar_orden
+```
+
+Alcance actual de venta:
+
+- Registro de nuevas comandas desde salón.
+- Asociación de comandas a una mesa del establecimiento.
+- Envío de comandas al flujo operativo del KDS.
+- Visualización básica de cuenta abierta por mesa.
+
+No incluye todavía:
+
+- Cobro de cuentas.
+- Liberación definitiva de mesas desde caja.
+- Gestión avanzada de consumos adicionales.
+- Notas específicas por ítem desde la interfaz.
+- Impresión de comprobantes.
 
 Funcionalidades actuales de avisos de cocina:
 
@@ -540,7 +598,7 @@ Funcionalidades actuales de avisos de cocina:
 - Ocultamiento de avisos después de ser atendidos o entregados.
 - Feedback visual mediante toasts ante acciones exitosas o errores.
 
-Endpoints principales relacionados:
+Endpoints principales relacionados con avisos:
 
 ```txt
 GET   /api/kds/service-calls
@@ -548,7 +606,7 @@ PATCH /api/kds/service-calls/:id/attend
 PATCH /api/kds/orders/:id/delivered
 ```
 
-Permisos principales:
+Permisos principales relacionados con avisos:
 
 ```txt
 pos.ver
@@ -559,13 +617,20 @@ pos.confirmar_entrega
 
 Flujo operativo actual:
 
-1. Cocina prepara una comanda desde el KDS.
-2. Cocina marca la comanda como `LISTA`.
-3. Cocina llama al mesero desde el KDS.
-4. El aviso aparece en POS / Salón, dentro de la pestaña Avisos de cocina.
-5. El personal de salón confirma la entrega.
-6. La comanda pasa de `LISTA` a `ENTREGADA`.
-7. Los ítems pasan de `LISTO` a `ENTREGADO`.
+1. El personal de salón selecciona una mesa activa desde POS.
+2. El sistema muestra productos disponibles de la carta interna.
+3. El personal arma el pedido actual y registra la comanda.
+4. El backend crea la orden y sus ítems asociados.
+5. La orden queda disponible para el KDS como nueva comanda de cocina.
+6. Cocina prepara la comanda desde el KDS.
+7. Cocina marca la comanda como `LISTA`.
+8. Cocina llama al mesero desde el KDS.
+9. El aviso aparece en POS / Salón, dentro de la pestaña Avisos de cocina.
+10. El personal de salón confirma la entrega.
+11. La comanda pasa de `LISTA` a `ENTREGADA`.
+12. Los ítems pasan de `LISTO` a `ENTREGADO`.
+
+Cuando una mesa ya tiene órdenes activas, el POS permite registrar una nueva comanda para la misma mesa sin reabrir órdenes anteriores. Las órdenes `LISTA` o `ENTREGADA` se conservan con su estado actual y la nueva comanda ingresa al KDS como un registro independiente.
 
 También se permite registrar incidencias desde cocina cuando una comanda está abierta o en preparación. Estas incidencias aparecen en la pestaña Avisos de cocina y pueden marcarse como atendidas desde salón.
 
@@ -638,6 +703,9 @@ PATCH  /api/users/:id/status
 GET    /api/roles
 GET    /api/establishment
 PUT    /api/establishment
+GET    /api/pos/tables
+GET    /api/pos/menu
+POST   /api/pos/orders
 GET    /api/kds/orders
 PATCH  /api/kds/orders/:id/status
 PATCH  /api/kds/items/:id/status
@@ -646,6 +714,20 @@ GET    /api/kds/service-calls
 PATCH  /api/kds/service-calls/:id/attend
 PATCH  /api/kds/orders/:id/delivered
 ```
+
+Las pruebas de POS / Salón cubren:
+
+- Login de usuario autorizado para salón.
+- Listado de mesas del establecimiento.
+- Listado de productos disponibles para venta.
+- Registro de comanda asociada a mesa.
+- Persistencia de orden e ítems para consumo del KDS.
+- Rechazo de registro sin token.
+- Rechazo de registro sin permiso suficiente.
+- Rechazo de comanda sin mesa.
+- Rechazo de comanda sin productos.
+- Rechazo de mesa inexistente.
+- Rechazo de producto inexistente o no disponible.
 
 Las pruebas del monitor de cocina y avisos de servicio cubren:
 
