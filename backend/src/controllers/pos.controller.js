@@ -1,20 +1,51 @@
 // backend/src/controllers/pos.controller.js
 
-const { createPosOrder } = require("../services/pos.service")
+const {
+  createPosOrder,
+  getPosMenu,
+  getPosTables,
+} = require("../services/pos.service")
+
+async function listPosTables(req, res) {
+  try {
+    const tables = await getPosTables(req.user.id_establecimiento)
+
+    return res.status(200).json({
+      message: "Mesas de POS obtenidas correctamente.",
+      total: tables.length,
+      tables,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al obtener mesas de POS.",
+    })
+  }
+}
+
+async function listPosMenu(req, res) {
+  try {
+    const menu = await getPosMenu(req.user.id_establecimiento)
+
+    return res.status(200).json({
+      message: "Menú de POS obtenido correctamente.",
+      total: menu.products.length,
+      categories: menu.categories,
+      products: menu.products,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al obtener menú de POS.",
+    })
+  }
+}
 
 async function registerPosOrder(req, res) {
   try {
-    const { id_mesa, observaciones, items } = req.body || {}
+    const { id_mesa, observaciones, items } = req.body
 
     if (!id_mesa) {
       return res.status(400).json({
         message: "Debe seleccionar una mesa para registrar la comanda.",
-      })
-    }
-
-    if (!Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({
-        message: "Debe enviar al menos un producto en la comanda.",
       })
     }
 
@@ -38,5 +69,7 @@ async function registerPosOrder(req, res) {
 }
 
 module.exports = {
+  listPosTables,
+  listPosMenu,
   registerPosOrder,
 }

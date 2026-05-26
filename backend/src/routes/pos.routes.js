@@ -2,11 +2,29 @@
 
 const express = require("express")
 
-const { registerPosOrder } = require("../controllers/pos.controller")
+const {
+  listPosMenu,
+  listPosTables,
+  registerPosOrder,
+} = require("../controllers/pos.controller")
 const { authenticateToken } = require("../middlewares/auth.middleware")
 const { authorizePermission } = require("../middlewares/permission.middleware")
 
 const router = express.Router()
+
+router.get(
+  "/tables",
+  authenticateToken,
+  authorizePermission("pos.ver"),
+  listPosTables,
+)
+
+router.get(
+  "/menu",
+  authenticateToken,
+  authorizePermission("pos.ver"),
+  listPosMenu,
+)
 
 router.post(
   "/orders",

@@ -127,6 +127,156 @@ async function getOrderById(client, idOrden) {
   return rows[0] || null
 }
 
+async function getPosTables(idEstablecimiento) {
+  const { rows } = await pool.query(
+    `
+      with active_orders as (
+        select
+          o.id_mesa,
+          count(*)::int as active_order_count,
+          coalesce(sum(o.total), 0)::numeric as active_total,
+          max(o.created_at) as last_order_at,
+          json_agg(
+            json_build_object(
+              'id_orden', o.id_orden,
+              'numero_orden', o.numero_orden,
+              'estado', o.estado,
+              'subtotal', o.subtotal,
+              'igv', o.igv,
+              'total', o.total,
+              'created_at', o.created_at
+            )
+            order by o.created_at desc
+          ) as orders
+        from orden o
+        where o.estado = any($2::varchar[])
+        group by o.id_mesa
+      )
+      select
+        m.id_mesa,
+        m.id_establecimiento,
+        m.id_zona,
+        z.nombre as zona_nombre,
+        m.numero,
+        m.nombre,
+        m.capacidad,
+        m.disponibilidad,
+        m.estado,
+        coalesce(ao.active_order_count, 0) as active_order_count,
+        coalesce(ao.active_total, 0) as active_total,
+        ao.last_order_at,
+        coalesce(ao.orders, '[]'::json) as active_orders
+      from mesa m
+      left join zona z
+        on z.id_zona = m.id_zona
+      left join active_orders ao
+        on ao.id_mesa = m.id_mesa
+      where m.id_establecimiento = $1
+        and m.estado = true
+      order by
+        coalesce(z.nombre, 'Sin zona') asc,
+        m.numero asc;
+    `,
+    [idEstablecimiento, ACTIVE_ORDER_STATES],
+  )
+
+  return rows.map((table) => ({
+    id_mesa: table.id_mesa,
+    id: table.id_mesa,
+    id_establecimiento: table.id_establecimiento,
+    id_zona: table.id_zona,
+    zona_nombre: table.zona_nombre || "Sin zona",
+    floor: table.zona_nombre || "Sin zona",
+    numero: table.numero,
+    number: table.numero,
+    nombre: table.nombre,
+    capacidad: table.capacidad,
+    disponibilidad: table.disponibilidad,
+    estado: table.estado,
+    occupied:
+      table.disponibilidad === "OCUPADA" ||
+      Number(table.active_order_count) > 0,
+    active_order_count: Number(table.active_order_count || 0),
+    active_total: Number(table.active_total || 0),
+    last_order_at: table.last_order_at,
+    active_orders: table.active_orders || [],
+  }))
+}
+
+async function getPosMenu(idEstablecimiento) {
+  const { rows } = await pool.query(
+    `
+      select
+        p.id_producto,
+        p.id_establecimiento,
+        p.id_categoria,
+        c.nombre as categoria_nombre,
+        c.orden_display as categoria_orden,
+        p.nombre,
+        p.descripcion,
+        p.precio_base,
+        p.imagen_referencial,
+        p.disponibilidad,
+        p.popularidad_score,
+        p.estado
+      from producto p
+      inner join categoria c
+        on c.id_categoria = p.id_categoria
+      where p.id_establecimiento = $1
+        and p.estado = true
+        and p.disponibilidad = true
+        and c.estado = true
+      order by
+        c.orden_display asc,
+        c.nombre asc,
+        p.nombre asc;
+    `,
+    [idEstablecimiento],
+  )
+
+  const categoriesMap = new Map()
+
+  rows.forEach((product) => {
+    if (!categoriesMap.has(product.id_categoria)) {
+      categoriesMap.set(product.id_categoria, {
+        id_categoria: product.id_categoria,
+        nombre: product.categoria_nombre,
+        orden_display: product.categoria_orden,
+      })
+    }
+  })
+
+  const products = rows.map((product) => ({
+    id_producto: product.id_producto,
+    id: product.id_producto,
+    id_establecimiento: product.id_establecimiento,
+    id_categoria: product.id_categoria,
+    categoria_nombre: product.categoria_nombre,
+    category: product.categoria_nombre,
+    nombre: product.nombre,
+    name: product.nombre,
+    descripcion: product.descripcion,
+    precio_base: Number(product.precio_base),
+    price: Number(product.precio_base),
+    imagen_referencial: product.imagen_referencial,
+    disponibilidad: product.disponibilidad,
+    popularidad_score: product.popularidad_score,
+    estado: product.estado,
+  }))
+
+  return {
+    categories: [
+      {
+        id_categoria: "all",
+        nombre: "Todos",
+        orden_display: -1,
+      },
+      ...Array.from(categoriesMap.values()),
+    ],
+    products,
+  }
+}
+
 async function createPosOrder({
   idEstablecimiento,
   idUsuario,
@@ -335,4 +485,6 @@ async function createPosOrder({
 module.exports = {
   ACTIVE_ORDER_STATES,
   createPosOrder,
+  getPosMenu,
+  getPosTables,
 }
