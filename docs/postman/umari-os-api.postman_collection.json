@@ -794,6 +794,556 @@
       ]
     },
     {
+      "name": "POS - Orders",
+      "item": [
+        {
+          "name": "POS - List Tables",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{waiter_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pos/tables",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pos",
+                "tables"
+              ]
+            },
+            "description": "Lists POS tables for the authenticated establishment and stores `pos_table_id` from the first usable table."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"POS tables returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response contains tables array\", function () {",
+                  "    pm.expect(response.tables).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "if (response.tables && response.tables.length > 0) {",
+                  "    const firstAvailableTable = response.tables.find((table) => table.disponibilidad !== \"MANTENIMIENTO\" && table.disponibilidad !== \"RESERVADA\") || response.tables[0];",
+                  "    pm.collectionVariables.set(\"pos_table_id\", firstAvailableTable.id_mesa || firstAvailableTable.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POS - List Menu",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{waiter_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pos/menu",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pos",
+                "menu"
+              ]
+            },
+            "description": "Lists available POS menu products and stores product IDs for order registration tests."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"POS menu returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response contains products array\", function () {",
+                  "    pm.expect(response.products).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "if (response.products && response.products.length > 0) {",
+                  "    pm.collectionVariables.set(\"pos_product_id\", response.products[0].id_producto || response.products[0].id);",
+                  "}",
+                  "",
+                  "if (response.products && response.products.length > 1) {",
+                  "    pm.collectionVariables.set(\"pos_product_id_secondary\", response.products[1].id_producto || response.products[1].id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POS - Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{waiter_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pos/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pos",
+                "orders"
+              ]
+            },
+            "description": "Registers a new POS order for the selected table. The backend calculates prices and totals.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_mesa\": \"{{pos_table_id}}\",\n  \"observaciones\": \"{{pos_order_notes}}\",\n  \"items\": [\n    {\n      \"id_producto\": \"{{pos_product_id}}\",\n      \"cantidad\": 1,\n      \"notas_cocina\": \"{{pos_item_notes}}\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"POS order creation returns 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response contains order\", function () {",
+                  "    pm.expect(response.order).to.exist;",
+                  "    pm.expect(response.order.id_orden).to.exist;",
+                  "    pm.expect(response.order.numero_orden).to.exist;",
+                  "});",
+                  "",
+                  "pm.test(\"Order contains calculated totals\", function () {",
+                  "    pm.expect(Number(response.order.subtotal)).to.be.at.least(0);",
+                  "    pm.expect(Number(response.order.total)).to.be.at.least(0);",
+                  "});",
+                  "",
+                  "if (response.order && response.order.id_orden) {",
+                  "    pm.collectionVariables.set(\"pos_order_id\", response.order.id_orden);",
+                  "    pm.collectionVariables.set(\"order_id\", response.order.id_orden);",
+                  "    pm.collectionVariables.set(\"open_order_id\", response.order.id_orden);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POS - List Tables After Order",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{waiter_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pos/tables",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pos",
+                "tables"
+              ]
+            },
+            "description": "Validates that the selected table exposes active order information after order registration."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"POS tables after order returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "const tableId = pm.collectionVariables.get(\"pos_table_id\");",
+                  "const table = (response.tables || []).find((item) => (item.id_mesa || item.id) === tableId);",
+                  "",
+                  "pm.test(\"Selected table is present\", function () {",
+                  "    pm.expect(table).to.exist;",
+                  "});",
+                  "",
+                  "if (table) {",
+                  "    pm.test(\"Selected table has active order information\", function () {",
+                  "        pm.expect(Number(table.active_order_count || 0)).to.be.at.least(1);",
+                  "        pm.expect(table.active_orders).to.be.an(\"array\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POS - Create Order Without Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pos/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pos",
+                "orders"
+              ]
+            },
+            "description": "Rejects order registration when no Bearer token is sent.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_mesa\": \"{{pos_table_id}}\",\n  \"observaciones\": \"{{pos_order_notes}}\",\n  \"items\": [\n    {\n      \"id_producto\": \"{{pos_product_id}}\",\n      \"cantidad\": 1,\n      \"notas_cocina\": \"{{pos_item_notes}}\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Request without token returns 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POS - Create Order Denied",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pos/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pos",
+                "orders"
+              ]
+            },
+            "description": "Rejects order registration when the authenticated user does not have POS order permission.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_mesa\": \"{{pos_table_id}}\",\n  \"observaciones\": \"{{pos_order_notes}}\",\n  \"items\": [\n    {\n      \"id_producto\": \"{{pos_product_id}}\",\n      \"cantidad\": 1,\n      \"notas_cocina\": \"{{pos_item_notes}}\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Request without POS permission returns 403\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POS - Reject Order Without Table",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{waiter_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pos/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pos",
+                "orders"
+              ]
+            },
+            "description": "Rejects order registration when table ID is missing.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"observaciones\": \"{{pos_order_notes}}\",\n  \"items\": [\n    {\n      \"id_producto\": \"{{pos_product_id}}\",\n      \"cantidad\": 1,\n      \"notas_cocina\": \"{{pos_item_notes}}\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Order without table returns 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POS - Reject Order Without Items",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{waiter_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pos/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pos",
+                "orders"
+              ]
+            },
+            "description": "Rejects order registration when the item list is empty.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_mesa\": \"{{pos_table_id}}\",\n  \"observaciones\": \"{{pos_order_notes}}\",\n  \"items\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Order without items returns 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POS - Reject Invalid Table",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{waiter_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pos/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pos",
+                "orders"
+              ]
+            },
+            "description": "Rejects order registration when the table does not exist or does not belong to the establishment.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_mesa\": \"{{invalid_table_id}}\",\n  \"observaciones\": \"{{pos_order_notes}}\",\n  \"items\": [\n    {\n      \"id_producto\": \"{{pos_product_id}}\",\n      \"cantidad\": 1,\n      \"notas_cocina\": \"{{pos_item_notes}}\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Invalid table returns 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POS - Reject Invalid Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{waiter_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pos/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pos",
+                "orders"
+              ]
+            },
+            "description": "Rejects order registration when a product does not exist, is inactive or is not available.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_mesa\": \"{{pos_table_id}}\",\n  \"observaciones\": \"{{pos_order_notes}}\",\n  \"items\": [\n    {\n      \"id_producto\": \"{{invalid_product_id}}\",\n      \"cantidad\": 1,\n      \"notas_cocina\": \"{{pos_item_notes}}\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Invalid product returns 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "KDS - Kitchen Monitor",
       "description": "AAT-28 tests for the kitchen monitor. This folder validates listing kitchen orders, preparation status updates, business rules, and permission checks. It does not cover dispatch or delivery flows from AAT-29.",
       "item": [
@@ -2697,6 +3247,46 @@
     },
     {
       "key": "invalid_service_call_id",
+      "value": "00000000-0000-0000-0000-000000000000",
+      "type": "string"
+    },
+    {
+      "key": "pos_table_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pos_product_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pos_product_id_secondary",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pos_order_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pos_order_notes",
+      "value": "Pedido registrado desde Postman.",
+      "type": "string"
+    },
+    {
+      "key": "pos_item_notes",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "invalid_table_id",
+      "value": "00000000-0000-0000-0000-000000000000",
+      "type": "string"
+    },
+    {
+      "key": "invalid_product_id",
       "value": "00000000-0000-0000-0000-000000000000",
       "type": "string"
     }
