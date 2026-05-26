@@ -1,6 +1,6 @@
 // src/pages/modules/CartaPage/components/ProductoModal.jsx
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 
 const tagEmojis = {
   "Más vendido": "⭐",
