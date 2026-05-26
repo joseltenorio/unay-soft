@@ -1,8 +1,9 @@
 // src/pages/modules/SecurityPage/SecurityPage.jsx
 
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
 import {
+  ChevronDown,
   Filter,
   Pencil,
   Plus,
@@ -27,18 +28,27 @@ import UserForm from "./UserForm"
 
 import "./SecurityPage.css"
 
-const PAGE_SIZE = 8
+const ROW_HEIGHT = 58
+const MIN_PAGE_SIZE = 4
+const MAX_PAGE_SIZE = 10
+
+function getRowsPerPage() {
+  if (typeof window === "undefined") {
+    return 8
+  }
+
+  const availableHeight = window.innerHeight - 355
+  const rows = Math.floor(availableHeight / ROW_HEIGHT)
+
+  return Math.max(MIN_PAGE_SIZE, Math.min(MAX_PAGE_SIZE, rows))
+}
 
 function formatShortDate(value, fallback = "Sin registro") {
-  if (!value) {
-    return fallback
-  }
+  if (!value) return fallback
 
   const date = new Date(value)
 
-  if (Number.isNaN(date.getTime())) {
-    return fallback
-  }
+  if (Number.isNaN(date.getTime())) return fallback
 
   return new Intl.DateTimeFormat("es-PE", {
     day: "2-digit",
@@ -52,20 +62,18 @@ function getUserFullName(user) {
 }
 
 function getUserInitials(user) {
-  const names = [user.nombres, user.apellidos]
+  const parts = [user.nombres, user.apellidos]
     .filter(Boolean)
     .join(" ")
     .trim()
     .split(" ")
     .filter(Boolean)
 
-  if (names.length === 0) {
-    return "U"
-  }
+  if (parts.length === 0) return "U"
 
-  return names
+  return parts
     .slice(0, 2)
-    .map((name) => name.charAt(0).toUpperCase())
+    .map((part) => part.charAt(0).toUpperCase())
     .join("")
 }
 
@@ -80,6 +88,7 @@ export default function SecurityPage() {
   const [selectedRole, setSelectedRole] = useState("all")
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(getRowsPerPage)
 
   const [formMode, setFormMode] = useState(null)
   const [selectedUser, setSelectedUser] = useState(null)
@@ -88,15 +97,17 @@ export default function SecurityPage() {
 
   const { showToast } = useToast()
 
-  async function loadSecurityData() {
+  const loadSecurityData = useCallback(async ({ showLoading = true } = {}) => {
     try {
-      setStatus("loading")
-      setErrorMessage("")
+      if (showLoading) {
+        setStatus("loading")
+      }
 
       const [usersData, rolesData] = await Promise.all([getUsers(), getRoles()])
 
       setUsers(usersData)
       setRoles(rolesData)
+      setErrorMessage("")
       setStatus("success")
     } catch (error) {
       setStatus("error")
@@ -104,15 +115,50 @@ export default function SecurityPage() {
         error.message || "No se pudo cargar la información de usuarios.",
       )
     }
-  }
-
-  useEffect(() => {
-    loadSecurityData()
   }, [])
 
   useEffect(() => {
-    setCurrentPage(1)
-  }, [searchTerm, selectedRole, selectedStatus])
+    let isMounted = true
+
+    async function fetchInitialSecurityData() {
+      try {
+        const [usersData, rolesData] = await Promise.all([getUsers(), getRoles()])
+
+        if (!isMounted) return
+
+        setUsers(usersData)
+        setRoles(rolesData)
+        setErrorMessage("")
+        setStatus("success")
+      } catch (error) {
+        if (!isMounted) return
+
+        setStatus("error")
+        setErrorMessage(
+          error.message || "No se pudo cargar la información de usuarios.",
+        )
+      }
+    }
+
+    fetchInitialSecurityData()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  useEffect(() => {
+    function handleResize() {
+      setPageSize(getRowsPerPage())
+      setCurrentPage(1)
+    }
+
+    window.addEventListener("resize", handleResize)
+
+    return () => {
+      window.removeEventListener("resize", handleResize)
+    }
+  }, [])
 
   const summary = useMemo(() => {
     const activeUsers = users.filter((user) => user.estado).length
@@ -150,12 +196,36 @@ export default function SecurityPage() {
     })
   }, [users, searchTerm, selectedRole, selectedStatus])
 
-  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE))
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / pageSize))
+  const activePage = Math.min(currentPage, totalPages)
 
   const paginatedUsers = useMemo(() => {
-    const startIndex = (currentPage - 1) * PAGE_SIZE
-    return filteredUsers.slice(startIndex, startIndex + PAGE_SIZE)
-  }, [filteredUsers, currentPage])
+    const startIndex = (activePage - 1) * pageSize
+
+    return filteredUsers.slice(startIndex, startIndex + pageSize)
+  }, [filteredUsers, activePage, pageSize])
+
+  function handleSearchChange(event) {
+    setSearchTerm(event.target.value)
+    setCurrentPage(1)
+  }
+
+  function handleRoleChange(event) {
+    setSelectedRole(event.target.value)
+    setCurrentPage(1)
+  }
+
+  function handleStatusChange(event) {
+    setSelectedStatus(event.target.value)
+    setCurrentPage(1)
+  }
+
+  function handleClearFilters() {
+    setSearchTerm("")
+    setSelectedRole("all")
+    setSelectedStatus("all")
+    setCurrentPage(1)
+  }
 
   function handleOpenCreateForm() {
     setFormMode("create")
@@ -199,7 +269,7 @@ export default function SecurityPage() {
         })
       }
 
-      await loadSecurityData()
+      await loadSecurityData({ showLoading: false })
       handleCloseForm()
     } catch (error) {
       const message = error.message || "No se pudo guardar el usuario."
@@ -224,15 +294,11 @@ export default function SecurityPage() {
       `¿Deseas ${actionLabel} al usuario ${getUserFullName(user)}?`,
     )
 
-    if (!confirmed) {
-      return
-    }
+    if (!confirmed) return
 
     try {
-      setErrorMessage("")
-
       await updateUserStatus(user.id_usuario, nextStatus)
-      await loadSecurityData()
+      await loadSecurityData({ showLoading: false })
 
       showToast({
         type: "success",
@@ -256,12 +322,6 @@ export default function SecurityPage() {
     }
   }
 
-  function handleClearFilters() {
-    setSearchTerm("")
-    setSelectedRole("all")
-    setSelectedStatus("all")
-  }
-
   function handlePreviousPage() {
     setCurrentPage((page) => Math.max(1, page - 1))
   }
@@ -270,81 +330,66 @@ export default function SecurityPage() {
     setCurrentPage((page) => Math.min(totalPages, page + 1))
   }
 
-  const isFormOpen = Boolean(formMode)
   const hasActiveFilters =
     searchTerm.trim() || selectedRole !== "all" || selectedStatus !== "all"
+
+  const isFormOpen = Boolean(formMode)
 
   return (
     <main className="security-page">
       <section className="security-page__shell">
         <header className="security-page__header">
           <div className="security-page__title-group">
-            <div className="security-page__title-icon" aria-hidden="true">
-              <UsersRound size={21} strokeWidth={2.2} />
-            </div>
+            <span className="security-page__title-icon" aria-hidden="true">
+              <UsersRound size={18} strokeWidth={2.2} />
+            </span>
 
             <div>
               <h1>Gestión de usuarios</h1>
-              <p>
-                Administra al personal interno, sus roles operativos y el estado
-                de acceso al sistema.
-              </p>
+              <p>Administra usuarios, roles y accesos del personal interno.</p>
             </div>
           </div>
-
-          <button
-            className="security-page__primary-button"
-            type="button"
-            onClick={handleOpenCreateForm}
-            disabled={status === "loading"}
-          >
-            <Plus size={16} strokeWidth={2.4} />
-            Nuevo usuario
-          </button>
         </header>
-
-        <section className="security-page__metrics" aria-label="Resumen de usuarios">
-          <article className="security-page__metric-card">
-            <span>Total usuarios</span>
-            <strong>{summary.totalUsers}</strong>
-          </article>
-
-          <article className="security-page__metric-card">
-            <span>Activos</span>
-            <strong>{summary.activeUsers}</strong>
-          </article>
-
-          <article className="security-page__metric-card">
-            <span>Inactivos</span>
-            <strong>{summary.inactiveUsers}</strong>
-          </article>
-        </section>
 
         <section className="security-page__panel">
           <div className="security-page__panel-top">
-            <div>
+            <div className="security-page__panel-heading">
               <h2>
-                Todos los usuarios{" "}
-                <span>{filteredUsers.length}</span>
+                Todos los usuarios <span>{filteredUsers.length}</span>
               </h2>
-              <p>
-                Vista conectada al backend y protegida por permisos de gestión.
-              </p>
+
+              <div className="security-page__summary-inline" aria-label="Resumen">
+                <span>Total {summary.totalUsers}</span>
+                <span>Activos {summary.activeUsers}</span>
+                <span>Inactivos {summary.inactiveUsers}</span>
+              </div>
             </div>
 
-            <button
-              className="security-page__ghost-button"
-              type="button"
-              onClick={loadSecurityData}
-              disabled={status === "loading"}
-            >
-              <RefreshCw
-                size={15}
-                strokeWidth={2.3}
-                className={status === "loading" ? "is-spinning" : ""}
-              />
-              Actualizar
-            </button>
+            <div className="security-page__top-actions">
+              <button
+                className="security-page__ghost-button"
+                type="button"
+                onClick={() => loadSecurityData()}
+                disabled={status === "loading"}
+              >
+                <RefreshCw
+                  size={15}
+                  strokeWidth={2.3}
+                  className={status === "loading" ? "is-spinning" : ""}
+                />
+                Actualizar
+              </button>
+
+              <button
+                className="security-page__primary-button"
+                type="button"
+                onClick={handleOpenCreateForm}
+                disabled={status === "loading"}
+              >
+                <Plus size={15} strokeWidth={2.4} />
+                Nuevo usuario
+              </button>
+            </div>
           </div>
 
           <div className="security-page__toolbar">
@@ -353,7 +398,7 @@ export default function SecurityPage() {
               <input
                 type="search"
                 value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
+                onChange={handleSearchChange}
                 placeholder="Buscar por nombre, correo, usuario o rol"
                 aria-label="Buscar usuarios"
               />
@@ -362,9 +407,10 @@ export default function SecurityPage() {
             <div className="security-page__filters">
               <label className="security-page__filter">
                 <Filter size={15} strokeWidth={2.2} aria-hidden="true" />
+
                 <select
                   value={selectedRole}
-                  onChange={(event) => setSelectedRole(event.target.value)}
+                  onChange={handleRoleChange}
                   aria-label="Filtrar por rol"
                 >
                   <option value="all">Todos los roles</option>
@@ -375,19 +421,24 @@ export default function SecurityPage() {
                     </option>
                   ))}
                 </select>
+
+                <ChevronDown size={15} strokeWidth={2.3} aria-hidden="true" />
               </label>
 
               <label className="security-page__filter">
                 <ShieldCheck size={15} strokeWidth={2.2} aria-hidden="true" />
+
                 <select
                   value={selectedStatus}
-                  onChange={(event) => setSelectedStatus(event.target.value)}
+                  onChange={handleStatusChange}
                   aria-label="Filtrar por estado"
                 >
                   <option value="all">Todos los estados</option>
                   <option value="active">Activos</option>
                   <option value="inactive">Inactivos</option>
                 </select>
+
+                <ChevronDown size={15} strokeWidth={2.3} aria-hidden="true" />
               </label>
 
               {hasActiveFilters && (
@@ -404,10 +455,7 @@ export default function SecurityPage() {
 
           {isFormOpen && (
             <div className="security-page__modal-overlay">
-              <div
-                className="security-page__modal"
-                onClick={(event) => event.stopPropagation()}
-              >
+              <div className="security-page__modal">
                 <UserForm
                   key={selectedUser?.id_usuario || "create"}
                   mode={formMode}
@@ -448,9 +496,19 @@ export default function SecurityPage() {
             <>
               <div className="security-page__table-card">
                 <table className="security-page__table">
+                  <colgroup>
+                    <col className="security-page__col-check" />
+                    <col className="security-page__col-user" />
+                    <col className="security-page__col-role" />
+                    <col className="security-page__col-status" />
+                    <col className="security-page__col-last" />
+                    <col className="security-page__col-created" />
+                    <col className="security-page__col-actions" />
+                  </colgroup>
+
                   <thead>
                     <tr>
-                      <th className="security-page__checkbox-cell">
+                      <th>
                         <span className="security-page__fake-checkbox" />
                       </th>
                       <th>Usuario</th>
@@ -465,7 +523,7 @@ export default function SecurityPage() {
                   <tbody>
                     {paginatedUsers.map((user) => (
                       <tr key={user.id_usuario}>
-                        <td className="security-page__checkbox-cell">
+                        <td>
                           <span className="security-page__fake-checkbox" />
                         </td>
 
@@ -475,15 +533,17 @@ export default function SecurityPage() {
                               {getUserInitials(user)}
                             </span>
 
-                            <div>
-                              <strong>{getUserFullName(user)}</strong>
-                              <small>{user.email}</small>
+                            <div className="security-page__user-copy">
+                              <strong title={getUserFullName(user)}>
+                                {getUserFullName(user)}
+                              </strong>
+                              <small title={user.email}>{user.email}</small>
                             </div>
                           </div>
                         </td>
 
                         <td>
-                          <span className="security-page__role">
+                          <span className="security-page__role" title={user.rol}>
                             {user.rol || "Sin rol"}
                           </span>
                         </td>
@@ -520,7 +580,7 @@ export default function SecurityPage() {
                               onClick={() => handleOpenEditForm(user)}
                             >
                               <Pencil size={14} strokeWidth={2.1} />
-                              Editar
+                              <span>Editar</span>
                             </button>
 
                             <button
@@ -533,7 +593,7 @@ export default function SecurityPage() {
                               onClick={() => handleToggleStatus(user)}
                             >
                               <Power size={14} strokeWidth={2.1} />
-                              {user.estado ? "Desactivar" : "Activar"}
+                              <span>{user.estado ? "Desactivar" : "Activar"}</span>
                             </button>
                           </div>
                         </td>
@@ -545,8 +605,7 @@ export default function SecurityPage() {
 
               <footer className="security-page__pagination">
                 <p>
-                  Mostrando{" "}
-                  <strong>{paginatedUsers.length}</strong> de{" "}
+                  Mostrando <strong>{paginatedUsers.length}</strong> de{" "}
                   <strong>{filteredUsers.length}</strong> usuarios
                 </p>
 
@@ -554,7 +613,7 @@ export default function SecurityPage() {
                   <button
                     type="button"
                     onClick={handlePreviousPage}
-                    disabled={currentPage === 1}
+                    disabled={activePage === 1}
                   >
                     Anterior
                   </button>
@@ -565,7 +624,7 @@ export default function SecurityPage() {
                         key={page}
                         type="button"
                         className={
-                          currentPage === page
+                          activePage === page
                             ? "security-page__page-button security-page__page-button--active"
                             : "security-page__page-button"
                         }
@@ -579,7 +638,7 @@ export default function SecurityPage() {
                   <button
                     type="button"
                     onClick={handleNextPage}
-                    disabled={currentPage === totalPages}
+                    disabled={activePage === totalPages}
                   >
                     Siguiente
                   </button>

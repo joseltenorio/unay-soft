@@ -35,6 +35,10 @@
   background: #f6efe1;
 }
 
+.app-layout--security {
+  background: #f7f8fa;
+}
+
 .app-layout__content {
   position: relative;
   z-index: 1;
@@ -48,6 +52,20 @@
       rgba(255, 255, 255, 0.72) 0%,
       rgba(244, 233, 205, 0.72) 100%
     );
+}
+
+.app-layout__route-view {
+  min-height: calc(100vh - 64px);
+}
+
+.app-layout--security .app-layout__content {
+  min-height: 100vh;
+  padding: 0;
+  background: #f7f8fa;
+}
+
+.app-layout--security .app-layout__route-view {
+  min-height: 100vh;
 }
 
 .app-layout--kds .app-layout__content {
@@ -70,6 +88,7 @@
     padding: 24px;
   }
 
+  .app-layout--security .app-layout__content,
   .app-layout--kds .app-layout__content {
     padding: 0;
   }

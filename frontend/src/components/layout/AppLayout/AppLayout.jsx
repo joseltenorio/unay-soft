@@ -12,21 +12,23 @@ export default function AppLayout() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
 
   const isKdsRoute = location.pathname.startsWith("/app/kds")
+  const isSecurityRoute = location.pathname.startsWith("/app/security")
 
   function handleToggleSidebar() {
     setIsSidebarCollapsed((currentValue) => !currentValue)
   }
 
+  const layoutClassName = [
+    "app-layout",
+    isSidebarCollapsed && !isKdsRoute ? "app-layout--sidebar-collapsed" : "",
+    isKdsRoute ? "app-layout--kds" : "",
+    isSecurityRoute ? "app-layout--security" : "",
+  ]
+    .filter(Boolean)
+    .join(" ")
+
   return (
-    <div
-      className={
-        isKdsRoute
-          ? "app-layout app-layout--kds"
-          : isSidebarCollapsed
-            ? "app-layout app-layout--sidebar-collapsed"
-            : "app-layout"
-      }
-    >
+    <div className={layoutClassName}>
       {!isKdsRoute && (
         <AppSidebar
           isCollapsed={isSidebarCollapsed}
