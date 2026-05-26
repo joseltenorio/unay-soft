@@ -1,6 +1,6 @@
 // src/pages/modules/SecurityPage/SecurityPage.jsx
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import {
   ChevronDown,
@@ -11,7 +11,9 @@ import {
   RefreshCw,
   Search,
   ShieldCheck,
+  TriangleAlert,
   UsersRound,
+  X,
 } from "lucide-react"
 
 import useToast from "../../../components/common/Toast/useToast"
@@ -77,6 +79,111 @@ function getUserInitials(user) {
     .join("")
 }
 
+function FilterDropdown({
+  icon: Icon,
+  label,
+  value,
+  options,
+  onChange,
+  align = "left",
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef(null)
+
+  const selectedOption =
+    options.find((option) => String(option.value) === String(value)) ||
+    options[0]
+
+  useEffect(() => {
+    function handlePointerDown(event) {
+      if (!dropdownRef.current) return
+
+      if (!dropdownRef.current.contains(event.target)) {
+        setIsOpen(false)
+      }
+    }
+
+    function handleEscape(event) {
+      if (event.key === "Escape") {
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown)
+    document.addEventListener("keydown", handleEscape)
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown)
+      document.removeEventListener("keydown", handleEscape)
+    }
+  }, [])
+
+  function handleSelect(optionValue) {
+    onChange(optionValue)
+    setIsOpen(false)
+  }
+
+  return (
+    <div
+      className={`security-page__dropdown security-page__dropdown--${align}`}
+      ref={dropdownRef}
+    >
+      <button
+        className={
+          isOpen
+            ? "security-page__dropdown-trigger security-page__dropdown-trigger--open"
+            : "security-page__dropdown-trigger"
+        }
+        type="button"
+        onClick={() => setIsOpen((currentValue) => !currentValue)}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-label={label}
+      >
+        {Icon && <Icon size={15} strokeWidth={2.2} aria-hidden="true" />}
+
+        <span>{selectedOption.label}</span>
+
+        <ChevronDown
+          size={15}
+          strokeWidth={2.3}
+          aria-hidden="true"
+          className={
+            isOpen
+              ? "security-page__dropdown-chevron security-page__dropdown-chevron--open"
+              : "security-page__dropdown-chevron"
+          }
+        />
+      </button>
+
+      {isOpen && (
+        <div className="security-page__dropdown-menu" role="listbox">
+          {options.map((option) => {
+            const isSelected = String(option.value) === String(value)
+
+            return (
+              <button
+                key={option.value}
+                className={
+                  isSelected
+                    ? "security-page__dropdown-option security-page__dropdown-option--selected"
+                    : "security-page__dropdown-option"
+                }
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => handleSelect(option.value)}
+              >
+                {option.label}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function SecurityPage() {
   const [users, setUsers] = useState([])
   const [roles, setRoles] = useState([])
@@ -94,6 +201,9 @@ export default function SecurityPage() {
   const [selectedUser, setSelectedUser] = useState(null)
   const [formError, setFormError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const [statusActionUser, setStatusActionUser] = useState(null)
+  const [isChangingStatus, setIsChangingStatus] = useState(false)
 
   const { showToast } = useToast()
 
@@ -160,6 +270,26 @@ export default function SecurityPage() {
     }
   }, [])
 
+  const roleOptions = useMemo(
+    () => [
+      { value: "all", label: "Todos los roles" },
+      ...roles.map((role) => ({
+        value: role.id_rol,
+        label: role.nombre,
+      })),
+    ],
+    [roles],
+  )
+
+  const statusOptions = useMemo(
+    () => [
+      { value: "all", label: "Todos los estados" },
+      { value: "active", label: "Activos" },
+      { value: "inactive", label: "Inactivos" },
+    ],
+    [],
+  )
+
   const summary = useMemo(() => {
     const activeUsers = users.filter((user) => user.estado).length
     const inactiveUsers = users.length - activeUsers
@@ -210,13 +340,13 @@ export default function SecurityPage() {
     setCurrentPage(1)
   }
 
-  function handleRoleChange(event) {
-    setSelectedRole(event.target.value)
+  function handleRoleChange(value) {
+    setSelectedRole(value)
     setCurrentPage(1)
   }
 
-  function handleStatusChange(event) {
-    setSelectedStatus(event.target.value)
+  function handleStatusChange(value) {
+    setSelectedStatus(value)
     setCurrentPage(1)
   }
 
@@ -286,27 +416,36 @@ export default function SecurityPage() {
     }
   }
 
-  async function handleToggleStatus(user) {
-    const nextStatus = !user.estado
-    const actionLabel = nextStatus ? "activar" : "desactivar"
+  function handleOpenStatusModal(user) {
+    setStatusActionUser(user)
+  }
 
-    const confirmed = window.confirm(
-      `¿Deseas ${actionLabel} al usuario ${getUserFullName(user)}?`,
-    )
+  function handleCloseStatusModal() {
+    if (isChangingStatus) return
 
-    if (!confirmed) return
+    setStatusActionUser(null)
+  }
+
+  async function handleConfirmStatusChange() {
+    if (!statusActionUser) return
+
+    const nextStatus = !statusActionUser.estado
 
     try {
-      await updateUserStatus(user.id_usuario, nextStatus)
+      setIsChangingStatus(true)
+
+      await updateUserStatus(statusActionUser.id_usuario, nextStatus)
       await loadSecurityData({ showLoading: false })
 
       showToast({
         type: "success",
         title: nextStatus ? "Usuario activado" : "Usuario desactivado",
-        message: `${getUserFullName(user)} fue ${
+        message: `${getUserFullName(statusActionUser)} fue ${
           nextStatus ? "activado" : "desactivado"
         } correctamente.`,
       })
+
+      setStatusActionUser(null)
     } catch (error) {
       const message =
         error.message || "No se pudo actualizar el estado del usuario."
@@ -319,6 +458,8 @@ export default function SecurityPage() {
         title: "No se pudo actualizar",
         message,
       })
+    } finally {
+      setIsChangingStatus(false)
     }
   }
 
@@ -334,6 +475,8 @@ export default function SecurityPage() {
     searchTerm.trim() || selectedRole !== "all" || selectedStatus !== "all"
 
   const isFormOpen = Boolean(formMode)
+  const isStatusModalOpen = Boolean(statusActionUser)
+  const nextStatus = statusActionUser ? !statusActionUser.estado : false
 
   return (
     <main className="security-page">
@@ -404,52 +547,33 @@ export default function SecurityPage() {
               />
             </label>
 
+            {hasActiveFilters && (
+              <button
+                className="security-page__clear-button"
+                type="button"
+                onClick={handleClearFilters}
+              >
+                Limpiar
+              </button>
+            )}
+
             <div className="security-page__filters">
-              <label className="security-page__filter">
-                <Filter size={15} strokeWidth={2.2} aria-hidden="true" />
+              <FilterDropdown
+                icon={Filter}
+                label="Filtrar por rol"
+                value={selectedRole}
+                options={roleOptions}
+                onChange={handleRoleChange}
+              />
 
-                <select
-                  value={selectedRole}
-                  onChange={handleRoleChange}
-                  aria-label="Filtrar por rol"
-                >
-                  <option value="all">Todos los roles</option>
-
-                  {roles.map((role) => (
-                    <option key={role.id_rol} value={role.id_rol}>
-                      {role.nombre}
-                    </option>
-                  ))}
-                </select>
-
-                <ChevronDown size={15} strokeWidth={2.3} aria-hidden="true" />
-              </label>
-
-              <label className="security-page__filter">
-                <ShieldCheck size={15} strokeWidth={2.2} aria-hidden="true" />
-
-                <select
-                  value={selectedStatus}
-                  onChange={handleStatusChange}
-                  aria-label="Filtrar por estado"
-                >
-                  <option value="all">Todos los estados</option>
-                  <option value="active">Activos</option>
-                  <option value="inactive">Inactivos</option>
-                </select>
-
-                <ChevronDown size={15} strokeWidth={2.3} aria-hidden="true" />
-              </label>
-
-              {hasActiveFilters && (
-                <button
-                  className="security-page__clear-button"
-                  type="button"
-                  onClick={handleClearFilters}
-                >
-                  Limpiar
-                </button>
-              )}
+              <FilterDropdown
+                icon={ShieldCheck}
+                label="Filtrar por estado"
+                value={selectedStatus}
+                options={statusOptions}
+                onChange={handleStatusChange}
+                align="right"
+              />
             </div>
           </div>
 
@@ -467,6 +591,86 @@ export default function SecurityPage() {
                   onSubmit={handleSubmitUser}
                 />
               </div>
+            </div>
+          )}
+
+          {isStatusModalOpen && (
+            <div className="security-page__confirm-overlay">
+              <section
+                className="security-page__confirm-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="status-confirm-title"
+              >
+                <button
+                  className="security-page__confirm-close"
+                  type="button"
+                  onClick={handleCloseStatusModal}
+                  disabled={isChangingStatus}
+                  aria-label="Cerrar confirmación"
+                >
+                  <X size={17} strokeWidth={2.3} />
+                </button>
+
+                <div
+                  className={
+                    nextStatus
+                      ? "security-page__confirm-icon security-page__confirm-icon--success"
+                      : "security-page__confirm-icon security-page__confirm-icon--danger"
+                  }
+                  aria-hidden="true"
+                >
+                  {nextStatus ? (
+                    <Power size={20} strokeWidth={2.3} />
+                  ) : (
+                    <TriangleAlert size={20} strokeWidth={2.3} />
+                  )}
+                </div>
+
+                <div className="security-page__confirm-content">
+                  <h3 id="status-confirm-title">
+                    {nextStatus ? "Activar usuario" : "Desactivar usuario"}
+                  </h3>
+
+                  <p>
+                    {nextStatus
+                      ? `¿Deseas activar la cuenta de ${getUserFullName(
+                          statusActionUser,
+                        )}?`
+                      : `¿Deseas desactivar la cuenta de ${getUserFullName(
+                          statusActionUser,
+                        )}? Esta persona no podrá iniciar sesión mientras esté inactiva.`}
+                  </p>
+                </div>
+
+                <div className="security-page__confirm-actions">
+                  <button
+                    className="security-page__confirm-secondary"
+                    type="button"
+                    onClick={handleCloseStatusModal}
+                    disabled={isChangingStatus}
+                  >
+                    Cancelar
+                  </button>
+
+                  <button
+                    className={
+                      nextStatus
+                        ? "security-page__confirm-primary security-page__confirm-primary--success"
+                        : "security-page__confirm-primary security-page__confirm-primary--danger"
+                    }
+                    type="button"
+                    onClick={handleConfirmStatusChange}
+                    disabled={isChangingStatus}
+                  >
+                    {isChangingStatus
+                      ? "Procesando..."
+                      : nextStatus
+                        ? "Activar usuario"
+                        : "Desactivar usuario"}
+                  </button>
+                </div>
+              </section>
             </div>
           )}
 
@@ -590,7 +794,7 @@ export default function SecurityPage() {
                                   : "security-page__table-button security-page__table-button--success"
                               }
                               type="button"
-                              onClick={() => handleToggleStatus(user)}
+                              onClick={() => handleOpenStatusModal(user)}
                             >
                               <Power size={14} strokeWidth={2.1} />
                               <span>{user.estado ? "Desactivar" : "Activar"}</span>
