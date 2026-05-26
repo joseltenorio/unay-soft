@@ -1,6 +1,6 @@
 // frontend/src/pages/modules/PosPage/PosPage.jsx
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import {
   AlertTriangle,
@@ -11,12 +11,10 @@ import {
   Utensils,
 } from "lucide-react"
 
-import {
-  getCurrentPermissions,
-  getCurrentUser,
-} from "../../../services/authService"
+import { getCurrentPermissions } from "../../../services/authService"
 
 import {
+  createPosOrder,
   getPosMenu,
   getPosTables,
 } from "../../../services/posService"
@@ -63,24 +61,6 @@ function normalizeText(value) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
-}
-
-function getUserDisplayName(user) {
-  const fullName = [
-    user?.nombres,
-    user?.apellidos,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .trim()
-
-  return (
-    fullName ||
-    user?.nombre ||
-    user?.username ||
-    user?.email ||
-    "Mesero"
-  )
 }
 
 function getNotificationTypeLabel(type) {
@@ -195,13 +175,9 @@ function KitchenNoticeCard({
 
 export default function PosPage() {
   const { showToast } = useToast()
+  const isSendingToKitchenRef = useRef(false)
 
   const permissions = useMemo(() => getCurrentPermissions(), [])
-  const currentUser = useMemo(() => getCurrentUser(), [])
-  const currentWaiter = useMemo(
-    () => getUserDisplayName(currentUser),
-    [currentUser],
-  )
 
   const canViewKitchenNotices = hasPermission(
     permissions,
@@ -233,6 +209,7 @@ export default function PosPage() {
 
   const [isLoadingSaleData, setIsLoadingSaleData] = useState(true)
   const [saleDataError, setSaleDataError] = useState("")
+  const [isSendingToKitchen, setIsSendingToKitchen] = useState(false)
 
   const [tableOrders, setTableOrders] = useState({})
   const [savedOrders, setSavedOrders] = useState({})
@@ -330,10 +307,13 @@ export default function PosPage() {
       }
     }
 
-    loadSaleData()
+    const loadSaleDataId = window.setTimeout(() => {
+      loadSaleData()
+    }, 0)
 
     return () => {
       isMounted = false
+      window.clearTimeout(loadSaleDataId)
     }
   }, [showToast])
 
@@ -613,8 +593,8 @@ export default function PosPage() {
     })
   }
 
-  function handleSendToKitchen() {
-    if (!selectedTable) {
+  async function handleSendToKitchen() {
+    if (!selectedTable || isSendingToKitchenRef.current) {
       return
     }
 
@@ -628,7 +608,13 @@ export default function PosPage() {
       return
     }
 
-    const newItems = orderItems
+    const tableToSend = selectedTable
+    const tableId = tableToSend.id
+    const tableNumber = tableToSend.number
+    const notes = orderNotes[tableId] || ""
+    const itemsSnapshot = orderItems
+
+    const newItems = itemsSnapshot
       .map((item) => {
         const quantityToSend = item.quantity - item.sentQuantity
 
@@ -637,8 +623,9 @@ export default function PosPage() {
         }
 
         return {
-          ...item,
-          quantity: quantityToSend,
+          id_producto: item.id_producto || item.id,
+          cantidad: quantityToSend,
+          notas_cocina: notes,
         }
       })
       .filter(Boolean)
@@ -653,57 +640,66 @@ export default function PosPage() {
       return
     }
 
-    setTablesState((prev) =>
-      prev.map((table) =>
-        table.id === selectedTable.id
-          ? {
-              ...table,
-              occupied: true,
-              waiter: currentWaiter,
-              time: "Ahora",
-              disponibilidad: "OCUPADA",
-            }
-          : table,
-      ),
-    )
+    try {
+      isSendingToKitchenRef.current = true
+      setIsSendingToKitchen(true)
 
-    setSelectedTable((prev) =>
-      prev
-        ? {
-            ...prev,
-            occupied: true,
-            waiter: currentWaiter,
-            time: "Ahora",
-            disponibilidad: "OCUPADA",
-          }
-        : prev,
-    )
+      const createdOrder = await createPosOrder({
+        id_mesa: tableToSend.id_mesa || tableToSend.id,
+        observaciones: notes,
+        items: newItems,
+      })
 
-    const updatedItems = orderItems.map((item) => ({
-      ...item,
-      sentQuantity: item.quantity,
-    }))
+      const refreshedTables = await getPosTables()
 
-    setTableOrders((prev) => ({
-      ...prev,
-      [selectedTable.id]: updatedItems,
-    }))
+      setTablesState(refreshedTables)
 
-    setSavedOrders((prev) => ({
-      ...prev,
-      [selectedTable.id]: updatedItems,
-    }))
+      setSelectedTable((currentTable) => {
+        if (!currentTable || currentTable.id !== tableId) {
+          return currentTable
+        }
 
-    setOrderNotes((prev) => ({
-      ...prev,
-      [selectedTable.id]: "",
-    }))
+        return (
+          refreshedTables.find((table) => table.id === tableId) ||
+          currentTable
+        )
+      })
 
-    showToast({
-      type: "success",
-      title: "Pedido preparado para envío",
-      message: `Pedido de mesa ${selectedTable.number} actualizado localmente. El envío real se conectará en el siguiente commit.`,
-    })
+      const updatedItems = itemsSnapshot.map((item) => ({
+        ...item,
+        sentQuantity: item.quantity,
+      }))
+
+      setTableOrders((prev) => ({
+        ...prev,
+        [tableId]: updatedItems,
+      }))
+
+      setSavedOrders((prev) => ({
+        ...prev,
+        [tableId]: updatedItems,
+      }))
+
+      setOrderNotes((prev) => ({
+        ...prev,
+        [tableId]: "",
+      }))
+
+      showToast({
+        type: "success",
+        title: "Comanda enviada a cocina",
+        message: `Orden ${createdOrder?.numero_orden || ""} registrada para la mesa ${tableNumber}.`,
+      })
+    } catch (error) {
+      showToast({
+        type: "error",
+        title: "No se pudo enviar a cocina",
+        message: error.message || "Verifica la mesa, productos y disponibilidad.",
+      })
+    } finally {
+      isSendingToKitchenRef.current = false
+      setIsSendingToKitchen(false)
+    }
   }
 
   function handleSendToCashier() {
@@ -725,50 +721,11 @@ export default function PosPage() {
       return
     }
 
-    const confirmSend = window.confirm(
-      `¿Estás seguro de enviar la mesa ${selectedTable.number} a caja?`,
-    )
-
-    if (!confirmSend) {
-      return
-    }
-
-    setTableOrders((prev) => ({
-      ...prev,
-      [selectedTable.id]: [],
-    }))
-
-    setSavedOrders((prev) => ({
-      ...prev,
-      [selectedTable.id]: [],
-    }))
-
-    setOrderNotes((prev) => ({
-      ...prev,
-      [selectedTable.id]: "",
-    }))
-
-    setTablesState((prev) =>
-      prev.map((table) =>
-        table.id === selectedTable.id
-          ? {
-              ...table,
-              occupied: false,
-              waiter: null,
-              time: null,
-              disponibilidad: "LIBRE",
-            }
-          : table,
-      ),
-    )
-
     showToast({
-      type: "success",
-      title: "Mesa enviada a caja",
-      message: `Mesa ${selectedTable.number} enviada a caja localmente.`,
+      type: "info",
+      title: "Caja pendiente",
+      message: "El envío real a caja se implementará en un sprint posterior.",
     })
-
-    setSelectedTable(null)
   }
 
   function handleUpdateOrderNotes(notes) {
@@ -878,6 +835,7 @@ export default function PosPage() {
                 handleSendToCashier={handleSendToCashier}
                 orderNotes={orderNotes[selectedTable.id] || ""}
                 handleUpdateOrderNotes={handleUpdateOrderNotes}
+                isSendingToKitchen={isSendingToKitchen}
               />
             )}
           </section>
