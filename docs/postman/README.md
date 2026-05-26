@@ -83,6 +83,18 @@ Umari OS API
 │  ├─ Get Establishment
 │  └─ Update Establishment
 │
+├─ POS - Orders
+│  ├─ POS - List Tables
+│  ├─ POS - List Menu
+│  ├─ POS - Create Order
+│  ├─ POS - List Tables After Order
+│  ├─ POS - Create Order Without Token
+│  ├─ POS - Create Order Denied
+│  ├─ POS - Reject Order Without Table
+│  ├─ POS - Reject Order Without Items
+│  ├─ POS - Reject Invalid Table
+│  └─ POS - Reject Invalid Product
+│
 ├─ KDS - Kitchen Monitor
 │  ├─ List Kitchen Orders
 │  ├─ List Kitchen Orders Without Token
@@ -184,6 +196,16 @@ order_id =
 item_id =
 open_order_id =
 open_order_item_id =
+
+pos_table_id =
+pos_product_id =
+pos_product_id_secondary =
+pos_order_id =
+pos_order_notes = Pedido registrado desde Postman.
+pos_item_notes =
+
+invalid_table_id = 00000000-0000-0000-0000-000000000000
+invalid_product_id = 00000000-0000-0000-0000-000000000000
 ready_order_id =
 service_call_id =
 incident_service_call_id =
@@ -794,3 +816,50 @@ admin_password = contraseña_real
 admin_token = token_real
 DATABASE_URL = cadena_real_de_conexion
 ```
+
+---
+
+## Pruebas POS / Salón
+
+Las pruebas de POS / Salón validan el registro de comandas desde una mesa y la disponibilidad de información necesaria para el flujo POS → KDS.
+
+Endpoints cubiertos:
+
+```txt
+GET  {{base_url}}/pos/tables
+GET  {{base_url}}/pos/menu
+POST {{base_url}}/pos/orders
+```
+
+Variables utilizadas:
+
+```txt
+waiter_token
+pos_table_id
+pos_product_id
+pos_product_id_secondary
+pos_order_id
+pos_order_notes
+pos_item_notes
+invalid_table_id
+invalid_product_id
+user_token
+```
+
+Body base para registrar una comanda:
+
+```json
+{
+  "id_mesa": "{{pos_table_id}}",
+  "observaciones": "{{pos_order_notes}}",
+  "items": [
+    {
+      "id_producto": "{{pos_product_id}}",
+      "cantidad": 1,
+      "notas_cocina": "{{pos_item_notes}}"
+    }
+  ]
+}
+```
+
+La prueba de registro almacena `pos_order_id`, `order_id` y `open_order_id` para reutilización en validaciones posteriores.
