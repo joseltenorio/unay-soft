@@ -7,6 +7,8 @@ const {
   updateProductoStatus,
   deleteProducto,
   setProductoTags,
+  updateProductoDisponibilidad,
+  updateProductoImagen,
 } = require("../services/producto.service")
 
 async function listProductos(req, res) {
@@ -145,6 +147,34 @@ async function changeProductoStatus(req, res) {
   }
 }
 
+async function changeProductoDisponibilidad(req, res) {
+  try {
+    const { id } = req.params
+    const { disponibilidad } = req.body
+
+    if (typeof disponibilidad !== "boolean") {
+      return res.status(400).json({
+        message: "Debe enviar disponibilidad como true o false.",
+      })
+    }
+
+    const producto = await updateProductoDisponibilidad(
+      req.user.id_establecimiento, id, disponibilidad
+    )
+
+    return res.status(200).json({
+      message: disponibilidad
+        ? "Producto marcado como disponible."
+        : "Producto marcado como agotado.",
+      producto,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al actualizar disponibilidad.",
+    })
+  }
+}
+
 async function assignTags(req, res) {
   try {
     const { id } = req.params
@@ -168,6 +198,51 @@ async function assignTags(req, res) {
   }
 }
 
+async function uploadProductoImagen(req, res) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No se envió ningún archivo." })
+    }
+
+    const { createClient } = require("@supabase/supabase-js")
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    )
+
+    const idEstablecimiento = req.user.id_establecimiento
+    const idProducto = req.params.id
+    const extension = req.file.originalname.split(".").pop()
+    const filePath = `${idEstablecimiento}/${idProducto}.${extension}`
+
+    const { error: uploadError } = await supabase.storage
+      .from("Producto_img")
+      .upload(filePath, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: true,
+      })
+
+    if (uploadError) {
+      console.error("Supabase error:", uploadError)
+      return res.status(500).json({ message: "Error al subir la imagen a Supabase." })
+    }
+
+    const { data: urlData } = supabase.storage
+      .from("Producto_img")
+      .getPublicUrl(filePath)
+    const publicUrl = urlData.publicUrl + `?t=${Date.now()}`
+    const updated = await updateProductoImagen(idEstablecimiento, idProducto, publicUrl)
+    return res.status(200).json({
+      message: "Imagen del producto actualizada correctamente.",
+      producto: updated,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al subir la imagen.",
+    })
+  }
+}
+
 module.exports = {
   listProductos,
   registerProducto,
@@ -175,4 +250,6 @@ module.exports = {
   changeProductoStatus,
   removeProducto,
   assignTags,
+  changeProductoDisponibilidad,
+  uploadProductoImagen
 }

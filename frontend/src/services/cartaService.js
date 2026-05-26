@@ -87,3 +87,12 @@ export async function asignarEtiquetas(id, tag_ids) {
   })
   return data.etiquetas
 }
+
+export async function toggleProductoDisponibilidad(id, disponibilidad) {
+  const data = await apiPrivateRequest(`/productos/${id}/disponibilidad`, {
+    method: "PATCH",
+    body: JSON.stringify({ disponibilidad }),
+  })
+  return data.producto
+}
+

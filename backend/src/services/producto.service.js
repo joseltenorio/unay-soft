@@ -189,8 +189,30 @@ async function updateProductoStatus(idEstablecimiento, idProducto, estado) {
   return rows[0]
 }
 
+async function updateProductoDisponibilidad(idEstablecimiento, idProducto, disponibilidad) {
+  const existsResult = await pool.query(
+    `SELECT id_productoo FROM productoo 
+     WHERE id_productoo = $1 AND id_establecimiento = $2 LIMIT 1`,
+    [idProducto, idEstablecimiento]
+  )
+
+  if (existsResult.rows.length === 0) {
+    const error = new Error("El producto no existe o no pertenece al establecimiento.")
+    error.statusCode = 404
+    throw error
+  }
+
+  const { rows } = await pool.query(
+    `UPDATE producto SET disponibilidad = $1, updated_at = now()
+     WHERE id_producto = $2 AND id_establecimiento = $3
+     RETURNING id_producto, nombre, disponibilidad, estado, updated_at`,
+    [disponibilidad, idProducto, idEstablecimiento]
+  )
+
+  return rows[0]
+}
+
 async function setProductoTags(idEstablecimiento, idProducto, tagIds) {
-  // Verifica que el producto pertenece al establecimiento
   const exist = await pool.query(
     `SELECT id_producto FROM producto 
      WHERE id_producto = $1 AND id_establecimiento = $2 LIMIT 1`,
@@ -203,7 +225,6 @@ async function setProductoTags(idEstablecimiento, idProducto, tagIds) {
     throw error
   }
 
-  // Borra las etiquetas actuales y reinserta
   await pool.query(
     `DELETE FROM producto_etiqueta WHERE id_producto = $1`,
     [idProducto]
@@ -218,11 +239,31 @@ async function setProductoTags(idEstablecimiento, idProducto, tagIds) {
   }
 }
 
+async function updateProductoImagen(idEstablecimiento, idProducto, imagenUrl) {
+  const { rows } = await pool.query(
+    `UPDATE producto
+     SET imagen_referencial = $1, updated_at = now()
+     WHERE id_producto = $2 AND id_establecimiento = $3
+     RETURNING id_producto, nombre, imagen_referencial`,
+    [imagenUrl, idProducto, idEstablecimiento]
+  )
+
+  if (rows.length === 0) {
+    const error = new Error("El producto no existe o no pertenece al establecimiento.")
+    error.statusCode = 404
+    throw error
+  }
+
+  return rows[0]
+}
+
 module.exports = {
   getProductos,
   createProducto,
   updateProducto,
   updateProductoStatus,
   deleteProducto,
+  updateProductoDisponibilidad,
   setProductoTags,
+  updateProductoImagen, 
 }
