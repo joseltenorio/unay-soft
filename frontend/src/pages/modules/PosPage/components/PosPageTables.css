@@ -1,223 +1,150 @@
 /* src/pages/modules/PosPage/components/PosPageTables.css */
 
 :root {
-
-  /* ======================================== */
-  /* COLORS */
-  /* ======================================== */
-
   --pos-primary: #325358;
-  
   --pos-primary-hover: #274248;
-
   --pos-background: #f8fafc;
-
   --pos-surface: #ffffff;
-
   --pos-border: #e2e8f0;
-
   --pos-text: #0f172a;
-
   --pos-text-secondary: #64748b;
-
   --pos-text-muted: #94a3b8;
-
   --pos-free: #e2e8f0;
-
-  --pos-shadow:
-    0 4px 20px rgba(15, 23, 42, 0.06);
-
-  --pos-shadow-hover:
-    0 12px 28px rgba(15, 23, 42, 0.12);
+  --pos-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+  --pos-shadow-hover: 0 12px 28px rgba(15, 23, 42, 0.12);
 }
-
-
-
-/* ======================================== */
-/* MAIN */
-/* ======================================== */
 
 .pos-tables {
   display: flex;
-  flex-direction: column;  
+  flex-direction: column;
   width: 100%;
   gap: 32px;
 }
-/* ======================================== */
-/* HEADER */
-/* ======================================== */
 
 .pos-tables-header {
   display: flex;
-
   justify-content: space-between;
-
   align-items: center;
 }
 
 .pos-tables-subtitle {
-  font-size: 14px;
-
-  color: var(--pos-text-secondary);
-
   margin-bottom: 6px;
+  color: var(--pos-text-secondary);
+  font-size: 14px;
 }
 
 .pos-tables-header h1 {
-  font-size: 38px;
-
-  font-weight: 700;
-
   color: var(--pos-text);
+  font-size: 38px;
+  font-weight: 700;
 }
 
+.pos-floor-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
 
+.pos-floor-button {
+  border: none;
+  border-radius: 999px;
+  padding: 0.7rem 1.2rem;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
 
-/* ======================================== */
-/* GRID */
-/* ======================================== */
+.pos-floor-button:hover {
+  transform: translateY(-2px);
+}
+
+.pos-floor-button--active {
+  background: var(--pos-primary);
+  color: white;
+  box-shadow: 0 10px 24px rgba(50, 83, 72, 0.18);
+}
 
 .pos-tables-grid {
   display: grid;
-
-  grid-template-columns:
-    repeat(auto-fill, minmax(180px, 1fr));
-
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 28px;
 }
 
-
-
-/* ======================================== */
-/* TABLE */
-/* ======================================== */
-
 .pos-table {
   border: none;
-
-  background: var(--pos-surface);
-
   border-radius: 30px;
-
   padding: 30px 22px;
-
+  background: var(--pos-surface);
   cursor: pointer;
-
   display: flex;
-
   flex-direction: column;
-
   align-items: center;
-
   gap: 18px;
-
+  box-shadow: var(--pos-shadow);
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
-
-  box-shadow: var(--pos-shadow);
 }
 
 .pos-table:hover {
   transform: translateY(-5px);
-
   box-shadow: var(--pos-shadow-hover);
 }
 
-
-
-/* ======================================== */
-/* TABLE CIRCLE */
-/* ======================================== */
-
 .pos-table-circle {
   width: 92px;
-
   height: 92px;
-
   border-radius: 999px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
   background: var(--pos-free);
-
   color: #334155;
-
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 30px;
-
   font-weight: 700;
-
   transition:
     background 0.2s ease,
     color 0.2s ease;
 }
 
-
-
-/* ======================================== */
-/* OCCUPIED */
-/* ======================================== */
-
-.pos-table--occupied
-.pos-table-circle {
+.pos-table--occupied .pos-table-circle {
   background: var(--pos-primary);
-
   color: white;
 }
 
-
-
-/* ======================================== */
-/* INFO */
-/* ======================================== */
-
 .pos-table-info {
   display: flex;
-
   flex-direction: column;
-
   align-items: center;
-
   gap: 4px;
 }
 
 .pos-table-waiter {
-  font-size: 16px;
-
-  font-weight: 700;
-
   color: var(--pos-text);
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .pos-table-time {
-  font-size: 13px;
-
   color: var(--pos-text-secondary);
+  font-size: 13px;
 }
 
 .pos-table-free {
-  font-size: 13px;
-
   color: var(--pos-text-muted);
+  font-size: 13px;
 }
 
-
-
-/* ======================================== */
-/* RESPONSIVE */
-/* ======================================== */
-
 @media (max-width: 768px) {
-
   .pos-tables-grid {
-
-    grid-template-columns:
-      repeat(auto-fill, minmax(140px, 1fr));
-
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 18px;
   }
 
@@ -227,55 +154,7 @@
 
   .pos-table-circle {
     width: 76px;
-
     height: 76px;
-
     font-size: 24px;
   }
-}
-
-/* ======================================== */
-/* PISOS */
-/* ======================================== */
-
-.pos-floor-tabs {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-
-  margin-top: 1rem;
-}
-
-.pos-floor-button {
-  border: none;
-
-  background: var(--color-surface);
-
-  color: var(--color-text-secondary);
-
-  padding: 0.7rem 1.2rem;
-
-  border-radius: 999px;
-
-  font-size: 0.9rem;
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.pos-floor-button:hover {
-  transform: translateY(-2px); 
-}
-
-.pos-floor-button--active {
-  background: var(--pos-primary);
-
-  color: white;
-
-  box-shadow: 0 10px 24px rgba(50, 83, 72, 0.18);
 }
