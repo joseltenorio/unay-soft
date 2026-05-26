@@ -5,14 +5,15 @@ const cors = require("cors")
 require("dotenv").config()
 
 const { testConnection } = require("./config/database")
-const authRoutes          = require("./routes/auth.routes")
-const userRoutes          = require("./routes/user.routes")
-const roleRoutes          = require("./routes/role.routes")
+const authRoutes = require("./routes/auth.routes")
+const userRoutes  = require("./routes/user.routes")
+const roleRoutes = require("./routes/role.routes")
 const establishmentRoutes = require("./routes/establishment.routes")
 const kdsRoutes = require("./routes/kds.routes")
-const categoriaRoutes     = require("./routes/categoria.routes")   
-const productoRoutes      = require("./routes/producto.routes")    
+const categoriaRoutes = require("./routes/categoria.routes")   
+const productoRoutes = require("./routes/producto.routes")    
 const etiquetaRoutes = require("./routes/etiqueta.routes")
+const posRoutes = require("./routes/pos.routes")
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -37,6 +38,7 @@ app.use("/api/kds", kdsRoutes)
 app.use("/api/categorias", categoriaRoutes)   
 app.use("/api/productos", productoRoutes)    
 app.use("/api/etiquetas", etiquetaRoutes)
+app.use("/api/pos", posRoutes)
 
 app.use((req, res) =>
   res.status(404).json({ message: "Ruta no encontrada.", path: req.originalUrl })
