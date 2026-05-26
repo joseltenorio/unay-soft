@@ -701,21 +701,39 @@ export default function PosPage() {
       setIsSendingToKitchen(false)
     }
   }
-
+  
   function handleSendToCashier() {
     if (!selectedTable) {
       return
     }
 
-    const alreadySentToKitchen = orderItems.some(
+    const hasActiveTableOrders =
+      Number(selectedTable.active_order_count || 0) > 0 ||
+      selectedTable.active_orders?.length > 0
+
+    const hasSentLocalItems = orderItems.some(
       (item) => item.sentQuantity > 0,
     )
 
-    if (!alreadySentToKitchen) {
+    const hasPendingLocalItems = orderItems.some(
+      (item) => item.quantity > item.sentQuantity,
+    )
+
+    if (hasPendingLocalItems) {
       showToast({
         type: "warning",
         title: "Pedido pendiente",
-        message: "Primero debes enviar el pedido a cocina.",
+        message: "Primero envía los productos nuevos a cocina.",
+      })
+
+      return
+    }
+
+    if (!hasActiveTableOrders && !hasSentLocalItems) {
+      showToast({
+        type: "warning",
+        title: "Sin cuenta activa",
+        message: "Esta mesa no tiene órdenes activas para enviar a caja.",
       })
 
       return
@@ -724,7 +742,7 @@ export default function PosPage() {
     showToast({
       type: "info",
       title: "Caja pendiente",
-      message: "El envío real a caja se implementará en un sprint posterior.",
+      message: "La cuenta se cobrará y la mesa se liberará desde el módulo de caja.",
     })
   }
 
@@ -836,6 +854,9 @@ export default function PosPage() {
                 orderNotes={orderNotes[selectedTable.id] || ""}
                 handleUpdateOrderNotes={handleUpdateOrderNotes}
                 isSendingToKitchen={isSendingToKitchen}
+                activeOrders={selectedTable.active_orders || []}
+                activeOrderCount={selectedTable.active_order_count || 0}
+                activeTotal={selectedTable.active_total || 0}
               />
             )}
           </section>
