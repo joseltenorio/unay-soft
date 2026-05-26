@@ -48,7 +48,20 @@ export default function UserForm({
   )
 
   useEffect(() => {
-    setFormData(getInitialFormState(mode, initialUser))
+    let isMounted = true
+
+    const resetFormId = window.setTimeout(() => {
+      if (!isMounted) {
+        return
+      }
+
+      setFormData(getInitialFormState(mode, initialUser))
+    }, 0)
+
+    return () => {
+      isMounted = false
+      window.clearTimeout(resetFormId)
+    }
   }, [mode, initialUser])
 
   function handleChange(event) {
