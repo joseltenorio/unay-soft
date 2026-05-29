@@ -191,8 +191,8 @@ async function updateProductoStatus(idEstablecimiento, idProducto, estado) {
 
 async function updateProductoDisponibilidad(idEstablecimiento, idProducto, disponibilidad) {
   const existsResult = await pool.query(
-    `SELECT id_productoo FROM productoo 
-     WHERE id_productoo = $1 AND id_establecimiento = $2 LIMIT 1`,
+    `SELECT id_producto FROM producto 
+     WHERE id_producto = $1 AND id_establecimiento = $2 LIMIT 1`,
     [idProducto, idEstablecimiento]
   )
 
