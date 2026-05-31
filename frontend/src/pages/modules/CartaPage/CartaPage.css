@@ -451,7 +451,11 @@
 }
 
 .carta__prod-card--inactive {
-  opacity: 0.6;
+  opacity: 0.9;
+}
+
+.carta__prod-card--agotado {
+  opacity: 0.9;
 }
 
 .carta__prod-img {
@@ -547,10 +551,7 @@
   transition: all 0.2s ease;
 }
 
-.carta__tag:hover {
-  background: #4338ca;
-  color: white;
-}
+
 
 .carta__prod-footer {
   display: flex;
@@ -599,6 +600,52 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
+}
+
+.carta__prod-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 12px 12px 0 0;
+}
+.carta__prod-overlay--agotado {
+  background: rgba(161, 79, 0, 0.75);
+  
+}
+
+.carta__prod-overlay--inactivo {
+  background: rgba(45, 70, 100, 0.75);
+}
+
+.carta__prod-overlay-text {
+  color: white;
+  font-size: 0.75rem;
+  opacity: 0.85;
+  margin: 0;
+}
+
+.carta__prod-overlay-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  color: #111;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.carta__prod-overlay-btn:hover {
+  background: #f0f0f0;
 }
 
 .carta__empty {
