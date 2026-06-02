@@ -22,7 +22,7 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer__container container">
         <p className="footer__copyright">
-          © 2026 Umarí OS - Sistema de Gestión Gastronómica.
+          © 2026 Umarí OS v1.3 - Sistema de Gestión Gastronómica.
         </p>
 
         <nav className="footer__nav" aria-label="Enlaces legales y ayuda">
