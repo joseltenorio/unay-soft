@@ -335,271 +335,275 @@ export default function AppHome() {
 
   return (
     <div className="ah">
-      <div className="ah__topbar">
-        <div className="ah__topbar-left">
-          <div className="ah__avatar">{getInitials(user)}</div>
+      <div className="ah__content">
+        <div className="ah__topbar">
+          <div className="ah__topbar-left">
+            <div className="ah__avatar">{getInitials(user)}</div>
 
-          <div>
-            <h1 className="ah__greeting">
-              {getGreeting()}, {getFirstName(user)}
-            </h1>
-
-            <p className="ah__sub">
-              Control Operativo · <span>{formatDay()}</span>
-            </p>
-          </div>
-        </div>
-
-        <div className="ah__topbar-right">
-          <span className="ah__role-badge">
-            <span className="ah__role-dot" />
-            {user?.rol || "Usuario"}
-          </span>
-
-          <span className="ah__notif-badge">🔔 3</span>
-
-          {roleContent_.primaryAction && (
-            <Link className="ah__cta" to={roleContent_.primaryAction.to}>
-              {roleContent_.primaryAction.label}
-            </Link>
-          )}
-        </div>
-      </div>
-
-      <div className="ah__kpis">
-        {kpis.map((kpi) => {
-          const Icon = kpi.icon
-
-          return (
-            <div key={kpi.label} className="ah__kpi">
-              <div className="ah__kpi-top">
-                <span className={`ah__kpi-icon ah__kpi-icon--${kpi.color}`}>
-                  <Icon size={18} strokeWidth={2} />
-                </span>
-
-                <span
-                  className={`ah__kpi-trend ${
-                    kpi.trendUp ? "ah__kpi-trend--up" : "ah__kpi-trend--down"
-                  }`}
-                >
-                  {kpi.trendUp ? (
-                    <TrendingUp size={11} strokeWidth={2.5} />
-                  ) : (
-                    <TrendingDown size={11} strokeWidth={2.5} />
-                  )}
-
-                  {kpi.trend}
-                </span>
-              </div>
-
-              <div className="ah__kpi-val">{kpi.value}</div>
-              <div className="ah__kpi-label">{kpi.label}</div>
-            </div>
-          )
-        })}
-      </div>
-
-      <div className="ah__grid2">
-        <div className="ah__card">
-          <div className="ah__card-header">
             <div>
-              <div className="ah__card-title">Resumen de ingresos</div>
-              <div className="ah__card-sub">Últimos 7 días</div>
-            </div>
+              <h1 className="ah__greeting">
+                {getGreeting()}, {getFirstName(user)}
+              </h1>
 
-            <span className="ah__card-pill">Esta semana</span>
+              <p className="ah__sub">
+                Control Operativo · <span>{formatDay()}</span>
+              </p>
+            </div>
           </div>
 
-          <div className="ah__legend">
-            <span className="ah__leg-item">
-              <span className="ah__leg-sq ah__leg-sq--dark" />
-              Ingresos
+          <div className="ah__topbar-right">
+            <span className="ah__role-badge">
+              <span className="ah__role-dot" />
+              {user?.rol || "Usuario"}
             </span>
 
-            <span className="ah__leg-item">
-              <span className="ah__leg-sq ah__leg-sq--teal" />
-              Hoy
-            </span>
+            <span className="ah__notif-badge">🔔 3</span>
+
+            {roleContent_.primaryAction && (
+              <Link className="ah__cta" to={roleContent_.primaryAction.to}>
+                {roleContent_.primaryAction.label}
+              </Link>
+            )}
           </div>
-
-          <ResponsiveContainer width="100%" height={168}>
-            <BarChart
-              data={SALES_DATA}
-              barSize={26}
-              margin={{ top: 4, right: 0, left: -10, bottom: 0 }}
-            >
-              <XAxis
-                dataKey="day"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 11, fontWeight: 700, fill: "#68706c" }}
-              />
-
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 11, fill: "#68706c" }}
-                tickFormatter={(v) => `S/${Math.round(v / 1000)}k`}
-                width={38}
-              />
-
-              <Tooltip
-                content={<CustomTooltip />}
-                cursor={{ fill: "rgba(3,25,38,0.04)" }}
-              />
-
-              <Bar dataKey="ingresos" radius={[6, 6, 0, 0]}>
-                {SALES_DATA.map((entry) => (
-                  <Cell
-                    key={entry.day}
-                    fill={entry.day === "Hoy" ? "#77aca2" : "#031926"}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
         </div>
 
-        <div className="ah__card">
-          <div className="ah__card-header">
-            <div>
-              <div className="ah__card-title">Actividad reciente</div>
-              <div className="ah__card-sub">Últimas acciones del sistema</div>
-            </div>
-          </div>
+        <div className="ah__kpis">
+          {kpis.map((kpi) => {
+            const Icon = kpi.icon
 
-          <ul className="ah__activity">
-            {ACTIVITY.map((item) => {
-              const Icon = item.icon
-
-              return (
-                <li key={item.id} className="ah__act-item">
-                  <span className={`ah__act-dot ah__act-dot--${item.color}`}>
-                    <Icon size={14} strokeWidth={2.2} />
+            return (
+              <div key={kpi.label} className="ah__kpi">
+                <div className="ah__kpi-top">
+                  <span className={`ah__kpi-icon ah__kpi-icon--${kpi.color}`}>
+                    <Icon size={18} strokeWidth={2} />
                   </span>
 
-                  <div className="ah__act-info">
-                    <strong>{item.title}</strong>
-                    <span>{item.sub}</span>
-                  </div>
+                  <span
+                    className={`ah__kpi-trend ${
+                      kpi.trendUp ? "ah__kpi-trend--up" : "ah__kpi-trend--down"
+                    }`}
+                  >
+                    {kpi.trendUp ? (
+                      <TrendingUp size={11} strokeWidth={2.5} />
+                    ) : (
+                      <TrendingDown size={11} strokeWidth={2.5} />
+                    )}
 
-                  <span className="ah__act-time">{item.time}</span>
-                </li>
-              )
-            })}
-          </ul>
+                    {kpi.trend}
+                  </span>
+                </div>
+
+                <div className="ah__kpi-val">{kpi.value}</div>
+                <div className="ah__kpi-label">{kpi.label}</div>
+              </div>
+            )
+          })}
         </div>
-      </div>
 
-      <div className="ah__card">
-        <div className="ah__card-header">
-          <div>
-            <div className="ah__card-title">Pedidos recientes</div>
-            <div className="ah__card-sub">Órdenes del día en curso</div>
+        <div className="ah__grid2">
+          <div className="ah__card">
+            <div className="ah__card-header">
+              <div>
+                <div className="ah__card-title">Resumen de ingresos</div>
+                <div className="ah__card-sub">Últimos 7 días</div>
+              </div>
+
+              <span className="ah__card-pill">Esta semana</span>
+            </div>
+
+            <div className="ah__legend">
+              <span className="ah__leg-item">
+                <span className="ah__leg-sq ah__leg-sq--dark" />
+                Ingresos
+              </span>
+
+              <span className="ah__leg-item">
+                <span className="ah__leg-sq ah__leg-sq--teal" />
+                Hoy
+              </span>
+            </div>
+
+            <ResponsiveContainer width="100%" height={168}>
+              <BarChart
+                data={SALES_DATA}
+                barSize={26}
+                margin={{ top: 4, right: 0, left: -10, bottom: 0 }}
+              >
+                <XAxis
+                  dataKey="day"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fontWeight: 700, fill: "#68706c" }}
+                />
+
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fill: "#68706c" }}
+                  tickFormatter={(v) => `S/${Math.round(v / 1000)}k`}
+                  width={38}
+                />
+
+                <Tooltip
+                  content={<CustomTooltip />}
+                  cursor={{ fill: "rgba(3,25,38,0.04)" }}
+                />
+
+                <Bar dataKey="ingresos" radius={[6, 6, 0, 0]}>
+                  {SALES_DATA.map((entry) => (
+                    <Cell
+                      key={entry.day}
+                      fill={entry.day === "Hoy" ? "#77aca2" : "#031926"}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
 
-          <button className="ah__card-pill ah__card-pill--btn">
-            Ver todos
-          </button>
-        </div>
+          <div className="ah__card">
+            <div className="ah__card-header">
+              <div>
+                <div className="ah__card-title">Actividad reciente</div>
+                <div className="ah__card-sub">Últimas acciones del sistema</div>
+              </div>
+            </div>
 
-        <div className="ah__table-wrap">
-          <table className="ah__table">
-            <thead>
-              <tr>
-                <th>Orden</th>
-                <th>Mesa</th>
-                <th>Productos</th>
-                <th>Total</th>
-                <th>Mozo</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
+            <ul className="ah__activity">
+              {ACTIVITY.map((item) => {
+                const Icon = item.icon
 
-            <tbody>
-              {RECENT_ORDERS.map((o) => (
-                <tr key={o.id}>
-                  <td>
-                    <div className="ah__tbl-id">{o.id}</div>
-                    <div className="ah__tbl-sub">{o.tiempo}</div>
-                  </td>
-
-                  <td>{o.mesa}</td>
-
-                  <td className="ah__tbl-prods">{o.productos}</td>
-
-                  <td>
-                    <strong>{o.total}</strong>
-                  </td>
-
-                  <td>{o.mozo}</td>
-
-                  <td>
-                    <span className={`ah__status ah__status--${o.estado}`}>
-                      {o.estadoLabel}
+                return (
+                  <li key={item.id} className="ah__act-item">
+                    <span className={`ah__act-dot ah__act-dot--${item.color}`}>
+                      <Icon size={14} strokeWidth={2.2} />
                     </span>
-                  </td>
+
+                    <div className="ah__act-info">
+                      <strong>{item.title}</strong>
+                      <span>{item.sub}</span>
+                    </div>
+
+                    <span className="ah__act-time">{item.time}</span>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        </div>
+
+        <div className="ah__card">
+          <div className="ah__card-header">
+            <div>
+              <div className="ah__card-title">Pedidos recientes</div>
+              <div className="ah__card-sub">Órdenes del día en curso</div>
+            </div>
+
+            <button className="ah__card-pill ah__card-pill--btn">
+              Ver todos
+            </button>
+          </div>
+
+          <div className="ah__table-wrap">
+            <table className="ah__table">
+              <thead>
+                <tr>
+                  <th>Orden</th>
+                  <th>Mesa</th>
+                  <th>Productos</th>
+                  <th>Total</th>
+                  <th>Mozo</th>
+                  <th>Estado</th>
                 </tr>
+              </thead>
+
+              <tbody>
+                {RECENT_ORDERS.map((o) => (
+                  <tr key={o.id}>
+                    <td>
+                      <div className="ah__tbl-id">{o.id}</div>
+                      <div className="ah__tbl-sub">{o.tiempo}</div>
+                    </td>
+
+                    <td>{o.mesa}</td>
+
+                    <td className="ah__tbl-prods">{o.productos}</td>
+
+                    <td>
+                      <strong>{o.total}</strong>
+                    </td>
+
+                    <td>{o.mozo}</td>
+
+                    <td>
+                      <span className={`ah__status ah__status--${o.estado}`}>
+                        {o.estadoLabel}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="ah__panels">
+          <div className="ah__panel">
+            <div className="ah__panel-hdr">
+              <span className="ah__panel-num">01</span>
+              <h3>{roleContent_.pendingTitle}</h3>
+            </div>
+
+            <ul className="ah__plist">
+              {roleContent_.pending.map((item) => (
+                <li key={item}>{item}</li>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className="ah__panels">
-        <div className="ah__panel">
-          <div className="ah__panel-hdr">
-            <span className="ah__panel-num">01</span>
-            <h3>{roleContent_.pendingTitle}</h3>
+            </ul>
           </div>
 
-          <ul className="ah__plist">
-            {roleContent_.pending.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="ah__panel">
-          <div className="ah__panel-hdr">
-            <span className="ah__panel-num">02</span>
-            <h3>{roleContent_.flowTitle}</h3>
-          </div>
-
-          <ol className="ah__steps">
-            {roleContent_.flow.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ol>
-        </div>
-
-        <div className="ah__panel ah__panel--accent">
-          <div className="ah__panel-hdr">
-            <span className="ah__panel-num">03</span>
-            <h3>Estado de acceso</h3>
-          </div>
-
-          <div className="ah__access">
-            <div>
-              <span>Permisos</span>
-              <strong>{permissions.length}</strong>
+          <div className="ah__panel">
+            <div className="ah__panel-hdr">
+              <span className="ah__panel-num">02</span>
+              <h3>{roleContent_.flowTitle}</h3>
             </div>
 
-            <div>
-              <span>Módulos</span>
-              <strong>{modules.length}</strong>
+            <ol className="ah__steps">
+              {roleContent_.flow.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ol>
+          </div>
+
+          <div className="ah__panel ah__panel--accent">
+            <div className="ah__panel-hdr">
+              <span className="ah__panel-num">03</span>
+              <h3>Estado de acceso</h3>
             </div>
 
-            <div>
-              <span>Sesión</span>
-              <strong>Activa</strong>
+            <div className="ah__access">
+              <div>
+                <span>Permisos</span>
+                <strong>{permissions.length}</strong>
+              </div>
+
+              <div>
+                <span>Módulos</span>
+                <strong>{modules.length}</strong>
+              </div>
+
+              <div>
+                <span>Sesión</span>
+                <strong>Activa</strong>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="ah__footer-shell">
-        <Footer />
+      <div className="ah__footer-band">
+        <div className="ah__footer-shell">
+          <Footer />
+        </div>
       </div>
     </div>
   )
