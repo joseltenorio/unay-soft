@@ -41,6 +41,10 @@
   font-size: 13px;
   font-weight: 500;
   line-height: 1.5;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 
   transition:
     color var(--transition-fast),
