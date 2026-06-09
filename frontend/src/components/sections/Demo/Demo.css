@@ -1,0 +1,220 @@
+/* frontend/src/components/sections/Demo/Demo.css */
+
+.demo-section {
+  padding: 108px 24px 116px;
+  background: var(--color-bg-highlight);
+  color: var(--color-text-primary);
+}
+
+.demo-section__container {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(500px, 590px);
+  align-items: center;
+  gap: 72px;
+}
+
+.demo-section__content {
+  max-width: 600px;
+}
+
+.demo-section__eyebrow {
+  margin-bottom: 16px;
+  color: var(--color-brand-main);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.demo-section__title {
+  color: var(--color-brand-primary);
+  font-size: clamp(38px, 4.4vw, 58px);
+  font-weight: 850;
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+.demo-section__description {
+  max-width: 540px;
+  margin-top: 24px;
+  color: var(--color-text-muted);
+  font-size: clamp(16px, 1.18vw, 19px);
+  font-weight: 500;
+  line-height: 1.68;
+}
+
+.demo-section__side {
+  width: 100%;
+}
+
+.demo-section__form {
+  padding: 32px;
+  border: 1.5px solid rgba(3, 25, 38, 0.22);
+  border-radius: 18px;
+  background: var(--color-surface);
+  box-shadow: none;
+}
+
+.demo-section__form-header {
+  margin-bottom: 28px;
+}
+
+.demo-section__form-header h3 {
+  color: var(--color-brand-primary);
+  font-size: 25px;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+}
+
+.demo-section__form-header p {
+  margin-top: 8px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.demo-section__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.demo-section__field + .demo-section__field {
+  margin-top: 18px;
+}
+
+.demo-section__field label {
+  color: var(--color-brand-primary);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.demo-section__field input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 15px;
+  border: 1.5px solid rgba(3, 25, 38, 0.28);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.demo-section__field input::placeholder {
+  color: rgba(119, 119, 119, 0.66);
+}
+
+.demo-section__field input:focus {
+  border-color: var(--color-brand-primary);
+  background: #ffffff;
+}
+
+.demo-section__button {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 26px;
+  justify-content: center;
+  border-radius: 0;
+  font-size: 15px;
+  font-weight: 900;
+  box-shadow: none;
+}
+
+.demo-section__button:hover {
+  box-shadow: none;
+}
+
+.demo-section__note {
+  margin-top: 14px;
+  color: var(--color-text-muted);
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.demo-section__trust {
+  margin-top: 24px;
+
+  display: grid;
+  grid-template-columns: repeat(3, max-content);
+  justify-content: center;
+  align-items: center;
+  gap: 22px;
+}
+
+.demo-section__trust-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.demo-section__trust-item span {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--color-brand-primary);
+  color: var(--color-text-on-dark);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.demo-section__trust-item p {
+  margin: 0;
+}
+
+@media (max-width: 980px) {
+  .demo-section__container {
+    grid-template-columns: 1fr;
+    gap: 52px;
+  }
+
+  .demo-section__content {
+    max-width: 760px;
+  }
+
+  .demo-section__side {
+    max-width: 590px;
+  }
+}
+
+@media (max-width: 640px) {
+  .demo-section {
+    padding: 76px 18px 88px;
+  }
+
+  .demo-section__title {
+    font-size: clamp(34px, 10vw, 44px);
+  }
+
+  .demo-section__description {
+    margin-top: 20px;
+  }
+
+  .demo-section__form {
+    padding: 24px;
+  }
+
+  .demo-section__trust {
+    grid-template-columns: 1fr;
+    justify-items: start;
+    gap: 12px;
+  }
+}
