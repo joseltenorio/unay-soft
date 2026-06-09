@@ -39,17 +39,17 @@ export default function Hero() {
         <div className="hero__content">
           <div className="hero__text-group">
             <h1 className="hero__title">
-              La tecnología a la medida de la frescura de Umarí.
+              La tecnología a la medida de tu negocio.
             </h1>
 
             <p className="hero__description">
-              Bienvenido a la columna vertebral de nuestra operación.
-              Digitalizamos la cadena de valor de nuestra cocina.
+              Bienvenido a la columna vertebral de operación.
+              Digitalizamos la cadena de valor de tu cocina.
             </p>
           </div>
 
-          <a className="btn btn-accent hero__button" href="/login">
-            Acceso al Portal
+          <a className="btn btn-accent hero__button" href="#demo">
+            Empezar ahora
           </a>
         </div>
       </div>
