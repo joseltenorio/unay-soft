@@ -1,0 +1,442 @@
+/* src/components/layout/FooterModals/FooterModal.css */
+
+.fmodal__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+
+  padding: 24px 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(3, 12, 16, 0.72);
+  backdrop-filter: blur(3px);
+
+  animation: fmodal-overlay-in 0.2s ease;
+}
+
+@keyframes fmodal-overlay-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.fmodal__panel {
+  width: min(100%, 920px);
+  max-height: 88vh;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+
+  background: #ffffff;
+  box-shadow: 0 22px 64px rgba(0, 0, 0, 0.28);
+
+  animation: fmodal-panel-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes fmodal-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.fmodal__header {
+  position: relative;
+  height: 140px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: flex-end;
+
+  padding: 0 42px 28px;
+
+  background-size: cover;
+  background-position: center;
+}
+
+.fmodal__header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(3, 10, 14, 0.2) 0%,
+      rgba(3, 10, 14, 0.74) 100%
+    );
+}
+
+.fmodal__title {
+  position: relative;
+  z-index: 1;
+
+  flex: 1;
+
+  color: #ffffff;
+
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.fmodal__close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 2;
+
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+
+  cursor: pointer;
+
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.fmodal__close:hover {
+  border-color: rgba(255, 255, 255, 0.42);
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.fmodal__close svg {
+  width: 18px;
+  height: 18px;
+
+  stroke: currentColor;
+  stroke-width: 2.3;
+  stroke-linecap: round;
+}
+
+.fmodal__body {
+  flex: 1;
+  overflow-y: auto;
+
+  padding: 36px 42px 18px;
+
+  color: #061621;
+
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.fmodal__body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.fmodal__body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.fmodal__body::-webkit-scrollbar-thumb {
+  border-radius: 99px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.fmodal__intro {
+  margin: 0 0 28px;
+
+  color: #4d5660;
+
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.75;
+}
+
+.fmodal__date {
+  display: block;
+  margin-bottom: 10px;
+
+  color: #061621;
+
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.fmodal__section {
+  margin-bottom: 30px;
+}
+
+.fmodal__section-title {
+  margin: 0 0 14px;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  color: #061621;
+
+  font-size: 17px;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.fmodal__section-icon {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  border-radius: 9px;
+
+  background: #f2f4f5;
+  color: #061621;
+}
+
+.fmodal__section-icon svg {
+  width: 16px;
+  height: 16px;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fmodal__section p {
+  margin: 0;
+
+  color: #4d5660;
+
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.7;
+}
+
+.fmodal__steps {
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  list-style: none;
+}
+
+.fmodal__step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.fmodal__step-num {
+  width: 28px;
+  height: 28px;
+  margin-top: 1px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  border-radius: 999px;
+
+  background: #061621;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.fmodal__step p {
+  margin: 0;
+
+  color: #4d5660;
+
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.65;
+}
+
+.fmodal__modules {
+  margin-top: 10px;
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.fmodal__module-card {
+  padding: 18px 20px;
+
+  border: 1px solid #e4e7e8;
+  border-radius: 12px;
+
+  background: #ffffff;
+}
+
+.fmodal__module-card--wip {
+  opacity: 0.62;
+  background: #fafafa;
+}
+
+.fmodal__module-name {
+  margin: 0 0 7px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  color: #061621;
+
+  font-size: 15px;
+  font-weight: 850;
+  line-height: 1.3;
+}
+
+.fmodal__wip-badge {
+  padding: 3px 8px;
+
+  border-radius: 999px;
+
+  background: #eeeeee;
+  color: #565d64;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.fmodal__module-desc {
+  margin: 0;
+
+  color: #5d666f;
+
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.fmodal__footer {
+  padding: 18px 42px 26px;
+
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+
+  border-top: 1px solid #e8eaec;
+  background: #ffffff;
+}
+
+.fmodal__btn {
+  min-width: 132px;
+  min-height: 48px;
+  padding: 0 28px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #061621;
+  color: #ffffff;
+
+  font-size: 15px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    background-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.fmodal__btn:hover {
+  background: #12232d;
+}
+
+.fmodal__btn:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 720px) {
+  .fmodal__panel {
+    width: min(100%, 680px);
+  }
+
+  .fmodal__header {
+    padding-inline: 28px;
+  }
+
+  .fmodal__body {
+    padding-inline: 28px;
+  }
+
+  .fmodal__footer {
+    padding-inline: 28px;
+  }
+
+  .fmodal__modules {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .fmodal__overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .fmodal__panel {
+    max-height: 92vh;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .fmodal__header {
+    height: 130px;
+    padding: 0 22px 20px;
+  }
+
+  .fmodal__title {
+    width: 100%;
+
+    font-size: 22px;
+    font-weight: 800;
+    text-align: left;
+  }
+
+  .fmodal__body {
+    padding: 24px 22px 12px;
+  }
+
+  .fmodal__footer {
+    padding: 16px 22px 22px;
+  }
+
+  .fmodal__btn {
+    width: 100%;
+  }
+}
