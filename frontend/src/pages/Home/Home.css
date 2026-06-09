@@ -6,3 +6,7 @@
   min-height: 100vh;
   background: var(--color-bg);
 }
+
+.home section[id] {
+  scroll-margin-top: calc(var(--navbar-height) + 16px);
+}
