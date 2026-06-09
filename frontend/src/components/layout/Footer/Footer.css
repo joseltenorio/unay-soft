@@ -36,11 +36,19 @@
 }
 
 .footer__link {
+  padding: 0;
+
+  border: none;
+  background: none;
+
   color: rgba(244, 233, 205, 0.72);
 
+  font: inherit;
   font-size: 13px;
   font-weight: 500;
   line-height: 1.5;
+
+  cursor: pointer;
 
   transition:
     color var(--transition-fast),
@@ -57,7 +65,6 @@
   border-radius: 4px;
 }
 
-/* Tablet */
 @media (max-width: 820px) {
   .footer__container {
     min-height: auto;
@@ -77,7 +84,6 @@
   }
 }
 
-/* Mobile */
 @media (max-width: 520px) {
   .footer__container {
     padding-block: 22px;
