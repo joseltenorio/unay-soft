@@ -14,6 +14,8 @@ const categoriaRoutes = require("./routes/categoria.routes")
 const productoRoutes = require("./routes/producto.routes")    
 const etiquetaRoutes = require("./routes/etiqueta.routes")
 const posRoutes = require("./routes/pos.routes")
+const zonaRoutes = require("./routes/zona.routes")
+const mesaRoutes = require("./routes/mesa.routes")
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -39,6 +41,8 @@ app.use("/api/categorias", categoriaRoutes)
 app.use("/api/productos", productoRoutes)    
 app.use("/api/etiquetas", etiquetaRoutes)
 app.use("/api/pos", posRoutes)
+app.use("/api/salon/zonas", zonaRoutes)
+app.use("/api/salon/mesas", mesaRoutes)
 
 app.use((req, res) =>
   res.status(404).json({ message: "Ruta no encontrada.", path: req.originalUrl })
