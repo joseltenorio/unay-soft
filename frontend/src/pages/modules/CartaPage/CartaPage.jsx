@@ -1070,17 +1070,17 @@ export default function CartaPage() {
                   </div>
                   )}
                     {!prod.estado && (
-    <div className="carta__prod-overlay carta__prod-overlay--inactivo">
-      <span style={{ fontSize: "1rem", fontWeight: 700, color: "white", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-        Inactivo
-      </span>
-      <p className="carta__prod-overlay-text">No visible para clientes</p>
-      <button className="carta__prod-overlay-btn" onClick={(e) => { e.stopPropagation(); handleToggleProducto(prod) }}>
-        <IconEye /> Activar producto
-      </button>
-    </div>
-  )}
-                
+                    <div className="carta__prod-overlay carta__prod-overlay--inactivo">
+                      <span style={{ fontSize: "1rem", fontWeight: 700, color: "white", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                        Inactivo
+                      </span>
+                      <p className="carta__prod-overlay-text">No visible para clientes</p>
+                      <button className="carta__prod-overlay-btn" onClick={(e) => { e.stopPropagation(); handleToggleProducto(prod) }}>
+                        <IconEye /> Activar producto
+                      </button>
+                    </div>
+                  )}
+                                
 
                         <div className="carta__prod-body">
                           {prod.etiquetas && prod.etiquetas.length > 0 && (

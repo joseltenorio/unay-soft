@@ -1,6 +1,7 @@
 // src/pages/modules/CartaPage/components/ProductoModal.jsx
 
 import { useState } from "react"
+import { uploadImagenProducto } from "../../../../services/cartaService"
 
 const tagEmojis = {
   "Más vendido": "⭐",
@@ -205,28 +206,14 @@ console.log("imagen_referencial:", data?.imagen_referencial)
                   if (!file) return
                   setIsUploadingImagen(true)
                   try {
-                    const formDataUpload = new FormData()
-                    formDataUpload.append("imagen", file)
-                    const storage = localStorage.getItem("umari_token") ? localStorage : sessionStorage
-                    const token = storage.getItem("umari_token")
-                    const res = await fetch(
-                      `http://localhost:3000/api/productos/${data.id_producto}/imagen`,
-                      {
-                        method: "POST",
-                        headers: { Authorization: `Bearer ${token}` },
-                        body: formDataUpload,
-                      }
-                    )
-                    const result = await res.json()
-                    if (!res.ok) throw new Error(result.message)
-                    setImagen(result.producto.imagen_referencial)
+                    const producto = await uploadImagenProducto(data.id_producto, file)
+                    setImagen(producto.imagen_referencial)
                   } catch (err) {
                     alert("Error al subir imagen: " + err.message)
                   } finally {
                     setIsUploadingImagen(false)
                   }
-                }}
-              />
+                }}              />
             </label>
             {isUploadingImagen && (
               <p style={{ fontSize: 13, marginTop: 4, color: "#64748b" }}>Subiendo imagen...</p>
