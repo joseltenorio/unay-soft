@@ -96,3 +96,20 @@ export async function toggleProductoDisponibilidad(id, disponibilidad) {
   return data.producto
 }
 
+export async function uploadImagenProducto(id, file) {
+  const formData = new FormData()
+  formData.append("imagen", file)
+
+  const token =
+    localStorage.getItem("umari_token") || sessionStorage.getItem("umari_token")
+
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/productos/${id}/imagen`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  })
+
+  const data = await response.json().catch(() => null)
+  if (!response.ok) throw new Error(data?.message || "Error al subir imagen")
+  return data.producto
+}
