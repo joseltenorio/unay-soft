@@ -19,6 +19,7 @@ import BiPage from "./pages/modules/BiPage/BiPage"
 import SecurityPage from "./pages/modules/SecurityPage/SecurityPage"
 import EstablishmentPage from "./pages/modules/EstablishmentPage/EstablishmentPage"
 import CartaPage from "./pages/modules/CartaPage/CartaPage"
+import SalonPage from "./pages/modules/SalonPage/SalonPage"
 
 import AppLayout from "./components/layout/AppLayout/AppLayout"
 
@@ -78,6 +79,15 @@ function App() {
               element={
                 <PermissionRoute permission="inventory.ver">
                   <InventoryPage />
+                </PermissionRoute>
+              }
+            />
+        
+           <Route
+              path="salon"
+              element={
+                <PermissionRoute permission="salon.ver">
+                  <SalonPage />
                 </PermissionRoute>
               }
             />
