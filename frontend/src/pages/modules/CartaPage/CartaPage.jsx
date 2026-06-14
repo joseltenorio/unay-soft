@@ -168,6 +168,33 @@ const IconLock = () => (
   </svg>
 )
 
+const IconBan = () => (
+  <svg
+    width="15"
+    height="15"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.2"
+    viewBox="0 0 24 24"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+  </svg>
+)
+
+const IconCheck = () => (
+  <svg
+    width="15"
+    height="15"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.2"
+    viewBox="0 0 24 24"
+  >
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+)
+
 export default function CartaPage() {
   const { showToast } = useToast()
 
@@ -179,7 +206,7 @@ export default function CartaPage() {
   const [categoriaActiva, setCategoriaActiva] = useState("all")
   const [busqueda, setBusqueda] = useState("")
   const [filtroEstado, setFiltroEstado] = useState(null)
-
+  const [mostrarCatsInactivas, setMostrarCatsInactivas] = useState(false)
   const [catModal, setCatModal] = useState({ open: false, data: null })
   const [prodModal, setProdModal] = useState({
     open: false,
@@ -479,7 +506,7 @@ export default function CartaPage() {
           ? "Producto disponible"
           : "Producto marcado como agotado",
         message: updated.disponibilidad
-          ? "El producto vuelve a estar disponible para la operación."
+          ? "El producto vuelve a estar disponible para pedidos."
           : "El producto ya no estará disponible temporalmente.",
       })
     } catch (err) {
@@ -708,6 +735,14 @@ export default function CartaPage() {
               </strong>
               <p>No visible para clientes</p>
             </div>
+            <button
+              type="button"
+              onClick={() => setMostrarCatsInactivas((prev) => !prev)}
+            >
+              <span style={{ textDecoration: "underline" }}>
+                {mostrarCatsInactivas ? "Ocultar" : "Mostrar"}
+              </span>
+            </button>
           </div>
         )}
 
@@ -786,7 +821,7 @@ export default function CartaPage() {
           categorias
             .filter((cat) =>
               categoriaActiva === "all"
-                ? cat.estado
+                ? mostrarCatsInactivas || cat.estado
                 : cat.id_categoria === categoriaActiva,
             )
             .map((cat) => {
@@ -910,6 +945,8 @@ export default function CartaPage() {
                         key={prod.id_producto}
                         className={`carta__prod-card ${
                           !prod.estado ? "carta__prod-card--inactive" : ""
+                        } ${
+                          prod.estado && !prod.disponibilidad ? "carta__prod-card--agotado" : ""
                         }`}
                       >
                         <RequirePermission permission="carta.gestionar">
@@ -947,14 +984,8 @@ export default function CartaPage() {
                                     setProdMenuOpen(null)
                                   }}
                                 >
-                                  {prod.disponibilidad ? (
-                                    <IconEyeOff />
-                                  ) : (
-                                    <IconEye />
-                                  )}
-                                  {prod.disponibilidad
-                                    ? " Marcar agotado"
-                                    : " Marcar disponible"}
+                                  {prod.disponibilidad ? <IconBan /> : <IconCheck />}
+                                  {prod.disponibilidad ? " Marcar agotado" : " Marcar disponible"}
                                 </button>
 
                                 <button
@@ -1014,7 +1045,42 @@ export default function CartaPage() {
                           >
                             🍽
                           </div>
-                        </div>
+                      </div>
+             {prod.estado && !prod.disponibilidad && (
+                <div className="carta__prod-overlay carta__prod-overlay--agotado">
+                    <span style={{ 
+                      fontSize: "1rem", 
+                      fontWeight: 700, 
+                      color: "white",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em"
+                    }}>
+                      Agotado
+                    </span>
+                    <p className="carta__prod-overlay-text">No disponible para pedidos</p>
+                    <button
+                      className="carta__prod-overlay-btn"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleToggleProductoDisponibilidad(prod)
+                      }}
+                    >
+                      <IconCheck />Marcar disponible
+                    </button>
+                  </div>
+                  )}
+                    {!prod.estado && (
+    <div className="carta__prod-overlay carta__prod-overlay--inactivo">
+      <span style={{ fontSize: "1rem", fontWeight: 700, color: "white", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+        Inactivo
+      </span>
+      <p className="carta__prod-overlay-text">No visible para clientes</p>
+      <button className="carta__prod-overlay-btn" onClick={(e) => { e.stopPropagation(); handleToggleProducto(prod) }}>
+        <IconEye /> Activar producto
+      </button>
+    </div>
+  )}
+                
 
                         <div className="carta__prod-body">
                           {prod.etiquetas && prod.etiquetas.length > 0 && (
@@ -1033,14 +1099,6 @@ export default function CartaPage() {
                                 </span>
                               ))}
                             </div>
-                          )}
-
-                          {!prod.estado && (
-                            <span className="carta__tag">Inactivo</span>
-                          )}
-
-                          {prod.estado && !prod.disponibilidad && (
-                            <span className="carta__tag">Agotado</span>
                           )}
 
                           <h3 className="carta__prod-name">{prod.nombre}</h3>

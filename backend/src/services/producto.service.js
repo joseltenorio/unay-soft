@@ -65,6 +65,20 @@ async function createProducto(idEstablecimiento, data) {
     error.statusCode = 400
     throw error
   }
+  
+  const dup = await pool.query(`
+    SELECT id_producto FROM producto
+    WHERE lower(trim(nombre)) = lower(trim($1))
+      AND id_categoria = $2
+      AND id_establecimiento = $3
+      AND estado = true
+  `, [nombre, id_categoria, idEstablecimiento])
+
+  if (dup.rows.length > 0) {
+    const error = new Error(`Ya existe un producto llamado "${nombre}" en esta categoría.`)
+    error.statusCode = 409
+    throw error
+  }
 
   const insertQ = `
     insert into producto
@@ -191,8 +205,8 @@ async function updateProductoStatus(idEstablecimiento, idProducto, estado) {
 
 async function updateProductoDisponibilidad(idEstablecimiento, idProducto, disponibilidad) {
   const existsResult = await pool.query(
-    `SELECT id_productoo FROM productoo 
-     WHERE id_productoo = $1 AND id_establecimiento = $2 LIMIT 1`,
+    `SELECT id_producto FROM producto 
+     WHERE id_producto = $1 AND id_establecimiento = $2 LIMIT 1`,
     [idProducto, idEstablecimiento]
   )
 

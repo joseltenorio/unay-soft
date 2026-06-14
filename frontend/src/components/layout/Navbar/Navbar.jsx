@@ -13,6 +13,10 @@ const navLinks = [
     href: "#modulos",
   },
   {
+    label: "Planes",
+    href: "#precios",
+  },
+  {
     label: "Guía de Uso",
     href: "#guia",
   },
