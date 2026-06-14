@@ -9,6 +9,7 @@ import {
   ChefHat,
   Home,
   LogOut,
+  LayoutGrid,
   Search,
   ShieldUser,
   Store,
@@ -68,6 +69,13 @@ const moduleNavigation = {
     icon: BarChart3,
     group: "Análisis",
     keywords: "reportes bi indicadores ventas analítica analytics",
+  },
+  salon: {
+    label: "Zonas/Mesas",
+    path: "/app/salon",
+    icon: LayoutGrid,
+    group: "Administración",
+    keywords: "salon mesas zonas distribución plano",
   },
   security: {
     label: "Usuarios",
