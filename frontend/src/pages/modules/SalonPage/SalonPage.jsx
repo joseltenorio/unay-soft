@@ -19,6 +19,7 @@ import useToast from "../../../components/common/Toast/useToast"
 import ZonaModal from "./components/ZonaModal"
 import MesaModal from "./components/MesaModal"
 import ConfirmModal from "./components/ConfirmModal"
+import MesaDetailPanel from "./components/MesaDetailPanel"
 import "./SalonPage.css"
 
 const IconPlus = () => (
@@ -77,11 +78,6 @@ const IconChair = () => (
     <path d="M6 13v6M18 13v6" />
   </svg>
 )
-const IconX = () => (
-  <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-)
 
 const DISP = {
   LIBRE:        { label: "Disponible",       color: "#16a34a", bg: "#dcfce7", dot: "#16a34a" },
@@ -89,8 +85,6 @@ const DISP = {
   RESERVADA:    { label: "Reservada",        color: "#d97706", bg: "#fef3c7", dot: "#d97706" },
   MANTENIMIENTO:{ label: "Fuera de servicio",color: "#6b7280", bg: "#f3f4f6", dot: "#9ca3af" },
 }
-
-const DISP_OPTIONS = Object.keys(DISP)
 
 function MesaCard({ mesa, onSelect, selected }) {
   const disp = DISP[mesa.disponibilidad] || DISP.LIBRE
@@ -108,79 +102,6 @@ function MesaCard({ mesa, onSelect, selected }) {
     </button>
   )
 }
-
-function MesaDetailPanel({ mesa, zona, onEdit, onChangeDispo, onToggleStatus, onDelete, onClose }) {
-  const [dispOpen, setDispOpen] = useState(false)
-  const disp = DISP[mesa.disponibilidad] || DISP.LIBRE
-
-  return (
-    <div className="salon-detail">
-      <div className="salon-detail__header">
-        <h3 className="salon-detail__title">{mesa.nombre || mesa.numero}</h3>
-        <button className="salon-modal__close" onClick={onClose}><IconX /></button>
-      </div>
-
-      <div className="salon-detail__rows">
-        <div className="salon-detail__row">
-          <span>Número</span>
-          <strong>{mesa.numero}</strong>
-        </div>
-        <div className="salon-detail__row">
-          <span>Capacidad</span>
-          <strong>{mesa.capacidad} personas</strong>
-        </div>
-        <div className="salon-detail__row">
-          <span>Zona</span>
-          <strong>{zona?.nombre || "Sin zona"}</strong>
-        </div>
-        <div className="salon-detail__row">
-          <span>Estado</span>
-          <strong>
-            <span className="salon-detail__badge" style={{ background: disp.bg, color: disp.color }}>
-              {disp.label}
-            </span>
-          </strong>
-        </div>
-      </div>
-
-      <button className="salon-detail__btn-edit" onClick={onEdit}>
-        <IconEdit /> Editar mesa
-      </button>
-
-      <div className="salon-detail__dispo-wrap">
-        <button
-          className="salon-detail__btn-dispo"
-          onClick={() => setDispOpen(o => !o)}
-        >
-          Cambiar estado
-          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </button>
-        {dispOpen && (
-          <div className="salon-detail__dispo-menu">
-            {DISP_OPTIONS.map(key => (
-              <button
-                key={key}
-                className={`salon-detail__dispo-opt ${mesa.disponibilidad === key ? "salon-detail__dispo-opt--active" : ""}`}
-                onClick={() => { onChangeDispo(key); setDispOpen(false) }}
-              >
-                <span className="salon-detail__dot" style={{ background: DISP[key].dot }} />
-                {DISP[key].label}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-       <div className="salon-detail__secondary">
-        <button className="salon-detail__danger" onClick={onDelete}>
-          <IconTrash /> Eliminar
-        </button>
-       </div>
-      </div>
-  )
-}
-
 export default function SalonPage() {
   const { showToast } = useToast()
 
