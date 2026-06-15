@@ -1,6 +1,6 @@
-// src/pages/modules/SalonPage/SalonPage.jsx
+// frontend/src/pages/modules/SalonPage/SalonPage.jsx
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState } from "react"
 import {
   getZonas,
   getMesas,
@@ -27,18 +27,22 @@ const IconPlus = () => (
     <path d="M12 5v14M5 12h14" />
   </svg>
 )
+
 const IconEdit = () => (
   <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
   </svg>
 )
+
 const IconTrash = () => (
   <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-    <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" />
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6l-1 14H6L5 6" />
     <path d="M10 11v6M14 11v6M9 6V4h6v2" />
   </svg>
 )
+
 const IconEye = () => (
   <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -53,24 +57,35 @@ const IconEyeOff = () => (
     <line x1="1" y1="1" x2="23" y2="23" />
   </svg>
 )
+
 const IconDots = () => (
   <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-    <circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" />
+    <circle cx="12" cy="5" r="1" />
+    <circle cx="12" cy="12" r="1" />
+    <circle cx="12" cy="19" r="1" />
   </svg>
 )
+
 const IconGrid = () => (
   <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-    <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
-    <rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
+    <rect x="3" y="3" width="7" height="7" />
+    <rect x="14" y="3" width="7" height="7" />
+    <rect x="3" y="14" width="7" height="7" />
+    <rect x="14" y="14" width="7" height="7" />
   </svg>
 )
+
 const IconList = () => (
   <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-    <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" />
-    <line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" />
-    <line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
+    <line x1="8" y1="6" x2="21" y2="6" />
+    <line x1="8" y1="12" x2="21" y2="12" />
+    <line x1="8" y1="18" x2="21" y2="18" />
+    <line x1="3" y1="6" x2="3.01" y2="6" />
+    <line x1="3" y1="12" x2="3.01" y2="12" />
+    <line x1="3" y1="18" x2="3.01" y2="18" />
   </svg>
 )
+
 const IconChair = () => (
   <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
     <path d="M4 9V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4" />
@@ -80,14 +95,35 @@ const IconChair = () => (
 )
 
 const DISP = {
-  LIBRE:        { label: "Disponible",       color: "#16a34a", bg: "#dcfce7", dot: "#16a34a" },
-  OCUPADA:      { label: "Ocupada",          color: "#dc2626", bg: "#fee2e2", dot: "#dc2626" },
-  RESERVADA:    { label: "Reservada",        color: "#d97706", bg: "#fef3c7", dot: "#d97706" },
-  MANTENIMIENTO:{ label: "Fuera de servicio",color: "#6b7280", bg: "#f3f4f6", dot: "#9ca3af" },
+  LIBRE: {
+    label: "Disponible",
+    color: "#16a34a",
+    bg: "#dcfce7",
+    dot: "#16a34a",
+  },
+  OCUPADA: {
+    label: "Ocupada",
+    color: "#dc2626",
+    bg: "#fee2e2",
+    dot: "#dc2626",
+  },
+  RESERVADA: {
+    label: "Reservada",
+    color: "#d97706",
+    bg: "#fef3c7",
+    dot: "#d97706",
+  },
+  MANTENIMIENTO: {
+    label: "Fuera de servicio",
+    color: "#6b7280",
+    bg: "#f3f4f6",
+    dot: "#9ca3af",
+  },
 }
 
 function MesaCard({ mesa, onSelect, selected }) {
   const disp = DISP[mesa.disponibilidad] || DISP.LIBRE
+
   return (
     <button
       className={`salon-mesa-card ${selected ? "salon-mesa-card--selected" : ""}`}
@@ -95,101 +131,171 @@ function MesaCard({ mesa, onSelect, selected }) {
       onClick={() => onSelect(mesa)}
       title={`Mesa ${mesa.numero}${mesa.nombre ? ` · ${mesa.nombre}` : ""}`}
     >
-      <span className="salon-mesa-card__code">{mesa.nombre || `M${mesa.numero}`}</span>
+      <span className="salon-mesa-card__code">
+        {mesa.nombre || `M${mesa.numero}`}
+      </span>
+
       <span className="salon-mesa-card__cap">
         <IconChair /> {mesa.capacidad}
       </span>
     </button>
   )
 }
+
 export default function SalonPage() {
   const { showToast } = useToast()
 
-  const [zonas, setZonas]   = useState([])
-  const [mesas, setMesas]   = useState([])
+  const [zonas, setZonas] = useState([])
+  const [mesas, setMesas] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const [zonaActiva, setZonaActiva] = useState(null)   // null = todas
-  const [vista, setVista]           = useState("plano") // "plano" | "lista"
+  const [zonaActiva, setZonaActiva] = useState(null)
+  const [vista, setVista] = useState("plano")
   const [mesaSeleccionada, setMesaSeleccionada] = useState(null)
 
-  const [zonaModal,   setZonaModal]   = useState({ open: false, data: null })
-  const [mesaModal,   setMesaModal]   = useState({ open: false, data: null, defaultZonaId: null })
-  const [confirmModal, setConfirmModal] = useState({ open: false, mensaje: "", onConfirm: null })
+  const [zonaModal, setZonaModal] = useState({ open: false, data: null })
+  const [mesaModal, setMesaModal] = useState({
+    open: false,
+    data: null,
+    defaultZonaId: null,
+  })
+  const [confirmModal, setConfirmModal] = useState({
+    open: false,
+    mensaje: "",
+    onConfirm: null,
+  })
 
   const [zonaMenuOpen, setZonaMenuOpen] = useState(null)
-  const menuRef = useRef(null)
 
   useEffect(() => {
-    function handleClick(e) {
-      if (!e.target.closest(".salon__zona-menu-wrap")) {
+    function handleClick(event) {
+      if (!event.target.closest(".salon__zona-menu-wrap")) {
         setZonaMenuOpen(null)
       }
     }
+
     document.addEventListener("mousedown", handleClick)
-    return () => document.removeEventListener("mousedown", handleClick)
+
+    return () => {
+      document.removeEventListener("mousedown", handleClick)
+    }
   }, [])
 
   useEffect(() => {
-    loadData()
-  }, [])
+    let cancelled = false
 
-  async function loadData() {
-    setLoading(true)
-    try {
-      const [zs, ms] = await Promise.all([getZonas(), getMesas()])
-      setZonas(zs)
-      setMesas(ms)
-      if (!zonaActiva && zs.length > 0) setZonaActiva(zs[0].id_zona)
-    } catch (err) {
-      showToast({ type: "error", title: "Error al cargar", message: err.message })
-    } finally {
-      setLoading(false)
+    Promise.all([getZonas(), getMesas()])
+      .then(([zs, ms]) => {
+        if (cancelled) return
+
+        setZonas(zs)
+        setMesas(ms)
+
+        if (zs.length > 0) {
+          setZonaActiva(zs[0].id_zona)
+        }
+      })
+      .catch((err) => {
+        if (cancelled) return
+
+        showToast({
+          type: "error",
+          title: "Error al cargar",
+          message: err.message,
+        })
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false)
+        }
+      })
+
+    return () => {
+      cancelled = true
     }
-  }
+  }, [showToast])
 
-  const mesasActivas = mesas.filter(m => m.estado)
-  const total      = mesasActivas.length
-  const disponibles= mesasActivas.filter(m => m.disponibilidad === "LIBRE").length
-  const ocupadas   = mesasActivas.filter(m => m.disponibilidad === "OCUPADA").length
-  const reservadas = mesasActivas.filter(m => m.disponibilidad === "RESERVADA").length
-  const fuera      = mesasActivas.filter(m => m.disponibilidad === "MANTENIMIENTO").length
+  const mesasActivas = mesas.filter((mesa) => mesa.estado)
+
+  const total = mesasActivas.length
+  const disponibles = mesasActivas.filter(
+    (mesa) => mesa.disponibilidad === "LIBRE",
+  ).length
+  const ocupadas = mesasActivas.filter(
+    (mesa) => mesa.disponibilidad === "OCUPADA",
+  ).length
+  const reservadas = mesasActivas.filter(
+    (mesa) => mesa.disponibilidad === "RESERVADA",
+  ).length
+  const fuera = mesasActivas.filter(
+    (mesa) => mesa.disponibilidad === "MANTENIMIENTO",
+  ).length
 
   const mesasDeZona = zonaActiva
-    ? mesas.filter(m => m.id_zona === zonaActiva && m.estado)
-    : mesas.filter(m => m.estado)
+    ? mesas.filter((mesa) => mesa.id_zona === zonaActiva && mesa.estado)
+    : mesas.filter((mesa) => mesa.estado)
 
-  const zonaActivaData = zonas.find(z => z.id_zona === zonaActiva)
+  const zonaActivaData = zonas.find((zona) => zona.id_zona === zonaActiva)
 
   async function handleSaveZona(payload, id) {
     try {
       if (id) {
         const updated = await updateZona(id, payload)
-        setZonas(prev => prev.map(z => z.id_zona === id ? updated : z))
-        showToast({ type: "success", title: "Zona actualizada", message: "Los cambios se guardaron correctamente." })
+
+        setZonas((prev) =>
+          prev.map((zona) => (zona.id_zona === id ? updated : zona)),
+        )
+
+        showToast({
+          type: "success",
+          title: "Zona actualizada",
+          message: "Los cambios se guardaron correctamente.",
+        })
       } else {
         const nueva = await createZona(payload)
-        setZonas(prev => [...prev, nueva])
-        showToast({ type: "success", title: "Zona creada", message: "La zona fue agregada correctamente." })
+
+        setZonas((prev) => [...prev, nueva])
+
+        showToast({
+          type: "success",
+          title: "Zona creada",
+          message: "La zona fue agregada correctamente.",
+        })
       }
+
       setZonaModal({ open: false, data: null })
     } catch (err) {
-      showToast({ type: "error", title: "Error", message: err.message })
+      showToast({
+        type: "error",
+        title: "Error",
+        message: err.message,
+      })
     }
   }
+
   async function handleToggleZona(zona) {
     try {
-        const updated = await toggleZonaStatus(zona.id_zona, !zona.estado)
-        setZonas(prev => prev.map(z => z.id_zona === zona.id_zona ? updated : z))
-        showToast({
+      const updated = await toggleZonaStatus(zona.id_zona, !zona.estado)
+
+      setZonas((prev) =>
+        prev.map((item) => (item.id_zona === zona.id_zona ? updated : item)),
+      )
+
+      showToast({
         type: "success",
         title: updated.estado ? "Zona activada" : "Zona desactivada",
-        message: updated.estado ? "La zona vuelve a estar activa." : "La zona fue desactivada correctamente.",
-        })
+        message: updated.estado
+          ? "La zona vuelve a estar activa."
+          : "La zona fue desactivada correctamente.",
+      })
     } catch (err) {
-        showToast({ type: "error", title: "Error", message: err.message })
+      showToast({
+        type: "error",
+        title: "Error",
+        message: err.message,
+      })
     }
-    }
+  }
 
   function handleDeleteZona(zona) {
     setConfirmModal({
@@ -198,13 +304,32 @@ export default function SalonPage() {
       onConfirm: async () => {
         try {
           await deleteZona(zona.id_zona)
-          setZonas(prev => prev.filter(z => z.id_zona !== zona.id_zona))
-          if (zonaActiva === zona.id_zona) setZonaActiva(null)
-          showToast({ type: "success", title: "Zona eliminada", message: "La zona fue eliminada correctamente." })
+
+          setZonas((prev) =>
+            prev.filter((item) => item.id_zona !== zona.id_zona),
+          )
+
+          if (zonaActiva === zona.id_zona) {
+            setZonaActiva(null)
+          }
+
+          showToast({
+            type: "success",
+            title: "Zona eliminada",
+            message: "La zona fue eliminada correctamente.",
+          })
         } catch (err) {
-          showToast({ type: "error", title: "Error", message: err.message })
+          showToast({
+            type: "error",
+            title: "Error",
+            message: err.message,
+          })
         } finally {
-          setConfirmModal({ open: false, mensaje: "", onConfirm: null })
+          setConfirmModal({
+            open: false,
+            mensaje: "",
+            onConfirm: null,
+          })
         }
       },
     })
@@ -214,55 +339,138 @@ export default function SalonPage() {
     try {
       if (id) {
         const updated = await updateMesa(id, payload)
-        setMesas(prev => prev.map(m => m.id_mesa === id ? { ...m, ...updated } : m))
-        if (mesaSeleccionada?.id_mesa === id) setMesaSeleccionada(prev => ({ ...prev, ...updated }))
-        showToast({ type: "success", title: "Mesa actualizada", message: "Los cambios se guardaron correctamente." })
+
+        setMesas((prev) =>
+          prev.map((mesa) =>
+            mesa.id_mesa === id ? { ...mesa, ...updated } : mesa,
+          ),
+        )
+
+        if (mesaSeleccionada?.id_mesa === id) {
+          setMesaSeleccionada((prev) => ({ ...prev, ...updated }))
+        }
+
+        showToast({
+          type: "success",
+          title: "Mesa actualizada",
+          message: "Los cambios se guardaron correctamente.",
+        })
       } else {
         const nueva = await createMesa(payload)
-        setMesas(prev => [...prev, nueva])
-        showToast({ type: "success", title: "Mesa creada", message: "La mesa fue agregada correctamente." })
+
+        setMesas((prev) => [...prev, nueva])
+
+        showToast({
+          type: "success",
+          title: "Mesa creada",
+          message: "La mesa fue agregada correctamente.",
+        })
       }
-      setMesaModal({ open: false, data: null, defaultZonaId: null })
+
+      setMesaModal({
+        open: false,
+        data: null,
+        defaultZonaId: null,
+      })
     } catch (err) {
-      showToast({ type: "error", title: "Error", message: err.message })
+      showToast({
+        type: "error",
+        title: "Error",
+        message: err.message,
+      })
     }
   }
 
   async function handleChangeDispo(mesa, disponibilidad) {
     try {
-      const updated = await updateMesaDisponibilidad(mesa.id_mesa, disponibilidad)
-      setMesas(prev => prev.map(m => m.id_mesa === mesa.id_mesa ? { ...m, ...updated } : m))
-      if (mesaSeleccionada?.id_mesa === mesa.id_mesa) setMesaSeleccionada(prev => ({ ...prev, ...updated }))
-      showToast({ type: "success", title: "Estado actualizado", message: `Mesa marcada como ${DISP[disponibilidad].label}.` })
+      const updated = await updateMesaDisponibilidad(
+        mesa.id_mesa,
+        disponibilidad,
+      )
+
+      setMesas((prev) =>
+        prev.map((item) =>
+          item.id_mesa === mesa.id_mesa ? { ...item, ...updated } : item,
+        ),
+      )
+
+      if (mesaSeleccionada?.id_mesa === mesa.id_mesa) {
+        setMesaSeleccionada((prev) => ({ ...prev, ...updated }))
+      }
+
+      showToast({
+        type: "success",
+        title: "Estado actualizado",
+        message: `Mesa marcada como ${DISP[disponibilidad].label}.`,
+      })
     } catch (err) {
-      showToast({ type: "error", title: "Error", message: err.message })
+      showToast({
+        type: "error",
+        title: "Error",
+        message: err.message,
+      })
     }
   }
 
   async function handleToggleMesaStatus(mesa) {
     try {
       const updated = await toggleMesaStatus(mesa.id_mesa, !mesa.estado)
-      setMesas(prev => prev.map(m => m.id_mesa === mesa.id_mesa ? { ...m, ...updated } : m))
-      showToast({ type: "success", title: updated.estado ? "Mesa activada" : "Mesa desactivada", message: "" })
+
+      setMesas((prev) =>
+        prev.map((item) =>
+          item.id_mesa === mesa.id_mesa ? { ...item, ...updated } : item,
+        ),
+      )
+
+      showToast({
+        type: "success",
+        title: updated.estado ? "Mesa activada" : "Mesa desactivada",
+        message: "",
+      })
     } catch (err) {
-      showToast({ type: "error", title: "Error", message: err.message })
+      showToast({
+        type: "error",
+        title: "Error",
+        message: err.message,
+      })
     }
   }
 
   function handleDeleteMesa(mesa) {
     setConfirmModal({
       open: true,
-      mensaje: `¿Seguro que deseas eliminar la mesa "${mesa.nombre || mesa.numero}"?`,
+      mensaje: `¿Seguro que deseas eliminar la mesa "${
+        mesa.nombre || mesa.numero
+      }"?`,
       onConfirm: async () => {
         try {
           await deleteMesa(mesa.id_mesa)
-          setMesas(prev => prev.filter(m => m.id_mesa !== mesa.id_mesa))
-          if (mesaSeleccionada?.id_mesa === mesa.id_mesa) setMesaSeleccionada(null)
-          showToast({ type: "success", title: "Mesa eliminada", message: "La mesa fue eliminada correctamente." })
+
+          setMesas((prev) =>
+            prev.filter((item) => item.id_mesa !== mesa.id_mesa),
+          )
+
+          if (mesaSeleccionada?.id_mesa === mesa.id_mesa) {
+            setMesaSeleccionada(null)
+          }
+
+          showToast({
+            type: "success",
+            title: "Mesa eliminada",
+            message: "La mesa fue eliminada correctamente.",
+          })
         } catch (err) {
-          showToast({ type: "error", title: "Error", message: err.message })
+          showToast({
+            type: "error",
+            title: "Error",
+            message: err.message,
+          })
         } finally {
-          setConfirmModal({ open: false, mensaje: "", onConfirm: null })
+          setConfirmModal({
+            open: false,
+            mensaje: "",
+            onConfirm: null,
+          })
         }
       },
     })
@@ -270,103 +478,167 @@ export default function SalonPage() {
 
   return (
     <div className="salon">
-      {/* Header */}
       <div className="salon__header">
         <div>
           <span className="salon__breadcrumb">SALÓN</span>
           <h1 className="salon__title">Mesas por Zonas</h1>
-          <p className="salon__sub">Organiza las zonas y mesas de tu establecimiento.</p>
+          <p className="salon__sub">
+            Organiza las zonas y mesas de tu establecimiento.
+          </p>
         </div>
+
         <div className="salon__header-actions">
           <RequirePermission permission="salon.gestionar">
-            <button className="salon__btn salon__btn--secondary" onClick={() => setZonaModal({ open: true, data: null })}>
+            <button
+              className="salon__btn salon__btn--secondary"
+              onClick={() => setZonaModal({ open: true, data: null })}
+            >
               <IconPlus /> Nueva zona
             </button>
           </RequirePermission>
+
           <RequirePermission permission="salon.gestionar">
-            <button className="salon__btn salon__btn--primary" onClick={() => setMesaModal({ open: true, data: null, defaultZonaId: zonaActiva })}>
+            <button
+              className="salon__btn salon__btn--primary"
+              onClick={() =>
+                setMesaModal({
+                  open: true,
+                  data: null,
+                  defaultZonaId: zonaActiva,
+                })
+              }
+            >
               <IconPlus /> Nueva mesa
             </button>
           </RequirePermission>
         </div>
       </div>
-                {/* Stats bar */}
-          <div className="salon__stats">
-            {[
-              { label: "Total mesas", value: total,       color: "#111827" },
-              { label: "Disponibles", value: disponibles, color: "#16a34a" },
-              { label: "Ocupadas",    value: ocupadas,    color: "#dc2626" },
-              { label: "Reservadas",  value: reservadas,  color: "#d97706" },
-              { label: "Fuera de servicio", value: fuera, color: "#6b7280" },
-            ].map(s => (
-              <div key={s.label} className="salon__stat">
-                <span className="salon__stat-value" style={{ color: s.color }}>{s.value}</span>
-                <span className="salon__stat-label">{s.label}</span>
-              </div>
-            ))}
-          </div>
 
+      <div className="salon__stats">
+        {[
+          { label: "Total mesas", value: total, color: "#111827" },
+          { label: "Disponibles", value: disponibles, color: "#16a34a" },
+          { label: "Ocupadas", value: ocupadas, color: "#dc2626" },
+          { label: "Reservadas", value: reservadas, color: "#d97706" },
+          { label: "Fuera de servicio", value: fuera, color: "#6b7280" },
+        ].map((stat) => (
+          <div key={stat.label} className="salon__stat">
+            <span className="salon__stat-value" style={{ color: stat.color }}>
+              {stat.value}
+            </span>
+            <span className="salon__stat-label">{stat.label}</span>
+          </div>
+        ))}
+      </div>
 
       <div className="salon__body">
-        {/* Sidebar zonas */}
         <aside className="salon__sidebar">
           <div className="salon__sidebar-hdr">
             <span>Zonas del salón</span>
           </div>
 
           {loading ? (
-            [1,2,3].map(i => <div key={i} className="salon__zona-skeleton" />)
+            [1, 2, 3].map((item) => (
+              <div key={item} className="salon__zona-skeleton" />
+            ))
           ) : zonas.length === 0 ? (
             <p className="salon__sidebar-empty">No hay zonas aún.</p>
           ) : (
-            zonas.map(zona => (
+            zonas.map((zona) => (
               <div
                 key={zona.id_zona}
-                className={`salon__zona-item ${zonaActiva === zona.id_zona ? "salon__zona-item--active" : ""} ${!zona.estado ? "salon__zona-item--inactive" : ""}`}
+                className={`salon__zona-item ${
+                  zonaActiva === zona.id_zona ? "salon__zona-item--active" : ""
+                } ${!zona.estado ? "salon__zona-item--inactive" : ""}`}
                 onClick={() => setZonaActiva(zona.id_zona)}
               >
                 <div className="salon__zona-icon">
-                  <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                  <svg
+                    width="18"
+                    height="18"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    viewBox="0 0 24 24"
+                  >
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                     <polyline points="9 22 9 12 15 12 15 22" />
                   </svg>
                 </div>
+
                 <div className="salon__zona-info">
                   <span className="salon__zona-name">{zona.nombre}</span>
-      
                   <span className="salon__zona-count">
-                    {mesas.filter(m => m.id_zona === zona.id_zona && m.estado).length} mesas
+                    {
+                      mesas.filter(
+                        (mesa) =>
+                          mesa.id_zona === zona.id_zona && mesa.estado,
+                      ).length
+                    }{" "}
+                    mesas
                   </span>
                 </div>
 
                 <RequirePermission permission="salon.gestionar">
-                  <div className="salon__zona-menu-wrap" onClick={e => e.stopPropagation()}>
+                  <div
+                    className="salon__zona-menu-wrap"
+                    onClick={(event) => event.stopPropagation()}
+                  >
                     <button
                       className="salon__zona-dots"
-                      onClick={() => setZonaMenuOpen(zonaMenuOpen === zona.id_zona ? null : zona.id_zona)}
+                      onClick={() =>
+                        setZonaMenuOpen(
+                          zonaMenuOpen === zona.id_zona ? null : zona.id_zona,
+                        )
+                      }
                     >
                       <IconDots />
                     </button>
+
                     {zonaMenuOpen === zona.id_zona && (
-                        <div className="salon__dropdown">
-                            {zona.estado ? (
-                            <>
-                                <button onClick={() => { setZonaModal({ open: true, data: zona }); setZonaMenuOpen(null) }}>
-                                <IconEdit /> Editar
-                                </button>
-                                <button onClick={() => { handleToggleZona(zona); setZonaMenuOpen(null) }}>
-                                <IconEyeOff /> Desactivar </button>
-                                <button className="salon__dropdown-danger" onClick={() => { handleDeleteZona(zona); setZonaMenuOpen(null) }}>
-                                <IconTrash /> Eliminar
-                                </button>
-                            </>
-                            ) : (
-                            <button onClick={() => { handleToggleZona(zona); setZonaMenuOpen(null) }}>
-                                <IconEye /> Activar
+                      <div className="salon__dropdown">
+                        {zona.estado ? (
+                          <>
+                            <button
+                              onClick={() => {
+                                setZonaModal({ open: true, data: zona })
+                                setZonaMenuOpen(null)
+                              }}
+                            >
+                              <IconEdit /> Editar
                             </button>
-                            )}
-                        </div>
+
+                            <button
+                              onClick={() => {
+                                handleToggleZona(zona)
+                                setZonaMenuOpen(null)
+                              }}
+                            >
+                              <IconEyeOff /> Desactivar
+                            </button>
+
+                            <button
+                              className="salon__dropdown-danger"
+                              onClick={() => {
+                                handleDeleteZona(zona)
+                                setZonaMenuOpen(null)
+                              }}
+                            >
+                              <IconTrash /> Eliminar
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              handleToggleZona(zona)
+                              setZonaMenuOpen(null)
+                            }}
+                          >
+                            <IconEye /> Activar
+                          </button>
                         )}
+                      </div>
+                    )}
                   </div>
                 </RequirePermission>
               </div>
@@ -374,49 +646,71 @@ export default function SalonPage() {
           )}
         </aside>
 
-        {/* Panel central */}
         <div className="salon__content">
-          {/* Zona header + toggle vista */}
           <div className="salon__zone-hdr">
             <div>
               <h2 className="salon__zone-title">
                 {zonaActivaData ? zonaActivaData.nombre : "Todas las zonas"}
-            </h2>
+              </h2>
+
               {zonaActivaData?.descripcion && (
-                <p className="salon__zone-desc">{zonaActivaData.descripcion}</p>
+                <p className="salon__zone-desc">
+                  {zonaActivaData.descripcion}
+                </p>
               )}
             </div>
+
             <div className="salon__vista-toggle">
               <button
-                className={`salon__vista-btn ${vista === "plano" ? "salon__vista-btn--active" : ""}`}
+                className={`salon__vista-btn ${
+                  vista === "plano" ? "salon__vista-btn--active" : ""
+                }`}
                 onClick={() => setVista("plano")}
-              ><IconGrid /> Plano</button>
+              >
+                <IconGrid /> Plano
+              </button>
+
               <button
-                className={`salon__vista-btn ${vista === "lista" ? "salon__vista-btn--active" : ""}`}
+                className={`salon__vista-btn ${
+                  vista === "lista" ? "salon__vista-btn--active" : ""
+                }`}
                 onClick={() => setVista("lista")}
-              ><IconList /> Lista</button>
+              >
+                <IconList /> Lista
+              </button>
             </div>
           </div>
 
-          {/* Vista plano */}
           {vista === "plano" && (
             <div className="salon__plano">
               {loading ? (
                 <div className="salon__plano-grid">
-                  {[1,2,3,4,5,6].map(i => <div key={i} className="salon__mesa-skeleton" />)}
+                  {[1, 2, 3, 4, 5, 6].map((item) => (
+                    <div key={item} className="salon__mesa-skeleton" />
+                  ))}
                 </div>
               ) : mesasDeZona.length === 0 ? (
                 <div className="salon__empty">
                   <p>No hay mesas en esta zona.</p>
+
                   <RequirePermission permission="salon.gestionar">
-                    <button className="salon__btn salon__btn--primary" onClick={() => setMesaModal({ open: true, data: null, defaultZonaId: zonaActiva })}>
+                    <button
+                      className="salon__btn salon__btn--primary"
+                      onClick={() =>
+                        setMesaModal({
+                          open: true,
+                          data: null,
+                          defaultZonaId: zonaActiva,
+                        })
+                      }
+                    >
                       <IconPlus /> Agregar mesa
                     </button>
                   </RequirePermission>
                 </div>
               ) : (
                 <div className="salon__plano-grid">
-                  {mesasDeZona.map(mesa => (
+                  {mesasDeZona.map((mesa) => (
                     <MesaCard
                       key={mesa.id_mesa}
                       mesa={mesa}
@@ -429,7 +723,6 @@ export default function SalonPage() {
             </div>
           )}
 
-          {/* Vista lista */}
           {vista === "lista" && (
             <div className="salon__lista">
               {loading ? (
@@ -447,19 +740,37 @@ export default function SalonPage() {
                       <th>Estado</th>
                     </tr>
                   </thead>
+
                   <tbody>
-                    {mesasDeZona.map(mesa => {
+                    {mesasDeZona.map((mesa) => {
                       const disp = DISP[mesa.disponibilidad] || DISP.LIBRE
+
                       return (
-                        <tr key={mesa.id_mesa} onClick={() => setMesaSeleccionada(mesa)} className={mesaSeleccionada?.id_mesa === mesa.id_mesa ? "salon__table-row--active" : ""}>
-                          <td><strong>{mesa.nombre || `M${mesa.numero}`}</strong></td>
+                        <tr
+                          key={mesa.id_mesa}
+                          onClick={() => setMesaSeleccionada(mesa)}
+                          className={
+                            mesaSeleccionada?.id_mesa === mesa.id_mesa
+                              ? "salon__table-row--active"
+                              : ""
+                          }
+                        >
+                          <td>
+                            <strong>{mesa.nombre || `M${mesa.numero}`}</strong>
+                          </td>
                           <td>{mesa.capacidad}</td>
                           <td>
-                            <span className="salon__table-badge" style={{ background: disp.bg, color: disp.color }}>
+                            <span
+                              className="salon__table-badge"
+                              style={{
+                                background: disp.bg,
+                                color: disp.color,
+                              }}
+                            >
                               {disp.label}
                             </span>
                           </td>
-                      </tr>
+                        </tr>
                       )
                     })}
                   </tbody>
@@ -469,13 +780,20 @@ export default function SalonPage() {
           )}
         </div>
 
-        {/* Panel detalle mesa */}
         {mesaSeleccionada && (
           <MesaDetailPanel
             mesa={mesaSeleccionada}
-            zona={zonas.find(z => z.id_zona === mesaSeleccionada.id_zona)}
-            onEdit={() => setMesaModal({ open: true, data: mesaSeleccionada, defaultZonaId: null })}
-            onChangeDispo={key => handleChangeDispo(mesaSeleccionada, key)}
+            zona={zonas.find(
+              (zona) => zona.id_zona === mesaSeleccionada.id_zona,
+            )}
+            onEdit={() =>
+              setMesaModal({
+                open: true,
+                data: mesaSeleccionada,
+                defaultZonaId: null,
+              })
+            }
+            onChangeDispo={(key) => handleChangeDispo(mesaSeleccionada, key)}
             onToggleStatus={() => handleToggleMesaStatus(mesaSeleccionada)}
             onDelete={() => handleDeleteMesa(mesaSeleccionada)}
             onClose={() => setMesaSeleccionada(null)}
@@ -483,7 +801,6 @@ export default function SalonPage() {
         )}
       </div>
 
-      {/* Modals */}
       {zonaModal.open && (
         <ZonaModal
           data={zonaModal.data}
@@ -491,20 +808,34 @@ export default function SalonPage() {
           onClose={() => setZonaModal({ open: false, data: null })}
         />
       )}
+
       {mesaModal.open && (
         <MesaModal
           data={mesaModal.data}
           zonas={zonas}
           defaultZonaId={mesaModal.defaultZonaId}
           onSave={handleSaveMesa}
-          onClose={() => setMesaModal({ open: false, data: null, defaultZonaId: null })}
+          onClose={() =>
+            setMesaModal({
+              open: false,
+              data: null,
+              defaultZonaId: null,
+            })
+          }
         />
       )}
+
       {confirmModal.open && (
         <ConfirmModal
           mensaje={confirmModal.mensaje}
           onConfirm={confirmModal.onConfirm}
-          onClose={() => setConfirmModal({ open: false, mensaje: "", onConfirm: null })}
+          onClose={() =>
+            setConfirmModal({
+              open: false,
+              mensaje: "",
+              onConfirm: null,
+            })
+          }
         />
       )}
     </div>
