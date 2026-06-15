@@ -1,6 +1,7 @@
 // backend/src/services/salon.service.js
 
 const { pool } = require("../config/database")
+const ACTIVE_ORDER_STATES = ["ABIERTA", "EN_PREPARACION", "LISTA"]
 
 async function getMesas(idEstablecimiento) {
   const query = `
@@ -15,16 +16,20 @@ async function getMesas(idEstablecimiento) {
       m.disponibilidad,
       m.estado,
       m.created_at,
-      m.updated_at
+      m.updated_at,
+      COUNT(o.id_orden)::int AS active_order_count,
+      COALESCE(SUM(o.total), 0)::numeric AS active_total
     FROM mesa m
     LEFT JOIN zona z ON z.id_zona = m.id_zona
+    LEFT JOIN orden o ON o.id_mesa = m.id_mesa
+      AND o.estado = ANY($2::varchar[])
     WHERE m.id_establecimiento = $1
+    GROUP BY m.id_mesa, z.nombre
     ORDER BY z.nombre ASC NULLS LAST, m.numero ASC;
   `
-  const { rows } = await pool.query(query, [idEstablecimiento])
+  const { rows } = await pool.query(query, [idEstablecimiento, ACTIVE_ORDER_STATES])
   return rows
 }
-
 async function createMesa(idEstablecimiento, data) {
   const { numero, nombre, capacidad = 4, id_zona, disponibilidad = "LIBRE", estado = true } = data
 
