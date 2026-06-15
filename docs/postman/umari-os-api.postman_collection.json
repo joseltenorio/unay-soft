@@ -794,6 +794,512 @@
       ]
     },
     {
+      "name": "Carta",
+      "item": [
+        {
+          "name": "Categorías",
+          "item": [
+            {
+              "name": "Categoría - Listar",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{base_url}}/categorias", "host": ["{{base_url}}"], "path": ["categorias"] }
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Listar categorías retorna 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Response contiene array de categorías\", function () {",
+                  "    pm.expect(response.categorias).to.be.an(\"array\");",
+                  "});",
+                  "if (response.categorias && response.categorias.length > 0) {",
+                  "    pm.collectionVariables.set(\"carta_categoria_id\", response.categorias[0].id_categoria);",
+                  "}"
+                ]}
+              }]
+            },
+            {
+              "name": "Categoría - Crear",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"{{carta_categoria_nombre}}\",\n  \"descripcion\": \"{{carta_categoria_descripcion}}\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{base_url}}/categorias", "host": ["{{base_url}}"], "path": ["categorias"] }
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Crear categoría retorna 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Response contiene categoría creada\", function () {",
+                  "    pm.expect(response.categoria).to.exist;",
+                  "    pm.expect(response.categoria.id_categoria).to.exist;",
+                  "    pm.expect(response.categoria.nombre).to.exist;",
+                  "});",
+                  "if (response.categoria && response.categoria.id_categoria) {",
+                  "    pm.collectionVariables.set(\"carta_categoria_id\", response.categoria.id_categoria);",
+                  "}"
+                ]}
+              }]
+            },
+            {
+              "name": "Categoría - Editar",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"{{carta_categoria_nombre_edit}}\",\n  \"descripcion\": \"{{carta_categoria_descripcion}}\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{base_url}}/categorias/{{carta_categoria_id}}", "host": ["{{base_url}}"], "path": ["categorias", "{{carta_categoria_id}}"] }
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Editar categoría retorna 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Response contiene categoría actualizada\", function () {",
+                  "    pm.expect(response.categoria).to.exist;",
+                  "});"
+                ]}
+              }]
+            },
+            {
+              "name": "Categoría - Cambiar Estado",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"estado\": false\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{base_url}}/categorias/{{carta_categoria_id}}/status", "host": ["{{base_url}}"], "path": ["categorias", "{{carta_categoria_id}}", "status"] }
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Cambiar estado retorna 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Estado actualizado correctamente\", function () {",
+                  "    pm.expect(response.categoria).to.exist;",
+                  "    pm.expect(response.categoria.estado).to.eql(false);",
+                  "});"
+                ]}
+              }]
+            },
+            {
+              "name": "Categoría - Eliminar",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "DELETE",
+                "header": [],
+                "url": { "raw": "{{base_url}}/categorias/{{carta_categoria_id}}", "host": ["{{base_url}}"], "path": ["categorias", "{{carta_categoria_id}}"] }
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Eliminar categoría retorna 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]}
+              }]
+            },
+            {
+              "name": "Categoría - Listar Sin Token",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{base_url}}/categorias", "host": ["{{base_url}}"], "path": ["categorias"] }
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Sin token retorna 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]}
+              }]
+            },
+            {
+              "name": "Categoría - Crear Sin Permiso",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{waiter_token}}", "type": "string" }] },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"{{carta_categoria_nombre}}\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{base_url}}/categorias", "host": ["{{base_url}}"], "path": ["categorias"] }
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Sin permiso carta.gestionar retorna 403\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]}
+              }]
+            },
+            {
+              "name": "Categoría - Editar No Encontrada",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"No existe\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{base_url}}/categorias/{{invalid_id}}", "host": ["{{base_url}}"], "path": ["categorias", "{{invalid_id}}"] }
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Categoría no encontrada retorna 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]}
+              }]
+            }
+          ]
+        },
+        {
+          "name": "Productos",
+          "item": [
+            {
+              "name": "Producto - Listar",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{base_url}}/productos", "host": ["{{base_url}}"], "path": ["productos"] }
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Listar productos retorna 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Response contiene array de productos\", function () {",
+                  "    pm.expect(response.productos).to.be.an(\"array\");",
+                  "});",
+                  "if (response.productos && response.productos.length > 0) {",
+                  "    pm.collectionVariables.set(\"carta_producto_id\", response.productos[0].id_producto);",
+                  "}"
+                ]}
+              }]
+            },
+            {
+              "name": "Producto - Crear",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"{{carta_producto_nombre}}\",\n  \"descripcion\": \"{{carta_producto_descripcion}}\",\n  \"precio_base\": {{carta_producto_precio}},\n  \"id_categoria\": \"{{carta_categoria_id}}\",\n  \"disponibilidad\": true\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{base_url}}/productos", "host": ["{{base_url}}"], "path": ["productos"] }
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Crear producto retorna 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Response contiene producto creado\", function () {",
+                  "    pm.expect(response.producto).to.exist;",
+                  "    pm.expect(response.producto.id_producto).to.exist;",
+                  "    pm.expect(response.producto.nombre).to.exist;",
+                  "});",
+                  "if (response.producto && response.producto.id_producto) {",
+                  "    pm.collectionVariables.set(\"carta_producto_id\", response.producto.id_producto);",
+                  "}"
+                ]}
+              }]
+            },
+            {
+              "name": "Producto - Editar",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"{{carta_producto_nombre_edit}}\",\n  \"descripcion\": \"{{carta_producto_descripcion}}\",\n  \"precio_base\": {{carta_producto_precio}},\n  \"id_categoria\": \"{{carta_categoria_id}}\",\n  \"disponibilidad\": true\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{base_url}}/productos/{{carta_producto_id}}", "host": ["{{base_url}}"], "path": ["productos", "{{carta_producto_id}}"] }
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Editar producto retorna 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Response contiene producto actualizado\", function () {",
+                  "    pm.expect(response.producto).to.exist;",
+                  "});"
+                ]}
+              }]
+            },
+            {
+              "name": "Producto - Asignar Tags",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tag_ids\": []\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{base_url}}/productos/{{carta_producto_id}}/tags", "host": ["{{base_url}}"], "path": ["productos", "{{carta_producto_id}}", "tags"] }
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Asignar tags retorna 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Response contiene etiquetas\", function () {",
+                  "    pm.expect(response.etiquetas).to.be.an(\"array\");",
+                  "});"
+                ]}
+              }]
+            },
+            {
+              "name": "Producto - Cambiar Estado",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"estado\": false\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{base_url}}/productos/{{carta_producto_id}}/status", "host": ["{{base_url}}"], "path": ["productos", "{{carta_producto_id}}", "status"] }
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Cambiar estado retorna 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Estado actualizado correctamente\", function () {",
+                  "    pm.expect(response.producto).to.exist;",
+                  "    pm.expect(response.producto.estado).to.eql(false);",
+                  "});"
+                ]}
+              }]
+            },
+            {
+              "name": "Producto - Cambiar Disponibilidad",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"disponibilidad\": false\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{base_url}}/productos/{{carta_producto_id}}/disponibilidad", "host": ["{{base_url}}"], "path": ["productos", "{{carta_producto_id}}", "disponibilidad"] }
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Cambiar disponibilidad retorna 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Disponibilidad actualizada correctamente\", function () {",
+                  "    pm.expect(response.producto).to.exist;",
+                  "    pm.expect(response.producto.disponibilidad).to.eql(false);",
+                  "});"
+                ]}
+              }]
+            },
+            {
+              "name": "Producto - Subir Imagen",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [{ "key": "imagen", "type": "file", "src": "" }]
+                },
+                "url": { "raw": "{{base_url}}/productos/{{carta_producto_id}}/imagen", "host": ["{{base_url}}"], "path": ["productos", "{{carta_producto_id}}", "imagen"] }
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Subir imagen retorna 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Response contiene producto con imagen\", function () {",
+                  "    pm.expect(response.producto).to.exist;",
+                  "    pm.expect(response.producto.imagen_referencial).to.exist;",
+                  "});"
+                ]}
+              }]
+            },
+            {
+              "name": "Producto - Eliminar",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "DELETE",
+                "header": [],
+                "url": { "raw": "{{base_url}}/productos/{{carta_producto_id}}", "host": ["{{base_url}}"], "path": ["productos", "{{carta_producto_id}}"] }
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Eliminar producto retorna 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]}
+              }]
+            },
+            {
+              "name": "Producto - Listar Sin Token",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{base_url}}/productos", "host": ["{{base_url}}"], "path": ["productos"] }
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Sin token retorna 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]}
+              }]
+            },
+            {
+              "name": "Producto - Crear Sin Permiso",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{waiter_token}}", "type": "string" }] },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"{{carta_producto_nombre}}\",\n  \"precio_base\": {{carta_producto_precio}},\n  \"id_categoria\": \"{{carta_categoria_id}}\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{base_url}}/productos", "host": ["{{base_url}}"], "path": ["productos"] }
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Sin permiso carta.gestionar retorna 403\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]}
+              }]
+            },
+            {
+              "name": "Producto - Editar No Encontrado",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"No existe\",\n  \"precio_base\": 10,\n  \"id_categoria\": \"{{carta_categoria_id}}\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{base_url}}/productos/{{invalid_id}}", "host": ["{{base_url}}"], "path": ["productos", "{{invalid_id}}"] }
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Producto no encontrado retorna 404\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]}
+              }]
+            },
+            {
+              "name": "Producto - Subir Imagen Formato Inválido",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [{ "key": "imagen", "type": "file", "src": "" }]
+                },
+                "url": { "raw": "{{base_url}}/productos/{{carta_producto_id}}/imagen", "host": ["{{base_url}}"], "path": ["productos", "{{carta_producto_id}}", "imagen"] },
+                "description": "Enviar un archivo .gif o .pdf para validar el rechazo de formato."
+              },
+              "response": [],
+              "event": [{
+                "listen": "test",
+                "script": { "type": "text/javascript", "exec": [
+                  "pm.test(\"Formato inválido retorna 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]}
+              }]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "POS - Orders",
       "item": [
         {
@@ -3001,6 +3507,324 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Salón",
+      "item": [
+        {
+          "name": "Zonas",
+          "item": [
+            {
+              "name": "Zona - Listar",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{base_url}}/zonas", "host": ["{{base_url}}"], "path": ["zonas"] }
+              },
+              "response": [],
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "pm.test(\"Listar zonas retorna 200\", function () { pm.response.to.have.status(200); });",
+                "const response = pm.response.json();",
+                "pm.test(\"Response contiene array de zonas\", function () { pm.expect(response.zonas).to.be.an(\"array\"); });",
+                "if (response.zonas && response.zonas.length > 0) { pm.collectionVariables.set(\"salon_zona_id\", response.zonas[0].id_zona); }"
+              ]}}]
+            },
+            {
+              "name": "Zona - Crear",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "POST",
+                "header": [],
+                "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"{{salon_zona_nombre}}\",\n  \"descripcion\": \"{{salon_zona_descripcion}}\"\n}", "options": { "raw": { "language": "json" } } },
+                "url": { "raw": "{{base_url}}/zonas", "host": ["{{base_url}}"], "path": ["zonas"] }
+              },
+              "response": [],
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "pm.test(\"Crear zona retorna 201\", function () { pm.response.to.have.status(201); });",
+                "const response = pm.response.json();",
+                "pm.test(\"Response contiene zona creada\", function () { pm.expect(response.zona).to.exist; pm.expect(response.zona.id_zona).to.exist; });",
+                "if (response.zona && response.zona.id_zona) { pm.collectionVariables.set(\"salon_zona_id\", response.zona.id_zona); }"
+              ]}}]
+            },
+            {
+              "name": "Zona - Editar",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "PUT",
+                "header": [],
+                "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"{{salon_zona_nombre_edit}}\",\n  \"descripcion\": \"{{salon_zona_descripcion}}\"\n}", "options": { "raw": { "language": "json" } } },
+                "url": { "raw": "{{base_url}}/zonas/{{salon_zona_id}}", "host": ["{{base_url}}"], "path": ["zonas", "{{salon_zona_id}}"] }
+              },
+              "response": [],
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "pm.test(\"Editar zona retorna 200\", function () { pm.response.to.have.status(200); });",
+                "const response = pm.response.json();",
+                "pm.test(\"Response contiene zona actualizada\", function () { pm.expect(response.zona).to.exist; });"
+              ]}}]
+            },
+            {
+              "name": "Zona - Cambiar Estado",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "PATCH",
+                "header": [],
+                "body": { "mode": "raw", "raw": "{\n  \"estado\": false\n}", "options": { "raw": { "language": "json" } } },
+                "url": { "raw": "{{base_url}}/zonas/{{salon_zona_id}}/status", "host": ["{{base_url}}"], "path": ["zonas", "{{salon_zona_id}}", "status"] }
+              },
+              "response": [],
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "pm.test(\"Cambiar estado zona retorna 200\", function () { pm.response.to.have.status(200); });",
+                "const response = pm.response.json();",
+                "pm.test(\"Estado actualizado correctamente\", function () { pm.expect(response.zona).to.exist; pm.expect(response.zona.estado).to.eql(false); });"
+              ]}}]
+            },
+            {
+              "name": "Zona - Eliminar",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "DELETE",
+                "header": [],
+                "url": { "raw": "{{base_url}}/zonas/{{salon_zona_id}}", "host": ["{{base_url}}"], "path": ["zonas", "{{salon_zona_id}}"] }
+              },
+              "response": [],
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "pm.test(\"Eliminar zona retorna 200\", function () { pm.response.to.have.status(200); });"
+              ]}}]
+            },
+            {
+              "name": "Zona - Listar Sin Token",
+              "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/zonas", "host": ["{{base_url}}"], "path": ["zonas"] } },
+              "response": [],
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "pm.test(\"Sin token retorna 401\", function () { pm.response.to.have.status(401); });"
+              ]}}]
+            },
+            {
+              "name": "Zona - Crear Sin Permiso",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{waiter_token}}", "type": "string" }] },
+                "method": "POST",
+                "header": [],
+                "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"{{salon_zona_nombre}}\"\n}", "options": { "raw": { "language": "json" } } },
+                "url": { "raw": "{{base_url}}/zonas", "host": ["{{base_url}}"], "path": ["zonas"] }
+              },
+              "response": [],
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "pm.test(\"Sin permiso salon.gestionar retorna 403\", function () { pm.response.to.have.status(403); });"
+              ]}}]
+            },
+            {
+              "name": "Zona - Editar No Encontrada",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "PUT",
+                "header": [],
+                "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"No existe\"\n}", "options": { "raw": { "language": "json" } } },
+                "url": { "raw": "{{base_url}}/zonas/{{invalid_id}}", "host": ["{{base_url}}"], "path": ["zonas", "{{invalid_id}}"] }
+              },
+              "response": [],
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "pm.test(\"Zona no encontrada retorna 404\", function () { pm.response.to.have.status(404); });"
+              ]}}]
+            }
+          ]
+        },
+        {
+          "name": "Mesas",
+          "item": [
+            {
+              "name": "Mesa - Listar",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{base_url}}/mesas", "host": ["{{base_url}}"], "path": ["mesas"] }
+              },
+              "response": [],
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "pm.test(\"Listar mesas retorna 200\", function () { pm.response.to.have.status(200); });",
+                "const response = pm.response.json();",
+                "pm.test(\"Response contiene array de mesas\", function () { pm.expect(response.mesas).to.be.an(\"array\"); });",
+                "if (response.mesas && response.mesas.length > 0) { pm.collectionVariables.set(\"salon_mesa_id\", response.mesas[0].id_mesa); }"
+              ]}}]
+            },
+            {
+              "name": "Mesa - Crear",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "POST",
+                "header": [],
+                "body": { "mode": "raw", "raw": "{\n  \"numero\": {{salon_mesa_numero}},\n  \"capacidad\": {{salon_mesa_capacidad}},\n  \"id_zona\": \"{{salon_zona_id}}\"\n}", "options": { "raw": { "language": "json" } } },
+                "url": { "raw": "{{base_url}}/mesas", "host": ["{{base_url}}"], "path": ["mesas"] }
+              },
+              "response": [],
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "pm.test(\"Crear mesa retorna 201\", function () { pm.response.to.have.status(201); });",
+                "const response = pm.response.json();",
+                "pm.test(\"Response contiene mesa creada\", function () { pm.expect(response.mesa).to.exist; pm.expect(response.mesa.id_mesa).to.exist; });",
+                "if (response.mesa && response.mesa.id_mesa) { pm.collectionVariables.set(\"salon_mesa_id\", response.mesa.id_mesa); }"
+              ]}}]
+            },
+            {
+              "name": "Mesa - Editar",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "PUT",
+                "header": [],
+                "body": { "mode": "raw", "raw": "{\n  \"numero\": {{salon_mesa_numero_edit}},\n  \"capacidad\": {{salon_mesa_capacidad}},\n  \"id_zona\": \"{{salon_zona_id}}\"\n}", "options": { "raw": { "language": "json" } } },
+                "url": { "raw": "{{base_url}}/mesas/{{salon_mesa_id}}", "host": ["{{base_url}}"], "path": ["mesas", "{{salon_mesa_id}}"] }
+              },
+              "response": [],
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "pm.test(\"Editar mesa retorna 200\", function () { pm.response.to.have.status(200); });",
+                "const response = pm.response.json();",
+                "pm.test(\"Response contiene mesa actualizada\", function () { pm.expect(response.mesa).to.exist; });"
+              ]}}]
+            },
+            {
+              "name": "Mesa - Cambiar Disponibilidad",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "PATCH",
+                "header": [],
+                "body": { "mode": "raw", "raw": "{\n  \"disponibilidad\": \"OCUPADA\"\n}", "options": { "raw": { "language": "json" } } },
+                "url": { "raw": "{{base_url}}/mesas/{{salon_mesa_id}}/disponibilidad", "host": ["{{base_url}}"], "path": ["mesas", "{{salon_mesa_id}}", "disponibilidad"] }
+              },
+              "response": [],
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "pm.test(\"Cambiar disponibilidad retorna 200\", function () { pm.response.to.have.status(200); });",
+                "const response = pm.response.json();",
+                "pm.test(\"Disponibilidad actualizada correctamente\", function () { pm.expect(response.mesa).to.exist; pm.expect(response.mesa.disponibilidad).to.eql(\"OCUPADA\"); });"
+              ]}}]
+            },
+            {
+              "name": "Mesa - Cambiar Estado",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "PATCH",
+                "header": [],
+                "body": { "mode": "raw", "raw": "{\n  \"estado\": false\n}", "options": { "raw": { "language": "json" } } },
+                "url": { "raw": "{{base_url}}/mesas/{{salon_mesa_id}}/status", "host": ["{{base_url}}"], "path": ["mesas", "{{salon_mesa_id}}", "status"] }
+              },
+              "response": [],
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "pm.test(\"Cambiar estado mesa retorna 200\", function () { pm.response.to.have.status(200); });",
+                "const response = pm.response.json();",
+                "pm.test(\"Estado actualizado correctamente\", function () { pm.expect(response.mesa).to.exist; pm.expect(response.mesa.estado).to.eql(false); });"
+              ]}}]
+            },
+            {
+              "name": "Mesa - Eliminar",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "DELETE",
+                "header": [],
+                "url": { "raw": "{{base_url}}/mesas/{{salon_mesa_id}}", "host": ["{{base_url}}"], "path": ["mesas", "{{salon_mesa_id}}"] }
+              },
+              "response": [],
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "pm.test(\"Eliminar mesa retorna 200\", function () { pm.response.to.have.status(200); });"
+              ]}}]
+            },
+            {
+              "name": "Mesa - Listar con active_order_count",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{base_url}}/mesas", "host": ["{{base_url}}"], "path": ["mesas"] }
+              },
+              "response": [],
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "pm.test(\"Listar mesas retorna 200\", function () { pm.response.to.have.status(200); });",
+                "const response = pm.response.json();",
+                "pm.test(\"Cada mesa tiene active_order_count\", function () {",
+                "    response.mesas.forEach(function (mesa) {",
+                "        pm.expect(mesa).to.have.property('active_order_count');",
+                "        pm.expect(Number(mesa.active_order_count)).to.be.at.least(0);",
+                "    });",
+                "});",
+                "pm.test(\"Cada mesa tiene active_total\", function () {",
+                "    response.mesas.forEach(function (mesa) {",
+                "        pm.expect(mesa).to.have.property('active_total');",
+                "    });",
+                "});",
+                "const ocupada = response.mesas.find(m => m.disponibilidad === 'OCUPADA');",
+                "if (ocupada) {",
+                "    pm.test(\"Mesa ocupada tiene active_order_count mayor a 0\", function () {",
+                "        pm.expect(Number(ocupada.active_order_count)).to.be.at.least(1);",
+                "    });",
+                "}"
+              ]}}]
+            },
+            {
+              "name": "Mesa - Verificar OCUPADA tras crear orden POS",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{waiter_token}}", "type": "string" }] },
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{base_url}}/mesas", "host": ["{{base_url}}"], "path": ["mesas"] },
+                "description": "Correr después de POS - Create Order. Valida que la mesa del pedido aparece OCUPADA con active_order_count >= 1."
+              },
+              "response": [],
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "pm.test(\"Listar mesas retorna 200\", function () { pm.response.to.have.status(200); });",
+                "const response = pm.response.json();",
+                "const tableId = pm.collectionVariables.get('pos_table_id');",
+                "const mesa = response.mesas.find(m => m.id_mesa === tableId);",
+                "pm.test(\"Mesa del pedido existe en el listado\", function () {",
+                "    pm.expect(mesa).to.exist;",
+                "});",
+                "if (mesa) {",
+                "    pm.test(\"Mesa está OCUPADA tras crear orden\", function () {",
+                "        pm.expect(mesa.disponibilidad).to.eql('OCUPADA');",
+                "    });",
+                "    pm.test(\"Mesa tiene al menos 1 orden activa\", function () {",
+                "        pm.expect(Number(mesa.active_order_count)).to.be.at.least(1);",
+                "    });",
+                "}"
+              ]}}]
+            },
+            {
+              "name": "Mesa - Listar Sin Token",
+              "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/mesas", "host": ["{{base_url}}"], "path": ["mesas"] } },
+              "response": [],
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "pm.test(\"Sin token retorna 401\", function () { pm.response.to.have.status(401); });"
+              ]}}]
+            },
+            {
+              "name": "Mesa - Crear Sin Permiso",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{waiter_token}}", "type": "string" }] },
+                "method": "POST",
+                "header": [],
+                "body": { "mode": "raw", "raw": "{\n  \"numero\": {{salon_mesa_numero}},\n  \"capacidad\": {{salon_mesa_capacidad}},\n  \"id_zona\": \"{{salon_zona_id}}\"\n}", "options": { "raw": { "language": "json" } } },
+                "url": { "raw": "{{base_url}}/mesas", "host": ["{{base_url}}"], "path": ["mesas"] }
+              },
+              "response": [],
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "pm.test(\"Sin permiso salon.gestionar retorna 403\", function () { pm.response.to.have.status(403); });"
+              ]}}]
+            },
+            {
+              "name": "Mesa - Editar No Encontrada",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "method": "PUT",
+                "header": [],
+                "body": { "mode": "raw", "raw": "{\n  \"numero\": 999,\n  \"capacidad\": 4,\n  \"id_zona\": \"{{salon_zona_id}}\"\n}", "options": { "raw": { "language": "json" } } },
+                "url": { "raw": "{{base_url}}/mesas/{{invalid_id}}", "host": ["{{base_url}}"], "path": ["mesas", "{{invalid_id}}"] }
+              },
+              "response": [],
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "pm.test(\"Mesa no encontrada retorna 404\", function () { pm.response.to.have.status(404); });"
+              ]}}]
+            }
+          ]
+        }
+      ]
     }
   ],
   "event": [],
@@ -3250,6 +4074,56 @@
       "value": "00000000-0000-0000-0000-000000000000",
       "type": "string"
     },
+    { 
+      "key": "carta_categoria_id", 
+      "value": "", 
+      "type": "string" 
+    },
+    { 
+      "key": "carta_categoria_nombre", 
+      "value": "Categoría Test", 
+      "type": "string"
+    },
+    { 
+      "key": "carta_categoria_nombre_edit", 
+      "value": "Categoría Test Editada", 
+      "type": "string" 
+    },
+    { 
+      "key": "carta_categoria_descripcion",
+      "value": "Descripción de prueba", 
+      "type": "string" 
+    },
+    { 
+      "key": "carta_producto_id", 
+      "value": "", 
+      "type": "string" 
+    },
+    { 
+      "key": "carta_producto_nombre", 
+      "value": "Producto Test", 
+      "type": "string" 
+    },
+    { 
+      "key": "carta_producto_nombre_edit", 
+      "value": "Producto Test Editado", 
+      "type": "string" 
+    },
+    { 
+      "key": "carta_producto_descripcion", 
+      "value": "Descripción de prueba", 
+      "type": "string" 
+    },
+    { 
+      "key": "carta_producto_precio", 
+      "value": "12.5", 
+      "type": "string" 
+    },
+    { 
+      "key": "invalid_id", 
+      "value": "00000000-0000-0000-0000-000000000000", 
+      "type": "string" 
+    },
     {
       "key": "pos_table_id",
       "value": "",
@@ -3289,6 +4163,44 @@
       "key": "invalid_product_id",
       "value": "00000000-0000-0000-0000-000000000000",
       "type": "string"
-    }
+    },
+    { 
+      "key": "salon_zona_id", 
+      "value": "", 
+      "type": "string" 
+    },
+    { 
+      "key": "salon_zona_nombre", 
+      "value": "Zona Test", 
+      "type": "string" 
+    },
+    { 
+      "key": "salon_zona_nombre_edit", 
+      "value": "Zona Test Editada",
+      "type": "string" 
+    },
+    { 
+      "key": "salon_zona_descripcion", 
+      "value": "Descripción de prueba", 
+      "type": "string" 
+    },
+    { 
+      "key": "salon_mesa_id", 
+      "value": "", 
+      "type": "string" 
+    },
+    { 
+      "key": "salon_mesa_numero", 
+      "value": "99", 
+      "type": "string" 
+    },
+    { "key": "salon_mesa_numero_edit", 
+      "value": "98", 
+      "type": "string" 
+    },
+    { 
+      "key": "salon_mesa_capacidad", 
+      "value": "4", 
+      "type": "string" }
   ]
 }
