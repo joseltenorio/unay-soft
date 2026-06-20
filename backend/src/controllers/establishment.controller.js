@@ -3,6 +3,7 @@
 const {
   getEstablishmentById,
   updateEstablishment,
+  updateEstablishmentSlug, 
   updateEstablishmentLogo,
 } = require("../services/establishment.service")
 
@@ -34,6 +35,7 @@ async function editEstablishment(req, res) {
       igv_porcentaje,
       moneda_codigo,
       moneda_simbolo,
+      slug,
     } = req.body
 
     if (!nombre_comercial || !razon_social || !ruc || !direccion) {
@@ -63,6 +65,15 @@ async function editEstablishment(req, res) {
       return res.status(400).json({
         message: "El porcentaje de IGV debe estar entre 0 y 100.",
       })
+    }
+    if (slug !== undefined) {
+      const slugLimpio = slug.trim().toLowerCase()
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slugLimpio)) {
+        return res.status(400).json({
+          message: "El slug solo puede contener letras minúsculas, números y guiones.",
+        })
+      }
+      await updateEstablishmentSlug(req.user.id_establecimiento, slugLimpio)
     }
 
     const updatedEstablishment = await updateEstablishment(

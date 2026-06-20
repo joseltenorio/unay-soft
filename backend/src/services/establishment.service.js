@@ -16,6 +16,7 @@ async function getEstablishmentById(idEstablecimiento) {
       igv_porcentaje,
       moneda_codigo,
       moneda_simbolo,
+      slug,
       estado,
       created_at,
       updated_at
@@ -81,6 +82,7 @@ async function updateEstablishment(idEstablecimiento, establishmentData) {
       igv_porcentaje,
       moneda_codigo,
       moneda_simbolo,
+      slug,
       estado,
       created_at,
       updated_at;
@@ -133,8 +135,49 @@ async function updateEstablishmentLogo(idEstablecimiento, logoUrl) {
   return rows[0]
 }
 
+// Busca establecimiento por slug (para carta pública)
+async function getEstablishmentBySlug(slug) {
+  const { rows } = await pool.query(
+    `SELECT id_establecimiento, nombre_comercial, logo_url, moneda_simbolo, slug
+     FROM establecimiento
+     WHERE slug = $1 AND estado = true
+     LIMIT 1`,
+    [slug]
+  )
+  if (rows.length === 0) {
+    const error = new Error("Establecimiento no encontrado.")
+    error.statusCode = 404
+    throw error
+  }
+  return rows[0]
+}
+
+// Actualiza el slug (lo llama editEstablishment)
+async function updateEstablishmentSlug(idEstablecimiento, slug) {
+  // Verifica que el slug no esté en uso por otro establecimiento
+  const { rows: existing } = await pool.query(
+    `SELECT id_establecimiento FROM establecimiento 
+     WHERE slug = $1 AND id_establecimiento != $2`,
+    [slug, idEstablecimiento]
+  )
+  if (existing.length > 0) {
+    const error = new Error("El slug ya está en uso por otro establecimiento.")
+    error.statusCode = 409
+    throw error
+  }
+
+  const { rows } = await pool.query(
+    `UPDATE establecimiento SET slug = $1, updated_at = now()
+     WHERE id_establecimiento = $2
+     RETURNING slug`,
+    [slug, idEstablecimiento]
+  )
+  return rows[0]
+}
 module.exports = {
   getEstablishmentById,
+  getEstablishmentBySlug,  
   updateEstablishment,
+  updateEstablishmentSlug,
   updateEstablishmentLogo,
 }

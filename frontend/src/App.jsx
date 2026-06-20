@@ -19,8 +19,7 @@ import BiPage from "./pages/modules/BiPage/BiPage"
 import SecurityPage from "./pages/modules/SecurityPage/SecurityPage"
 import EstablishmentPage from "./pages/modules/EstablishmentPage/EstablishmentPage"
 import CartaPage from "./pages/modules/CartaPage/CartaPage"
-import SalonPage from "./pages/modules/SalonPage/SalonPage"
-
+import CartaPublicaPage from "./pages/public/CartaPublicaPage/CartaPublicaPage"
 import AppLayout from "./components/layout/AppLayout/AppLayout"
 
 import ProtectedRoute from "./routes/ProtectedRoute"
@@ -82,15 +81,6 @@ function App() {
                 </PermissionRoute>
               }
             />
-        
-           <Route
-              path="salon"
-              element={
-                <PermissionRoute permission="salon.ver">
-                  <SalonPage />
-                </PermissionRoute>
-              }
-            />
 
             <Route
                path="menu"
@@ -139,6 +129,9 @@ function App() {
 
           </Route>
 
+          {/* HU18 — Carta pública sin login, acceso por QR */}
+          <Route path="/carta/:slug" element={<CartaPublicaPage />} />
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </ToastProvider>
@@ -146,4 +139,4 @@ function App() {
   )
 }
 
-export default App
+export default App 
