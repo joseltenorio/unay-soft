@@ -24,6 +24,7 @@ import useToast from "../../../components/common/Toast/useToast"
 import CategoriaModal from "./components/CategoriaModal"
 import ConfirmModal from "./components/ConfirmModal"
 import ProductoModal from "./components/ProductoModal"
+import QRModal from "./components/QRModal"
 
 import "./CartaPage.css"
 
@@ -194,6 +195,17 @@ const IconCheck = () => (
     <polyline points="20 6 9 17 4 12" />
   </svg>
 )
+const IconQR = () => (
+  <svg width="16" height="16" fill="none" stroke="currentColor"
+    strokeWidth="2" viewBox="0 0 24 24">
+    <rect x="3" y="3" width="7" height="7"/>
+    <rect x="14" y="3" width="7" height="7"/>
+    <rect x="3" y="14" width="7" height="7"/>
+    <line x1="14" y1="14" x2="14" y2="21"/>
+    <line x1="21" y1="14" x2="21" y2="21"/>
+    <line x1="14" y1="17.5" x2="21" y2="17.5"/>
+  </svg>
+)
 
 export default function CartaPage() {
   const { showToast } = useToast()
@@ -222,6 +234,7 @@ export default function CartaPage() {
   const [catMenuOpen, setCatMenuOpen] = useState(null)
   const [prodMenuOpen, setProdMenuOpen] = useState(null)
   const [catVisibility, setCatVisibility] = useState({})
+  const [qrModalOpen, setQrModalOpen] = useState(false)
 
   useEffect(() => {
     let isMounted = true
@@ -620,6 +633,18 @@ export default function CartaPage() {
               <IconPlus /> Nuevo producto
             </button>
           </RequirePermission>
+
+          <RequirePermission permission="carta.ver">
+            <button 
+            className="carta__btn carta__btn--secondary"
+            type="button"
+            onClick={() => setQrModalOpen(true)}
+            >
+              <IconQR /> Ver QR
+              </button>
+          </RequirePermission>
+
+
         </div>
       </div>
 
@@ -1070,17 +1095,17 @@ export default function CartaPage() {
                   </div>
                   )}
                     {!prod.estado && (
-                    <div className="carta__prod-overlay carta__prod-overlay--inactivo">
-                      <span style={{ fontSize: "1rem", fontWeight: 700, color: "white", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                        Inactivo
-                      </span>
-                      <p className="carta__prod-overlay-text">No visible para clientes</p>
-                      <button className="carta__prod-overlay-btn" onClick={(e) => { e.stopPropagation(); handleToggleProducto(prod) }}>
-                        <IconEye /> Activar producto
-                      </button>
-                    </div>
-                  )}
-                                
+    <div className="carta__prod-overlay carta__prod-overlay--inactivo">
+      <span style={{ fontSize: "1rem", fontWeight: 700, color: "white", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+        Inactivo
+      </span>
+      <p className="carta__prod-overlay-text">No visible para clientes</p>
+      <button className="carta__prod-overlay-btn" onClick={(e) => { e.stopPropagation(); handleToggleProducto(prod) }}>
+        <IconEye /> Activar producto
+      </button>
+    </div>
+  )}
+                
 
                         <div className="carta__prod-body">
                           {prod.etiquetas && prod.etiquetas.length > 0 && (
@@ -1185,6 +1210,8 @@ export default function CartaPage() {
           }
         />
       )}
+
+      {qrModalOpen && (<QRModal onClose={() => setQrModalOpen(false)} />)}
     </div>
   )
 }
