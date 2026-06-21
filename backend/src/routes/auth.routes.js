@@ -10,16 +10,22 @@ const {
 } = require("../controllers/auth.controller")
 const { authenticateToken } = require("../middlewares/auth.middleware")
 const { authorizePermission } = require("../middlewares/permission.middleware")
+const { loginRateLimiter } = require("../middlewares/rateLimit.middleware")
+const { validateBody } = require("../middlewares/validate.middleware")
+const {
+  loginSchema,
+  refreshSchema,
+} = require("../validators/auth.validator")
 
 const router = express.Router()
 
-router.post("/login", login)
+router.post("/login", loginRateLimiter, validateBody(loginSchema), login)
 
-router.post("/refresh", refresh)
-
-router.get("/me", authenticateToken, me)
+router.post("/refresh", validateBody(refreshSchema), refresh)
 
 router.post("/logout", authenticateToken, logout)
+
+router.get("/me", authenticateToken, me)
 
 router.get(
   "/admin-check",
