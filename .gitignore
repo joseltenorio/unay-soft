@@ -66,4 +66,4 @@ repomix-output.*
 repomix-output**
 .repomix-cache/
 repomix.config.json
-umari-os.xml
+umari-os.*
