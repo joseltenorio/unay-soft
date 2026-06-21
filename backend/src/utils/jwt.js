@@ -1,19 +1,30 @@
 // backend/src/utils/jwt.js
 
 const jwt = require("jsonwebtoken")
-require("dotenv").config()
+const { authConfig, assertAuthConfig } = require("../config/auth")
 
-function generateToken(payload) {
-  return jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || "2h",
+function generateAccessToken(payload) {
+  assertAuthConfig()
+
+  return jwt.sign(payload, authConfig.jwtSecret, {
+    expiresIn: authConfig.accessTokenExpiresIn,
   })
 }
 
 function verifyToken(token) {
-  return jwt.verify(token, process.env.JWT_SECRET)
+  assertAuthConfig()
+
+  return jwt.verify(token, authConfig.jwtSecret)
+}
+
+// Compatibilidad temporal con el flujo actual.
+// Despues, auth.service migrará a generateAccessToken.
+function generateToken(payload) {
+  return generateAccessToken(payload)
 }
 
 module.exports = {
+  generateAccessToken,
   generateToken,
   verifyToken,
 }
