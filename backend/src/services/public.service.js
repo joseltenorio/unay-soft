@@ -89,6 +89,8 @@ async function getCartaPublica(idEstablecimiento) {
 }
 
 async function getOrCreateQR(idEstablecimiento, baseUrl) {
+  const urlDestino = buildCartaUrl(baseUrl, idEstablecimiento)
+
   const existingQuery = `
     select
       id_codigo_qr,
@@ -110,10 +112,35 @@ async function getOrCreateQR(idEstablecimiento, baseUrl) {
   ])
 
   if (existingResult.rows.length > 0) {
-    return existingResult.rows[0]
-  }
+    const existingQr = existingResult.rows[0]
 
-  const urlDestino = buildCartaUrl(baseUrl, idEstablecimiento)
+    if (existingQr.url_destino === urlDestino) {
+      return existingQr
+    }
+
+    const updateQuery = `
+      update codigo_qr
+      set
+        url_destino = $1,
+        imagen_qr = null,
+        updated_at = now()
+      where id_codigo_qr = $2
+        and estado = true
+      returning
+        id_codigo_qr,
+        id_establecimiento,
+        tipo,
+        url_destino,
+        imagen_qr;
+    `
+
+    const updateResult = await pool.query(updateQuery, [
+      urlDestino,
+      existingQr.id_codigo_qr,
+    ])
+
+    return updateResult.rows[0]
+  }
 
   const insertQuery = `
     insert into codigo_qr (
