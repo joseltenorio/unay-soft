@@ -111,7 +111,6 @@ async function updateEstablishment(idEstablecimiento, establishmentData) {
   return rows[0]
 }
 
-
 async function updateEstablishmentLogo(idEstablecimiento, logoUrl) {
   const query = `
     update establecimiento
