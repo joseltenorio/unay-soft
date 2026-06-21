@@ -2,6 +2,7 @@
 
 const {
   loginUser,
+  logoutUserSession,
   refreshUserSession,
 } = require("../services/auth.service")
 const { getRequestMetadata } = require("../services/session.service")
@@ -68,6 +69,25 @@ async function refresh(req, res) {
   }
 }
 
+async function logout(req, res) {
+  try {
+    const result = await logoutUserSession({
+      id_sesion: req.user.id_sesion,
+      id_usuario: req.user.id_usuario,
+    })
+
+    return res.status(200).json({
+      message: result.revoked
+        ? "Sesión cerrada correctamente."
+        : "La sesión ya se encontraba cerrada o no estaba activa.",
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al cerrar la sesión.",
+    })
+  }
+}
+
 async function me(req, res) {
   try {
     const access = await getUserPermissions(req.user.id_usuario)
@@ -88,6 +108,7 @@ async function me(req, res) {
 
 module.exports = {
   login,
+  logout,
   me,
   refresh,
 }
