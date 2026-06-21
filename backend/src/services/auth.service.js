@@ -6,6 +6,7 @@ const { pool } = require("../config/database")
 const { generateAccessToken } = require("../utils/jwt")
 const {
   createUserSession,
+  revokeUserSession,
   rotateUserSession,
 } = require("./session.service")
 
@@ -244,7 +245,23 @@ async function refreshUserSession(refreshToken) {
   }
 }
 
+async function logoutUserSession({ id_sesion, id_usuario }) {
+  if (!id_sesion || !id_usuario) {
+    const error = new Error("Sesión inválida.")
+    error.statusCode = 400
+    throw error
+  }
+
+  const revokedSession = await revokeUserSession(id_sesion, id_usuario)
+
+  return {
+    revoked: Boolean(revokedSession),
+    session: revokedSession,
+  }
+}
+
 module.exports = {
   loginUser,
+  logoutUserSession,
   refreshUserSession,
 }

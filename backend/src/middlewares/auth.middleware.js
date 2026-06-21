@@ -1,8 +1,9 @@
 // backend/src/middlewares/auth.middleware.js
 
+const { getActiveSessionById } = require("../services/session.service")
 const { verifyToken } = require("../utils/jwt")
 
-function authenticateToken(req, res, next) {
+async function authenticateToken(req, res, next) {
   try {
     const authHeader = req.headers.authorization
 
@@ -22,7 +23,25 @@ function authenticateToken(req, res, next) {
 
     const decoded = verifyToken(token)
 
+    if (!decoded.id_sesion) {
+      return res.status(401).json({
+        message: "Token sin sesión asociada.",
+      })
+    }
+
+    const activeSession = await getActiveSessionById(
+      decoded.id_sesion,
+      decoded.id_usuario,
+    )
+
+    if (!activeSession) {
+      return res.status(401).json({
+        message: "Sesión inválida, expirada o cerrada.",
+      })
+    }
+
     req.user = decoded
+    req.session = activeSession
 
     next()
   } catch (error) {

@@ -110,8 +110,53 @@ async function rotateUserSession(refreshToken) {
   }
 }
 
+async function getActiveSessionById(id_sesion, id_usuario) {
+  if (!id_sesion || !id_usuario) {
+    return null
+  }
+
+  const query = `
+    select
+      id_sesion,
+      id_usuario,
+      expira_at,
+      revocado_at,
+      created_at
+    from sesion_usuario
+    where id_sesion = $1
+      and id_usuario = $2
+      and revocado_at is null
+      and expira_at > now()
+    limit 1;
+  `
+
+  const { rows } = await pool.query(query, [id_sesion, id_usuario])
+
+  return rows[0] || null
+}
+
+async function revokeUserSession(id_sesion, id_usuario) {
+  const query = `
+    update sesion_usuario
+    set revocado_at = now()
+    where id_sesion = $1
+      and id_usuario = $2
+      and revocado_at is null
+    returning
+      id_sesion,
+      id_usuario,
+      revocado_at;
+  `
+
+  const { rows } = await pool.query(query, [id_sesion, id_usuario])
+
+  return rows[0] || null
+}
+
 module.exports = {
   createUserSession,
+  getActiveSessionById,
   getRequestMetadata,
+  revokeUserSession,
   rotateUserSession,
 }

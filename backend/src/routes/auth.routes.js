@@ -4,6 +4,7 @@ const express = require("express")
 
 const {
   login,
+  logout,
   me,
   refresh,
 } = require("../controllers/auth.controller")
@@ -17,6 +18,8 @@ router.post("/login", login)
 router.post("/refresh", refresh)
 
 router.get("/me", authenticateToken, me)
+
+router.post("/logout", authenticateToken, logout)
 
 router.get(
   "/admin-check",
