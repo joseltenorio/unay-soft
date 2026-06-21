@@ -11,6 +11,7 @@ const TABS = [
 
 export default function CashierPage() {
   const [activeTab, setActiveTab] = useState("cobrar")
+  const [selectedOrder, setSelectedOrder] = useState(null)
 
   return (
     <div className="cashier-page">
@@ -45,8 +46,11 @@ export default function CashierPage() {
         </div>
 
         {activeTab === "cobrar" && (
-          <div className="cashier-tab-panel">
-            <p>Pantalla de cobro en construcción</p>
+          <div className="cashier-cobrar">
+            <CashierOrderList
+              selectedOrder={selectedOrder}
+              onSelect={setSelectedOrder}
+            />
           </div>
         )}
 
@@ -62,6 +66,53 @@ export default function CashierPage() {
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+function CashierOrderList({ selectedOrder, onSelect }) {
+  const orders = []
+
+  return (
+    <div className="cashier-orders">
+      <div className="cashier-orders__header">
+        <h2>Órdenes pendientes</h2>
+        <p>Listas para cobrar</p>
+      </div>
+
+      {orders.length === 0 ? (
+        <div className="cashier-orders__empty">
+          <p>No hay órdenes pendientes de cobro</p>
+        </div>
+      ) : (
+        <ul className="cashier-orders__list">
+          {orders.map((order) => (
+            <li
+              key={order.id}
+              className={
+                selectedOrder?.id === order.id
+                  ? "cashier-order-card cashier-order-card--selected"
+                  : "cashier-order-card"
+              }
+              onClick={() => onSelect(order)}
+            >
+              <div className="cashier-order-card__info">
+                <strong>
+                  {order.mesa} · {order.items.length} items
+                </strong>
+
+                <span>
+                  {order.items.map((item) => item.nombre).join(", ")}
+                </span>
+              </div>
+
+              <div className="cashier-order-card__total">
+                S/ {order.total.toFixed(2)}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
