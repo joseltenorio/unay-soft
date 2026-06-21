@@ -1,11 +1,19 @@
 // backend/src/controllers/auth.controller.js
 
-const { loginUser } = require("../services/auth.service")
+const {
+  loginUser,
+  refreshUserSession,
+} = require("../services/auth.service")
+const { getRequestMetadata } = require("../services/session.service")
 const { getUserPermissions } = require("../services/permission.service")
+
+function parseRememberValue(value) {
+  return value === true || value === "true"
+}
 
 async function login(req, res) {
   try {
-    const { identifier, password } = req.body
+    const { identifier, password, remember } = req.body
 
     if (!identifier || !password) {
       return res.status(400).json({
@@ -13,16 +21,49 @@ async function login(req, res) {
       })
     }
 
-    const result = await loginUser(identifier, password)
+    const metadata = getRequestMetadata(req)
+
+    const result = await loginUser(identifier, password, {
+      remember: parseRememberValue(remember),
+      ...metadata,
+    })
 
     return res.status(200).json({
       message: "Login exitoso.",
       token: result.token,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
       user: result.user,
+      permissions: result.permissions,
+      modules: result.modules,
+      session: result.session,
     })
   } catch (error) {
     return res.status(error.statusCode || 500).json({
       message: error.message || "Error interno del servidor.",
+    })
+  }
+}
+
+async function refresh(req, res) {
+  try {
+    const { refreshToken } = req.body
+
+    const result = await refreshUserSession(refreshToken)
+
+    return res.status(200).json({
+      message: "Sesión renovada correctamente.",
+      token: result.token,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      user: result.user,
+      permissions: result.permissions,
+      modules: result.modules,
+      session: result.session,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al renovar la sesión.",
     })
   }
 }
@@ -48,4 +89,5 @@ async function me(req, res) {
 module.exports = {
   login,
   me,
+  refresh,
 }

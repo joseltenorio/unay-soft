@@ -2,13 +2,19 @@
 
 const express = require("express")
 
-const { login, me } = require("../controllers/auth.controller")
+const {
+  login,
+  me,
+  refresh,
+} = require("../controllers/auth.controller")
 const { authenticateToken } = require("../middlewares/auth.middleware")
 const { authorizePermission } = require("../middlewares/permission.middleware")
 
 const router = express.Router()
 
 router.post("/login", login)
+
+router.post("/refresh", refresh)
 
 router.get("/me", authenticateToken, me)
 
