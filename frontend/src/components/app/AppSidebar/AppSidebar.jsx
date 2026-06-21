@@ -179,12 +179,12 @@ export default function AppSidebar({
   const displayName = getDisplayName(user)
   const roleName = user?.rol || "Sin rol"
 
-  function handleLogout() {
+  async function handleLogout() {
     if (isDrawer && onClose) {
       onClose()
     }
 
-    logout()
+    await logout()
     navigate("/login", { replace: true })
   }
 

@@ -1,4 +1,4 @@
-// src/routes/ProtectedRoute.jsx
+// frontend/src/routes/ProtectedRoute.jsx
 
 import { useEffect, useState } from "react"
 import { Navigate, useLocation } from "react-router-dom"
@@ -6,7 +6,7 @@ import { Navigate, useLocation } from "react-router-dom"
 import {
   getAuthenticatedUser,
   getToken,
-  logout,
+  logoutLocal,
 } from "../services/authService"
 
 import "./ProtectedRoute.css"
@@ -17,30 +17,48 @@ export default function ProtectedRoute({ children }) {
   const [status, setStatus] = useState("checking")
 
   useEffect(() => {
+    let isMounted = true
+
     async function validateSession() {
       const token = getToken()
 
       if (!token) {
-        setStatus("unauthenticated")
+        if (isMounted) {
+          setStatus("unauthenticated")
+        }
+
         return
       }
 
       try {
         await getAuthenticatedUser()
-        setStatus("authenticated")
+
+        if (isMounted) {
+          setStatus("authenticated")
+        }
       } catch {
-        logout()
-        setStatus("unauthenticated")
+        logoutLocal()
+
+        if (isMounted) {
+          setStatus("unauthenticated")
+        }
       }
     }
 
     validateSession()
+
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   if (status === "checking") {
     return (
       <main className="protected-route-status">
-        <p className="protected-route-status__message">Validando sesión...</p>
+        <div className="protected-route-status__card">
+          <span className="protected-route-status__eyebrow">Umarí OS</span>
+          <p className="protected-route-status__message">Validando sesión...</p>
+        </div>
       </main>
     )
   }
