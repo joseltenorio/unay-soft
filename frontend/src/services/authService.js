@@ -1,19 +1,17 @@
 // src/services/authService.js
 
 import { apiPrivateRequest, apiRequest } from "./api"
-
-const TOKEN_KEY = "umari_token"
-const USER_KEY = "umari_user"
-const PERMISSIONS_KEY = "umari_permissions"
-const MODULES_KEY = "umari_modules"
-
-function getStorage(remember = false) {
-  return remember ? localStorage : sessionStorage
-}
-
-function getActiveStorage() {
-  return localStorage.getItem(TOKEN_KEY) ? localStorage : sessionStorage
-}
+import {
+  clearAuthSession,
+  getStoredAccessToken,
+  getStoredModules,
+  getStoredPermissions,
+  getStoredRefreshToken,
+  getStoredUser,
+  saveAuthSession,
+  updateStoredSession,
+  updateStoredUser,
+} from "./authStorage"
 
 export async function loginRequest({ identifier, password, remember }) {
   const data = await apiRequest("/auth/login", {
@@ -21,21 +19,11 @@ export async function loginRequest({ identifier, password, remember }) {
     body: JSON.stringify({
       identifier,
       password,
+      remember,
     }),
   })
 
-  const storage = getStorage(remember)
-
-  storage.setItem(TOKEN_KEY, data.token)
-  storage.setItem(USER_KEY, JSON.stringify(data.user))
-  storage.setItem(PERMISSIONS_KEY, JSON.stringify(data.permissions || []))  // ✅ agrega esto
-  storage.setItem(MODULES_KEY, JSON.stringify(data.modules || []))        
-
-  const otherStorage = remember ? sessionStorage : localStorage
-  otherStorage.removeItem(TOKEN_KEY)
-  otherStorage.removeItem(USER_KEY)
-  otherStorage.removeItem(PERMISSIONS_KEY)
-  otherStorage.removeItem(MODULES_KEY)
+  saveAuthSession(data, { remember })
 
   return data
 }
@@ -52,54 +40,51 @@ export async function getAuthenticatedUser() {
   return data
 }
 
+export async function logout() {
+  try {
+    const token = getStoredAccessToken()
+
+    if (token) {
+      await apiPrivateRequest("/auth/logout", {
+        method: "POST",
+      })
+    }
+  } catch {
+    // Aunque el backend rechace el token por expirado o revocado,
+    // la sesión local debe limpiarse igual.
+  } finally {
+    clearAuthSession()
+  }
+}
+
+export function logoutLocal() {
+  clearAuthSession()
+}
+
 export function getToken() {
-  return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY)
+  return getStoredAccessToken()
+}
+
+export function getRefreshToken() {
+  return getStoredRefreshToken()
 }
 
 export function getCurrentUser() {
-  const user =
-    localStorage.getItem(USER_KEY) || sessionStorage.getItem(USER_KEY)
-
-  return user ? JSON.parse(user) : null
+  return getStoredUser()
 }
 
 export function getCurrentPermissions() {
-  const permissions =
-    localStorage.getItem(PERMISSIONS_KEY) ||
-    sessionStorage.getItem(PERMISSIONS_KEY)
-
-  return permissions ? JSON.parse(permissions) : []
+  return getStoredPermissions()
 }
 
 export function getCurrentModules() {
-  const modules =
-    localStorage.getItem(MODULES_KEY) || sessionStorage.getItem(MODULES_KEY)
-
-  return modules ? JSON.parse(modules) : []
+  return getStoredModules()
 }
 
 export function updateCurrentSession({ user, permissions = [], modules = [] }) {
-  const storage = getActiveStorage()
-
-  storage.setItem(USER_KEY, JSON.stringify(user))
-  storage.setItem(PERMISSIONS_KEY, JSON.stringify(permissions))
-  storage.setItem(MODULES_KEY, JSON.stringify(modules))
+  updateStoredSession({ user, permissions, modules })
 }
 
 export function updateCurrentUser(user) {
-  const storage = getActiveStorage()
-
-  storage.setItem(USER_KEY, JSON.stringify(user))
-}
-
-export function logout() {
-  localStorage.removeItem(TOKEN_KEY)
-  localStorage.removeItem(USER_KEY)
-  localStorage.removeItem(PERMISSIONS_KEY)
-  localStorage.removeItem(MODULES_KEY)
-
-  sessionStorage.removeItem(TOKEN_KEY)
-  sessionStorage.removeItem(USER_KEY)
-  sessionStorage.removeItem(PERMISSIONS_KEY)
-  sessionStorage.removeItem(MODULES_KEY)
+  updateStoredUser(user)
 }
