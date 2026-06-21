@@ -8,24 +8,14 @@ const {
 const { getRequestMetadata } = require("../services/session.service")
 const { getUserPermissions } = require("../services/permission.service")
 
-function parseRememberValue(value) {
-  return value === true || value === "true"
-}
-
 async function login(req, res) {
   try {
     const { identifier, password, remember } = req.body
 
-    if (!identifier || !password) {
-      return res.status(400).json({
-        message: "Debe ingresar usuario/correo y contraseña.",
-      })
-    }
-
     const metadata = getRequestMetadata(req)
 
     const result = await loginUser(identifier, password, {
-      remember: parseRememberValue(remember),
+      remember,
       ...metadata,
     })
 
