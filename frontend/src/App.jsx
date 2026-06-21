@@ -7,6 +7,7 @@ import ToastProvider from "./components/common/Toast/ToastProvider"
 import Home from "./pages/Home/Home"
 import Login from "./pages/Login/Login"
 import RestorePassword from "./pages/RestorePassword/RestorePassword"
+import PublicCartaPage from "./pages/public/PublicCartaPage/PublicCartaPage"
 
 import AppHome from "./pages/AppHome/AppHome"
 import Unauthorized from "./pages/Unauthorized/Unauthorized"
@@ -34,6 +35,10 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/restore-password" element={<RestorePassword />} />
+          <Route
+            path="/carta/:id_establecimiento"
+            element={<PublicCartaPage />}
+          />
 
           <Route
             path="/app"
@@ -82,8 +87,8 @@ function App() {
                 </PermissionRoute>
               }
             />
-        
-           <Route
+
+            <Route
               path="salon"
               element={
                 <PermissionRoute permission="salon.ver">
@@ -93,13 +98,13 @@ function App() {
             />
 
             <Route
-               path="menu"
-                element={
+              path="menu"
+              element={
                 <PermissionRoute permission="carta.ver">
                   <CartaPage />
-                  </PermissionRoute>
-                }
-                />
+                </PermissionRoute>
+              }
+            />
 
             <Route
               path="bi"
@@ -127,7 +132,7 @@ function App() {
                 </PermissionRoute>
               }
             />
-            
+
             <Route
               path="carta"
               element={
@@ -136,7 +141,6 @@ function App() {
                 </PermissionRoute>
               }
             />
-
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
