@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "a5e711cc-b091-4037-928d-3e7c606a6ea7",
     "name": "Umari OS API",
-    "description": "Postman collection for Umarí OS API.\n\nThis collection uses variables and does not store real credentials or tokens. Set local values in Postman before running the requests.",
+    "description": "Postman collection for Umarí OS API.\n\nThis collection uses variables and does not store real credentials or tokens. Set local values in Postman before running the requests.\n\nAuth session hardening notes:\n- Login requests now send `remember` and store access, refresh and session variables.\n- Protected requests keep using role access tokens such as `admin_token`, `waiter_token`, `kds_token`, `cashier_token` and `user_token`.\n- Session utilities use `auth_token` and `auth_refresh_token` for manual refresh/logout checks.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "54524212"
   },
@@ -65,14 +65,14 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"identifier\": \"{{admin_identifier}}\",\n  \"password\": \"{{admin_password}}\"\n}",
+              "raw": "{\n  \"identifier\": \"{{admin_identifier}}\",\n  \"password\": \"{{admin_password}}\",\n  \"remember\": {{admin_remember}}\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
             },
-            "description": "Authenticates a admin user and stores the token in `admin_token`."
+            "description": "Authenticates a admin user. Stores `admin_token`, `admin_refresh_token`, `admin_session_id`, plus current `auth_token` and `auth_refresh_token` variables."
           },
           "response": [],
           "event": [
@@ -83,19 +83,42 @@
                 "packages": {},
                 "requests": {},
                 "exec": [
-                  "pm.test(\"Login Admin returns 200\", function () {",
+                  "pm.test(\"Admin login returns 200\", function () {",
                   "    pm.response.to.have.status(200);",
                   "});",
                   "",
                   "const response = pm.response.json();",
+                  "const accessToken = response.accessToken || response.token;",
                   "",
-                  "pm.test(\"Response contains token\", function () {",
-                  "    pm.expect(response.token).to.exist;",
+                  "pm.test(\"Response contains access token\", function () {",
+                  "    pm.expect(accessToken).to.exist;",
                   "});",
                   "",
-                  "if (response.token) {",
-                  "    pm.collectionVariables.set(\"admin_token\", response.token);",
-                  "    pm.collectionVariables.set(\"auth_token\", response.token);",
+                  "pm.test(\"Response contains refresh token\", function () {",
+                  "    pm.expect(response.refreshToken).to.exist;",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains session metadata\", function () {",
+                  "    pm.expect(response.session).to.exist;",
+                  "    pm.expect(response.session.id_sesion).to.exist;",
+                  "    pm.expect(response.session.expira_at).to.exist;",
+                  "});",
+                  "",
+                  "if (accessToken) {",
+                  "    pm.collectionVariables.set(\"admin_token\", accessToken);",
+                  "    pm.collectionVariables.set(\"auth_token\", accessToken);",
+                  "}",
+                  "",
+                  "if (response.refreshToken) {",
+                  "    pm.collectionVariables.set(\"admin_refresh_token\", response.refreshToken);",
+                  "    pm.collectionVariables.set(\"auth_refresh_token\", response.refreshToken);",
+                  "}",
+                  "",
+                  "if (response.session) {",
+                  "    pm.collectionVariables.set(\"admin_session_id\", response.session.id_sesion);",
+                  "    pm.collectionVariables.set(\"admin_session_expires_at\", response.session.expira_at);",
+                  "    pm.collectionVariables.set(\"auth_session_id\", response.session.id_sesion);",
+                  "    pm.collectionVariables.set(\"auth_session_expires_at\", response.session.expira_at);",
                   "}"
                 ]
               }
@@ -119,14 +142,14 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"identifier\": \"{{kds_identifier}}\",\n  \"password\": \"{{kds_password}}\"\n}",
+              "raw": "{\n  \"identifier\": \"{{kds_identifier}}\",\n  \"password\": \"{{kds_password}}\",\n  \"remember\": {{kds_remember}}\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
             },
-            "description": "Authenticates a kds user and stores the token in `kds_token`."
+            "description": "Authenticates a kds user. Stores `kds_token`, `kds_refresh_token`, `kds_session_id`, plus current `auth_token` and `auth_refresh_token` variables."
           },
           "response": [],
           "event": [
@@ -137,19 +160,42 @@
                 "packages": {},
                 "requests": {},
                 "exec": [
-                  "pm.test(\"Login KDS returns 200\", function () {",
+                  "pm.test(\"KDS login returns 200\", function () {",
                   "    pm.response.to.have.status(200);",
                   "});",
                   "",
                   "const response = pm.response.json();",
+                  "const accessToken = response.accessToken || response.token;",
                   "",
-                  "pm.test(\"Response contains token\", function () {",
-                  "    pm.expect(response.token).to.exist;",
+                  "pm.test(\"Response contains access token\", function () {",
+                  "    pm.expect(accessToken).to.exist;",
                   "});",
                   "",
-                  "if (response.token) {",
-                  "    pm.collectionVariables.set(\"kds_token\", response.token);",
-                  "    pm.collectionVariables.set(\"auth_token\", response.token);",
+                  "pm.test(\"Response contains refresh token\", function () {",
+                  "    pm.expect(response.refreshToken).to.exist;",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains session metadata\", function () {",
+                  "    pm.expect(response.session).to.exist;",
+                  "    pm.expect(response.session.id_sesion).to.exist;",
+                  "    pm.expect(response.session.expira_at).to.exist;",
+                  "});",
+                  "",
+                  "if (accessToken) {",
+                  "    pm.collectionVariables.set(\"kds_token\", accessToken);",
+                  "    pm.collectionVariables.set(\"auth_token\", accessToken);",
+                  "}",
+                  "",
+                  "if (response.refreshToken) {",
+                  "    pm.collectionVariables.set(\"kds_refresh_token\", response.refreshToken);",
+                  "    pm.collectionVariables.set(\"auth_refresh_token\", response.refreshToken);",
+                  "}",
+                  "",
+                  "if (response.session) {",
+                  "    pm.collectionVariables.set(\"kds_session_id\", response.session.id_sesion);",
+                  "    pm.collectionVariables.set(\"kds_session_expires_at\", response.session.expira_at);",
+                  "    pm.collectionVariables.set(\"auth_session_id\", response.session.id_sesion);",
+                  "    pm.collectionVariables.set(\"auth_session_expires_at\", response.session.expira_at);",
                   "}"
                 ]
               }
@@ -173,14 +219,14 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"identifier\": \"{{cashier_identifier}}\",\n  \"password\": \"{{cashier_password}}\"\n}",
+              "raw": "{\n  \"identifier\": \"{{cashier_identifier}}\",\n  \"password\": \"{{cashier_password}}\",\n  \"remember\": {{cashier_remember}}\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
             },
-            "description": "Authenticates a cashier user and stores the token in `cashier_token`."
+            "description": "Authenticates a cashier user. Stores `cashier_token`, `cashier_refresh_token`, `cashier_session_id`, plus current `auth_token` and `auth_refresh_token` variables."
           },
           "response": [],
           "event": [
@@ -191,19 +237,42 @@
                 "packages": {},
                 "requests": {},
                 "exec": [
-                  "pm.test(\"Login Cashier returns 200\", function () {",
+                  "pm.test(\"Cashier login returns 200\", function () {",
                   "    pm.response.to.have.status(200);",
                   "});",
                   "",
                   "const response = pm.response.json();",
+                  "const accessToken = response.accessToken || response.token;",
                   "",
-                  "pm.test(\"Response contains token\", function () {",
-                  "    pm.expect(response.token).to.exist;",
+                  "pm.test(\"Response contains access token\", function () {",
+                  "    pm.expect(accessToken).to.exist;",
                   "});",
                   "",
-                  "if (response.token) {",
-                  "    pm.collectionVariables.set(\"cashier_token\", response.token);",
-                  "    pm.collectionVariables.set(\"auth_token\", response.token);",
+                  "pm.test(\"Response contains refresh token\", function () {",
+                  "    pm.expect(response.refreshToken).to.exist;",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains session metadata\", function () {",
+                  "    pm.expect(response.session).to.exist;",
+                  "    pm.expect(response.session.id_sesion).to.exist;",
+                  "    pm.expect(response.session.expira_at).to.exist;",
+                  "});",
+                  "",
+                  "if (accessToken) {",
+                  "    pm.collectionVariables.set(\"cashier_token\", accessToken);",
+                  "    pm.collectionVariables.set(\"auth_token\", accessToken);",
+                  "}",
+                  "",
+                  "if (response.refreshToken) {",
+                  "    pm.collectionVariables.set(\"cashier_refresh_token\", response.refreshToken);",
+                  "    pm.collectionVariables.set(\"auth_refresh_token\", response.refreshToken);",
+                  "}",
+                  "",
+                  "if (response.session) {",
+                  "    pm.collectionVariables.set(\"cashier_session_id\", response.session.id_sesion);",
+                  "    pm.collectionVariables.set(\"cashier_session_expires_at\", response.session.expira_at);",
+                  "    pm.collectionVariables.set(\"auth_session_id\", response.session.id_sesion);",
+                  "    pm.collectionVariables.set(\"auth_session_expires_at\", response.session.expira_at);",
                   "}"
                 ]
               }
@@ -227,14 +296,14 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"identifier\": \"{{waiter_identifier}}\",\n  \"password\": \"{{waiter_password}}\"\n}",
+              "raw": "{\n  \"identifier\": \"{{waiter_identifier}}\",\n  \"password\": \"{{waiter_password}}\",\n  \"remember\": {{waiter_remember}}\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
             },
-            "description": "Authenticates a waiter user and stores the token in `waiter_token`."
+            "description": "Authenticates a waiter user. Stores `waiter_token`, `waiter_refresh_token`, `waiter_session_id`, plus current `auth_token` and `auth_refresh_token` variables."
           },
           "response": [],
           "event": [
@@ -245,19 +314,42 @@
                 "packages": {},
                 "requests": {},
                 "exec": [
-                  "pm.test(\"Login Waiter returns 200\", function () {",
+                  "pm.test(\"Waiter login returns 200\", function () {",
                   "    pm.response.to.have.status(200);",
                   "});",
                   "",
                   "const response = pm.response.json();",
+                  "const accessToken = response.accessToken || response.token;",
                   "",
-                  "pm.test(\"Response contains token\", function () {",
-                  "    pm.expect(response.token).to.exist;",
+                  "pm.test(\"Response contains access token\", function () {",
+                  "    pm.expect(accessToken).to.exist;",
                   "});",
                   "",
-                  "if (response.token) {",
-                  "    pm.collectionVariables.set(\"waiter_token\", response.token);",
-                  "    pm.collectionVariables.set(\"auth_token\", response.token);",
+                  "pm.test(\"Response contains refresh token\", function () {",
+                  "    pm.expect(response.refreshToken).to.exist;",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains session metadata\", function () {",
+                  "    pm.expect(response.session).to.exist;",
+                  "    pm.expect(response.session.id_sesion).to.exist;",
+                  "    pm.expect(response.session.expira_at).to.exist;",
+                  "});",
+                  "",
+                  "if (accessToken) {",
+                  "    pm.collectionVariables.set(\"waiter_token\", accessToken);",
+                  "    pm.collectionVariables.set(\"auth_token\", accessToken);",
+                  "}",
+                  "",
+                  "if (response.refreshToken) {",
+                  "    pm.collectionVariables.set(\"waiter_refresh_token\", response.refreshToken);",
+                  "    pm.collectionVariables.set(\"auth_refresh_token\", response.refreshToken);",
+                  "}",
+                  "",
+                  "if (response.session) {",
+                  "    pm.collectionVariables.set(\"waiter_session_id\", response.session.id_sesion);",
+                  "    pm.collectionVariables.set(\"waiter_session_expires_at\", response.session.expira_at);",
+                  "    pm.collectionVariables.set(\"auth_session_id\", response.session.id_sesion);",
+                  "    pm.collectionVariables.set(\"auth_session_expires_at\", response.session.expira_at);",
                   "}"
                 ]
               }
@@ -281,14 +373,14 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"identifier\": \"{{user_identifier}}\",\n  \"password\": \"{{user_password}}\"\n}",
+              "raw": "{\n  \"identifier\": \"{{user_identifier}}\",\n  \"password\": \"{{user_password}}\",\n  \"remember\": {{user_remember}}\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
             },
-            "description": "Authenticates a user user and stores the token in `user_token`."
+            "description": "Authenticates a user user. Stores `user_token`, `user_refresh_token`, `user_session_id`, plus current `auth_token` and `auth_refresh_token` variables."
           },
           "response": [],
           "event": [
@@ -299,19 +391,42 @@
                 "packages": {},
                 "requests": {},
                 "exec": [
-                  "pm.test(\"Login User returns 200\", function () {",
+                  "pm.test(\"User login returns 200\", function () {",
                   "    pm.response.to.have.status(200);",
                   "});",
                   "",
                   "const response = pm.response.json();",
+                  "const accessToken = response.accessToken || response.token;",
                   "",
-                  "pm.test(\"Response contains token\", function () {",
-                  "    pm.expect(response.token).to.exist;",
+                  "pm.test(\"Response contains access token\", function () {",
+                  "    pm.expect(accessToken).to.exist;",
                   "});",
                   "",
-                  "if (response.token) {",
-                  "    pm.collectionVariables.set(\"user_token\", response.token);",
-                  "    pm.collectionVariables.set(\"auth_token\", response.token);",
+                  "pm.test(\"Response contains refresh token\", function () {",
+                  "    pm.expect(response.refreshToken).to.exist;",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains session metadata\", function () {",
+                  "    pm.expect(response.session).to.exist;",
+                  "    pm.expect(response.session.id_sesion).to.exist;",
+                  "    pm.expect(response.session.expira_at).to.exist;",
+                  "});",
+                  "",
+                  "if (accessToken) {",
+                  "    pm.collectionVariables.set(\"user_token\", accessToken);",
+                  "    pm.collectionVariables.set(\"auth_token\", accessToken);",
+                  "}",
+                  "",
+                  "if (response.refreshToken) {",
+                  "    pm.collectionVariables.set(\"user_refresh_token\", response.refreshToken);",
+                  "    pm.collectionVariables.set(\"auth_refresh_token\", response.refreshToken);",
+                  "}",
+                  "",
+                  "if (response.session) {",
+                  "    pm.collectionVariables.set(\"user_session_id\", response.session.id_sesion);",
+                  "    pm.collectionVariables.set(\"user_session_expires_at\", response.session.expira_at);",
+                  "    pm.collectionVariables.set(\"auth_session_id\", response.session.id_sesion);",
+                  "    pm.collectionVariables.set(\"auth_session_expires_at\", response.session.expira_at);",
                   "}"
                 ]
               }
@@ -342,7 +457,8 @@
                   "type": "string"
                 }
               ]
-            }
+            },
+            "description": "Returns the authenticated user using `auth_token`. If the access token is tied to a revoked session, this must return 401."
           },
           "response": [],
           "event": [
@@ -361,6 +477,11 @@
                   "",
                   "pm.test(\"Response contains user data\", function () {",
                   "    pm.expect(response.user).to.exist;",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains permissions and modules\", function () {",
+                  "    pm.expect(response.permissions).to.be.an(\"array\");",
+                  "    pm.expect(response.modules).to.be.an(\"array\");",
                   "});"
                 ]
               }
@@ -802,195 +923,387 @@
             {
               "name": "Categoría - Listar",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [],
-                "url": { "raw": "{{base_url}}/categorias", "host": ["{{base_url}}"], "path": ["categorias"] }
+                "url": {
+                  "raw": "{{base_url}}/categorias",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "categorias"
+                  ]
+                }
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Listar categorías retorna 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "const response = pm.response.json();",
-                  "pm.test(\"Response contiene array de categorías\", function () {",
-                  "    pm.expect(response.categorias).to.be.an(\"array\");",
-                  "});",
-                  "if (response.categorias && response.categorias.length > 0) {",
-                  "    pm.collectionVariables.set(\"carta_categoria_id\", response.categorias[0].id_categoria);",
-                  "}"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Listar categorías retorna 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Response contiene array de categorías\", function () {",
+                      "    pm.expect(response.categorias).to.be.an(\"array\");",
+                      "});",
+                      "if (response.categorias && response.categorias.length > 0) {",
+                      "    pm.collectionVariables.set(\"carta_categoria_id\", response.categorias[0].id_categoria);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Categoría - Crear",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"nombre\": \"{{carta_categoria_nombre}}\",\n  \"descripcion\": \"{{carta_categoria_descripcion}}\"\n}",
-                  "options": { "raw": { "language": "json" } }
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
                 },
-                "url": { "raw": "{{base_url}}/categorias", "host": ["{{base_url}}"], "path": ["categorias"] }
+                "url": {
+                  "raw": "{{base_url}}/categorias",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "categorias"
+                  ]
+                }
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Crear categoría retorna 201\", function () {",
-                  "    pm.response.to.have.status(201);",
-                  "});",
-                  "const response = pm.response.json();",
-                  "pm.test(\"Response contiene categoría creada\", function () {",
-                  "    pm.expect(response.categoria).to.exist;",
-                  "    pm.expect(response.categoria.id_categoria).to.exist;",
-                  "    pm.expect(response.categoria.nombre).to.exist;",
-                  "});",
-                  "if (response.categoria && response.categoria.id_categoria) {",
-                  "    pm.collectionVariables.set(\"carta_categoria_id\", response.categoria.id_categoria);",
-                  "}"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Crear categoría retorna 201\", function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Response contiene categoría creada\", function () {",
+                      "    pm.expect(response.categoria).to.exist;",
+                      "    pm.expect(response.categoria.id_categoria).to.exist;",
+                      "    pm.expect(response.categoria.nombre).to.exist;",
+                      "});",
+                      "if (response.categoria && response.categoria.id_categoria) {",
+                      "    pm.collectionVariables.set(\"carta_categoria_id\", response.categoria.id_categoria);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Categoría - Editar",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PUT",
                 "header": [],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"nombre\": \"{{carta_categoria_nombre_edit}}\",\n  \"descripcion\": \"{{carta_categoria_descripcion}}\"\n}",
-                  "options": { "raw": { "language": "json" } }
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
                 },
-                "url": { "raw": "{{base_url}}/categorias/{{carta_categoria_id}}", "host": ["{{base_url}}"], "path": ["categorias", "{{carta_categoria_id}}"] }
+                "url": {
+                  "raw": "{{base_url}}/categorias/{{carta_categoria_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "categorias",
+                    "{{carta_categoria_id}}"
+                  ]
+                }
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Editar categoría retorna 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "const response = pm.response.json();",
-                  "pm.test(\"Response contiene categoría actualizada\", function () {",
-                  "    pm.expect(response.categoria).to.exist;",
-                  "});"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Editar categoría retorna 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Response contiene categoría actualizada\", function () {",
+                      "    pm.expect(response.categoria).to.exist;",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Categoría - Cambiar Estado",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PATCH",
                 "header": [],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"estado\": false\n}",
-                  "options": { "raw": { "language": "json" } }
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
                 },
-                "url": { "raw": "{{base_url}}/categorias/{{carta_categoria_id}}/status", "host": ["{{base_url}}"], "path": ["categorias", "{{carta_categoria_id}}", "status"] }
+                "url": {
+                  "raw": "{{base_url}}/categorias/{{carta_categoria_id}}/status",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "categorias",
+                    "{{carta_categoria_id}}",
+                    "status"
+                  ]
+                }
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Cambiar estado retorna 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "const response = pm.response.json();",
-                  "pm.test(\"Estado actualizado correctamente\", function () {",
-                  "    pm.expect(response.categoria).to.exist;",
-                  "    pm.expect(response.categoria.estado).to.eql(false);",
-                  "});"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Cambiar estado retorna 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Estado actualizado correctamente\", function () {",
+                      "    pm.expect(response.categoria).to.exist;",
+                      "    pm.expect(response.categoria.estado).to.eql(false);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Categoría - Eliminar",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "DELETE",
                 "header": [],
-                "url": { "raw": "{{base_url}}/categorias/{{carta_categoria_id}}", "host": ["{{base_url}}"], "path": ["categorias", "{{carta_categoria_id}}"] }
+                "url": {
+                  "raw": "{{base_url}}/categorias/{{carta_categoria_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "categorias",
+                    "{{carta_categoria_id}}"
+                  ]
+                }
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Eliminar categoría retorna 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Eliminar categoría retorna 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Categoría - Listar Sin Token",
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": { "raw": "{{base_url}}/categorias", "host": ["{{base_url}}"], "path": ["categorias"] }
+                "url": {
+                  "raw": "{{base_url}}/categorias",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "categorias"
+                  ]
+                }
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Sin token retorna 401\", function () {",
-                  "    pm.response.to.have.status(401);",
-                  "});"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Sin token retorna 401\", function () {",
+                      "    pm.response.to.have.status(401);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Categoría - Crear Sin Permiso",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{waiter_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{waiter_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"nombre\": \"{{carta_categoria_nombre}}\"\n}",
-                  "options": { "raw": { "language": "json" } }
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
                 },
-                "url": { "raw": "{{base_url}}/categorias", "host": ["{{base_url}}"], "path": ["categorias"] }
+                "url": {
+                  "raw": "{{base_url}}/categorias",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "categorias"
+                  ]
+                }
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Sin permiso carta.gestionar retorna 403\", function () {",
-                  "    pm.response.to.have.status(403);",
-                  "});"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Sin permiso carta.gestionar retorna 403\", function () {",
+                      "    pm.response.to.have.status(403);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Categoría - Editar No Encontrada",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PUT",
                 "header": [],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"nombre\": \"No existe\"\n}",
-                  "options": { "raw": { "language": "json" } }
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
                 },
-                "url": { "raw": "{{base_url}}/categorias/{{invalid_id}}", "host": ["{{base_url}}"], "path": ["categorias", "{{invalid_id}}"] }
+                "url": {
+                  "raw": "{{base_url}}/categorias/{{invalid_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "categorias",
+                    "{{invalid_id}}"
+                  ]
+                }
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Categoría no encontrada retorna 404\", function () {",
-                  "    pm.response.to.have.status(404);",
-                  "});"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Categoría no encontrada retorna 404\", function () {",
+                      "    pm.response.to.have.status(404);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             }
           ]
         },
@@ -1000,300 +1313,608 @@
             {
               "name": "Producto - Listar",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [],
-                "url": { "raw": "{{base_url}}/productos", "host": ["{{base_url}}"], "path": ["productos"] }
+                "url": {
+                  "raw": "{{base_url}}/productos",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "productos"
+                  ]
+                }
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Listar productos retorna 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "const response = pm.response.json();",
-                  "pm.test(\"Response contiene array de productos\", function () {",
-                  "    pm.expect(response.productos).to.be.an(\"array\");",
-                  "});",
-                  "if (response.productos && response.productos.length > 0) {",
-                  "    pm.collectionVariables.set(\"carta_producto_id\", response.productos[0].id_producto);",
-                  "}"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Listar productos retorna 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Response contiene array de productos\", function () {",
+                      "    pm.expect(response.productos).to.be.an(\"array\");",
+                      "});",
+                      "if (response.productos && response.productos.length > 0) {",
+                      "    pm.collectionVariables.set(\"carta_producto_id\", response.productos[0].id_producto);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Producto - Crear",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"nombre\": \"{{carta_producto_nombre}}\",\n  \"descripcion\": \"{{carta_producto_descripcion}}\",\n  \"precio_base\": {{carta_producto_precio}},\n  \"id_categoria\": \"{{carta_categoria_id}}\",\n  \"disponibilidad\": true\n}",
-                  "options": { "raw": { "language": "json" } }
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
                 },
-                "url": { "raw": "{{base_url}}/productos", "host": ["{{base_url}}"], "path": ["productos"] }
+                "url": {
+                  "raw": "{{base_url}}/productos",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "productos"
+                  ]
+                }
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Crear producto retorna 201\", function () {",
-                  "    pm.response.to.have.status(201);",
-                  "});",
-                  "const response = pm.response.json();",
-                  "pm.test(\"Response contiene producto creado\", function () {",
-                  "    pm.expect(response.producto).to.exist;",
-                  "    pm.expect(response.producto.id_producto).to.exist;",
-                  "    pm.expect(response.producto.nombre).to.exist;",
-                  "});",
-                  "if (response.producto && response.producto.id_producto) {",
-                  "    pm.collectionVariables.set(\"carta_producto_id\", response.producto.id_producto);",
-                  "}"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Crear producto retorna 201\", function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Response contiene producto creado\", function () {",
+                      "    pm.expect(response.producto).to.exist;",
+                      "    pm.expect(response.producto.id_producto).to.exist;",
+                      "    pm.expect(response.producto.nombre).to.exist;",
+                      "});",
+                      "if (response.producto && response.producto.id_producto) {",
+                      "    pm.collectionVariables.set(\"carta_producto_id\", response.producto.id_producto);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Producto - Editar",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PUT",
                 "header": [],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"nombre\": \"{{carta_producto_nombre_edit}}\",\n  \"descripcion\": \"{{carta_producto_descripcion}}\",\n  \"precio_base\": {{carta_producto_precio}},\n  \"id_categoria\": \"{{carta_categoria_id}}\",\n  \"disponibilidad\": true\n}",
-                  "options": { "raw": { "language": "json" } }
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
                 },
-                "url": { "raw": "{{base_url}}/productos/{{carta_producto_id}}", "host": ["{{base_url}}"], "path": ["productos", "{{carta_producto_id}}"] }
+                "url": {
+                  "raw": "{{base_url}}/productos/{{carta_producto_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "productos",
+                    "{{carta_producto_id}}"
+                  ]
+                }
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Editar producto retorna 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "const response = pm.response.json();",
-                  "pm.test(\"Response contiene producto actualizado\", function () {",
-                  "    pm.expect(response.producto).to.exist;",
-                  "});"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Editar producto retorna 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Response contiene producto actualizado\", function () {",
+                      "    pm.expect(response.producto).to.exist;",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Producto - Asignar Tags",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PUT",
                 "header": [],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"tag_ids\": []\n}",
-                  "options": { "raw": { "language": "json" } }
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
                 },
-                "url": { "raw": "{{base_url}}/productos/{{carta_producto_id}}/tags", "host": ["{{base_url}}"], "path": ["productos", "{{carta_producto_id}}", "tags"] }
+                "url": {
+                  "raw": "{{base_url}}/productos/{{carta_producto_id}}/tags",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "productos",
+                    "{{carta_producto_id}}",
+                    "tags"
+                  ]
+                }
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Asignar tags retorna 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "const response = pm.response.json();",
-                  "pm.test(\"Response contiene etiquetas\", function () {",
-                  "    pm.expect(response.etiquetas).to.be.an(\"array\");",
-                  "});"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Asignar tags retorna 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Response contiene etiquetas\", function () {",
+                      "    pm.expect(response.etiquetas).to.be.an(\"array\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Producto - Cambiar Estado",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PATCH",
                 "header": [],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"estado\": false\n}",
-                  "options": { "raw": { "language": "json" } }
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
                 },
-                "url": { "raw": "{{base_url}}/productos/{{carta_producto_id}}/status", "host": ["{{base_url}}"], "path": ["productos", "{{carta_producto_id}}", "status"] }
+                "url": {
+                  "raw": "{{base_url}}/productos/{{carta_producto_id}}/status",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "productos",
+                    "{{carta_producto_id}}",
+                    "status"
+                  ]
+                }
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Cambiar estado retorna 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "const response = pm.response.json();",
-                  "pm.test(\"Estado actualizado correctamente\", function () {",
-                  "    pm.expect(response.producto).to.exist;",
-                  "    pm.expect(response.producto.estado).to.eql(false);",
-                  "});"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Cambiar estado retorna 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Estado actualizado correctamente\", function () {",
+                      "    pm.expect(response.producto).to.exist;",
+                      "    pm.expect(response.producto.estado).to.eql(false);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Producto - Cambiar Disponibilidad",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PATCH",
                 "header": [],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"disponibilidad\": false\n}",
-                  "options": { "raw": { "language": "json" } }
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
                 },
-                "url": { "raw": "{{base_url}}/productos/{{carta_producto_id}}/disponibilidad", "host": ["{{base_url}}"], "path": ["productos", "{{carta_producto_id}}", "disponibilidad"] }
+                "url": {
+                  "raw": "{{base_url}}/productos/{{carta_producto_id}}/disponibilidad",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "productos",
+                    "{{carta_producto_id}}",
+                    "disponibilidad"
+                  ]
+                }
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Cambiar disponibilidad retorna 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "const response = pm.response.json();",
-                  "pm.test(\"Disponibilidad actualizada correctamente\", function () {",
-                  "    pm.expect(response.producto).to.exist;",
-                  "    pm.expect(response.producto.disponibilidad).to.eql(false);",
-                  "});"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Cambiar disponibilidad retorna 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Disponibilidad actualizada correctamente\", function () {",
+                      "    pm.expect(response.producto).to.exist;",
+                      "    pm.expect(response.producto.disponibilidad).to.eql(false);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Producto - Subir Imagen",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [],
                 "body": {
                   "mode": "formdata",
-                  "formdata": [{ "key": "imagen", "type": "file", "src": "" }]
+                  "formdata": [
+                    {
+                      "key": "imagen",
+                      "type": "file",
+                      "src": ""
+                    }
+                  ]
                 },
-                "url": { "raw": "{{base_url}}/productos/{{carta_producto_id}}/imagen", "host": ["{{base_url}}"], "path": ["productos", "{{carta_producto_id}}", "imagen"] }
+                "url": {
+                  "raw": "{{base_url}}/productos/{{carta_producto_id}}/imagen",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "productos",
+                    "{{carta_producto_id}}",
+                    "imagen"
+                  ]
+                }
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Subir imagen retorna 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "const response = pm.response.json();",
-                  "pm.test(\"Response contiene producto con imagen\", function () {",
-                  "    pm.expect(response.producto).to.exist;",
-                  "    pm.expect(response.producto.imagen_referencial).to.exist;",
-                  "});"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Subir imagen retorna 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Response contiene producto con imagen\", function () {",
+                      "    pm.expect(response.producto).to.exist;",
+                      "    pm.expect(response.producto.imagen_referencial).to.exist;",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Producto - Eliminar",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "DELETE",
                 "header": [],
-                "url": { "raw": "{{base_url}}/productos/{{carta_producto_id}}", "host": ["{{base_url}}"], "path": ["productos", "{{carta_producto_id}}"] }
+                "url": {
+                  "raw": "{{base_url}}/productos/{{carta_producto_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "productos",
+                    "{{carta_producto_id}}"
+                  ]
+                }
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Eliminar producto retorna 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Eliminar producto retorna 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Producto - Listar Sin Token",
               "request": {
                 "method": "GET",
                 "header": [],
-                "url": { "raw": "{{base_url}}/productos", "host": ["{{base_url}}"], "path": ["productos"] }
+                "url": {
+                  "raw": "{{base_url}}/productos",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "productos"
+                  ]
+                }
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Sin token retorna 401\", function () {",
-                  "    pm.response.to.have.status(401);",
-                  "});"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Sin token retorna 401\", function () {",
+                      "    pm.response.to.have.status(401);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Producto - Crear Sin Permiso",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{waiter_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{waiter_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"nombre\": \"{{carta_producto_nombre}}\",\n  \"precio_base\": {{carta_producto_precio}},\n  \"id_categoria\": \"{{carta_categoria_id}}\"\n}",
-                  "options": { "raw": { "language": "json" } }
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
                 },
-                "url": { "raw": "{{base_url}}/productos", "host": ["{{base_url}}"], "path": ["productos"] }
+                "url": {
+                  "raw": "{{base_url}}/productos",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "productos"
+                  ]
+                }
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Sin permiso carta.gestionar retorna 403\", function () {",
-                  "    pm.response.to.have.status(403);",
-                  "});"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Sin permiso carta.gestionar retorna 403\", function () {",
+                      "    pm.response.to.have.status(403);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Producto - Editar No Encontrado",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PUT",
                 "header": [],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"nombre\": \"No existe\",\n  \"precio_base\": 10,\n  \"id_categoria\": \"{{carta_categoria_id}}\"\n}",
-                  "options": { "raw": { "language": "json" } }
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
                 },
-                "url": { "raw": "{{base_url}}/productos/{{invalid_id}}", "host": ["{{base_url}}"], "path": ["productos", "{{invalid_id}}"] }
+                "url": {
+                  "raw": "{{base_url}}/productos/{{invalid_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "productos",
+                    "{{invalid_id}}"
+                  ]
+                }
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Producto no encontrado retorna 404\", function () {",
-                  "    pm.response.to.have.status(404);",
-                  "});"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Producto no encontrado retorna 404\", function () {",
+                      "    pm.response.to.have.status(404);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Producto - Subir Imagen Formato Inválido",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [],
                 "body": {
                   "mode": "formdata",
-                  "formdata": [{ "key": "imagen", "type": "file", "src": "" }]
+                  "formdata": [
+                    {
+                      "key": "imagen",
+                      "type": "file",
+                      "src": ""
+                    }
+                  ]
                 },
-                "url": { "raw": "{{base_url}}/productos/{{carta_producto_id}}/imagen", "host": ["{{base_url}}"], "path": ["productos", "{{carta_producto_id}}", "imagen"] },
+                "url": {
+                  "raw": "{{base_url}}/productos/{{carta_producto_id}}/imagen",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "productos",
+                    "{{carta_producto_id}}",
+                    "imagen"
+                  ]
+                },
                 "description": "Enviar un archivo .gif o .pdf para validar el rechazo de formato."
               },
               "response": [],
-              "event": [{
-                "listen": "test",
-                "script": { "type": "text/javascript", "exec": [
-                  "pm.test(\"Formato inválido retorna 400\", function () {",
-                  "    pm.response.to.have.status(400);",
-                  "});"
-                ]}
-              }]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Formato inválido retorna 400\", function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             }
           ]
         }
@@ -3517,116 +4138,356 @@
             {
               "name": "Zona - Listar",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [],
-                "url": { "raw": "{{base_url}}/zonas", "host": ["{{base_url}}"], "path": ["zonas"] }
+                "url": {
+                  "raw": "{{base_url}}/zonas",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "zonas"
+                  ]
+                }
               },
               "response": [],
-              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-                "pm.test(\"Listar zonas retorna 200\", function () { pm.response.to.have.status(200); });",
-                "const response = pm.response.json();",
-                "pm.test(\"Response contiene array de zonas\", function () { pm.expect(response.zonas).to.be.an(\"array\"); });",
-                "if (response.zonas && response.zonas.length > 0) { pm.collectionVariables.set(\"salon_zona_id\", response.zonas[0].id_zona); }"
-              ]}}]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Listar zonas retorna 200\", function () { pm.response.to.have.status(200); });",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Response contiene array de zonas\", function () { pm.expect(response.zonas).to.be.an(\"array\"); });",
+                      "if (response.zonas && response.zonas.length > 0) { pm.collectionVariables.set(\"salon_zona_id\", response.zonas[0].id_zona); }"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Zona - Crear",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [],
-                "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"{{salon_zona_nombre}}\",\n  \"descripcion\": \"{{salon_zona_descripcion}}\"\n}", "options": { "raw": { "language": "json" } } },
-                "url": { "raw": "{{base_url}}/zonas", "host": ["{{base_url}}"], "path": ["zonas"] }
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"{{salon_zona_nombre}}\",\n  \"descripcion\": \"{{salon_zona_descripcion}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/zonas",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "zonas"
+                  ]
+                }
               },
               "response": [],
-              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-                "pm.test(\"Crear zona retorna 201\", function () { pm.response.to.have.status(201); });",
-                "const response = pm.response.json();",
-                "pm.test(\"Response contiene zona creada\", function () { pm.expect(response.zona).to.exist; pm.expect(response.zona.id_zona).to.exist; });",
-                "if (response.zona && response.zona.id_zona) { pm.collectionVariables.set(\"salon_zona_id\", response.zona.id_zona); }"
-              ]}}]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Crear zona retorna 201\", function () { pm.response.to.have.status(201); });",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Response contiene zona creada\", function () { pm.expect(response.zona).to.exist; pm.expect(response.zona.id_zona).to.exist; });",
+                      "if (response.zona && response.zona.id_zona) { pm.collectionVariables.set(\"salon_zona_id\", response.zona.id_zona); }"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Zona - Editar",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PUT",
                 "header": [],
-                "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"{{salon_zona_nombre_edit}}\",\n  \"descripcion\": \"{{salon_zona_descripcion}}\"\n}", "options": { "raw": { "language": "json" } } },
-                "url": { "raw": "{{base_url}}/zonas/{{salon_zona_id}}", "host": ["{{base_url}}"], "path": ["zonas", "{{salon_zona_id}}"] }
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"{{salon_zona_nombre_edit}}\",\n  \"descripcion\": \"{{salon_zona_descripcion}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/zonas/{{salon_zona_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "zonas",
+                    "{{salon_zona_id}}"
+                  ]
+                }
               },
               "response": [],
-              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-                "pm.test(\"Editar zona retorna 200\", function () { pm.response.to.have.status(200); });",
-                "const response = pm.response.json();",
-                "pm.test(\"Response contiene zona actualizada\", function () { pm.expect(response.zona).to.exist; });"
-              ]}}]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Editar zona retorna 200\", function () { pm.response.to.have.status(200); });",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Response contiene zona actualizada\", function () { pm.expect(response.zona).to.exist; });"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Zona - Cambiar Estado",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PATCH",
                 "header": [],
-                "body": { "mode": "raw", "raw": "{\n  \"estado\": false\n}", "options": { "raw": { "language": "json" } } },
-                "url": { "raw": "{{base_url}}/zonas/{{salon_zona_id}}/status", "host": ["{{base_url}}"], "path": ["zonas", "{{salon_zona_id}}", "status"] }
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"estado\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/zonas/{{salon_zona_id}}/status",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "zonas",
+                    "{{salon_zona_id}}",
+                    "status"
+                  ]
+                }
               },
               "response": [],
-              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-                "pm.test(\"Cambiar estado zona retorna 200\", function () { pm.response.to.have.status(200); });",
-                "const response = pm.response.json();",
-                "pm.test(\"Estado actualizado correctamente\", function () { pm.expect(response.zona).to.exist; pm.expect(response.zona.estado).to.eql(false); });"
-              ]}}]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Cambiar estado zona retorna 200\", function () { pm.response.to.have.status(200); });",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Estado actualizado correctamente\", function () { pm.expect(response.zona).to.exist; pm.expect(response.zona.estado).to.eql(false); });"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Zona - Eliminar",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "DELETE",
                 "header": [],
-                "url": { "raw": "{{base_url}}/zonas/{{salon_zona_id}}", "host": ["{{base_url}}"], "path": ["zonas", "{{salon_zona_id}}"] }
+                "url": {
+                  "raw": "{{base_url}}/zonas/{{salon_zona_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "zonas",
+                    "{{salon_zona_id}}"
+                  ]
+                }
               },
               "response": [],
-              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-                "pm.test(\"Eliminar zona retorna 200\", function () { pm.response.to.have.status(200); });"
-              ]}}]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Eliminar zona retorna 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Zona - Listar Sin Token",
-              "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/zonas", "host": ["{{base_url}}"], "path": ["zonas"] } },
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/zonas",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "zonas"
+                  ]
+                }
+              },
               "response": [],
-              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-                "pm.test(\"Sin token retorna 401\", function () { pm.response.to.have.status(401); });"
-              ]}}]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Sin token retorna 401\", function () { pm.response.to.have.status(401); });"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Zona - Crear Sin Permiso",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{waiter_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{waiter_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [],
-                "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"{{salon_zona_nombre}}\"\n}", "options": { "raw": { "language": "json" } } },
-                "url": { "raw": "{{base_url}}/zonas", "host": ["{{base_url}}"], "path": ["zonas"] }
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"{{salon_zona_nombre}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/zonas",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "zonas"
+                  ]
+                }
               },
               "response": [],
-              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-                "pm.test(\"Sin permiso salon.gestionar retorna 403\", function () { pm.response.to.have.status(403); });"
-              ]}}]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Sin permiso salon.gestionar retorna 403\", function () { pm.response.to.have.status(403); });"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Zona - Editar No Encontrada",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PUT",
                 "header": [],
-                "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"No existe\"\n}", "options": { "raw": { "language": "json" } } },
-                "url": { "raw": "{{base_url}}/zonas/{{invalid_id}}", "host": ["{{base_url}}"], "path": ["zonas", "{{invalid_id}}"] }
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"No existe\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/zonas/{{invalid_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "zonas",
+                    "{{invalid_id}}"
+                  ]
+                }
               },
               "response": [],
-              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-                "pm.test(\"Zona no encontrada retorna 404\", function () { pm.response.to.have.status(404); });"
-              ]}}]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Zona no encontrada retorna 404\", function () { pm.response.to.have.status(404); });"
+                    ]
+                  }
+                }
+              ]
             }
           ]
         },
@@ -3636,191 +4497,837 @@
             {
               "name": "Mesa - Listar",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [],
-                "url": { "raw": "{{base_url}}/mesas", "host": ["{{base_url}}"], "path": ["mesas"] }
+                "url": {
+                  "raw": "{{base_url}}/mesas",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "mesas"
+                  ]
+                }
               },
               "response": [],
-              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-                "pm.test(\"Listar mesas retorna 200\", function () { pm.response.to.have.status(200); });",
-                "const response = pm.response.json();",
-                "pm.test(\"Response contiene array de mesas\", function () { pm.expect(response.mesas).to.be.an(\"array\"); });",
-                "if (response.mesas && response.mesas.length > 0) { pm.collectionVariables.set(\"salon_mesa_id\", response.mesas[0].id_mesa); }"
-              ]}}]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Listar mesas retorna 200\", function () { pm.response.to.have.status(200); });",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Response contiene array de mesas\", function () { pm.expect(response.mesas).to.be.an(\"array\"); });",
+                      "if (response.mesas && response.mesas.length > 0) { pm.collectionVariables.set(\"salon_mesa_id\", response.mesas[0].id_mesa); }"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Mesa - Crear",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [],
-                "body": { "mode": "raw", "raw": "{\n  \"numero\": {{salon_mesa_numero}},\n  \"capacidad\": {{salon_mesa_capacidad}},\n  \"id_zona\": \"{{salon_zona_id}}\"\n}", "options": { "raw": { "language": "json" } } },
-                "url": { "raw": "{{base_url}}/mesas", "host": ["{{base_url}}"], "path": ["mesas"] }
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"numero\": {{salon_mesa_numero}},\n  \"capacidad\": {{salon_mesa_capacidad}},\n  \"id_zona\": \"{{salon_zona_id}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/mesas",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "mesas"
+                  ]
+                }
               },
               "response": [],
-              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-                "pm.test(\"Crear mesa retorna 201\", function () { pm.response.to.have.status(201); });",
-                "const response = pm.response.json();",
-                "pm.test(\"Response contiene mesa creada\", function () { pm.expect(response.mesa).to.exist; pm.expect(response.mesa.id_mesa).to.exist; });",
-                "if (response.mesa && response.mesa.id_mesa) { pm.collectionVariables.set(\"salon_mesa_id\", response.mesa.id_mesa); }"
-              ]}}]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Crear mesa retorna 201\", function () { pm.response.to.have.status(201); });",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Response contiene mesa creada\", function () { pm.expect(response.mesa).to.exist; pm.expect(response.mesa.id_mesa).to.exist; });",
+                      "if (response.mesa && response.mesa.id_mesa) { pm.collectionVariables.set(\"salon_mesa_id\", response.mesa.id_mesa); }"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Mesa - Editar",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PUT",
                 "header": [],
-                "body": { "mode": "raw", "raw": "{\n  \"numero\": {{salon_mesa_numero_edit}},\n  \"capacidad\": {{salon_mesa_capacidad}},\n  \"id_zona\": \"{{salon_zona_id}}\"\n}", "options": { "raw": { "language": "json" } } },
-                "url": { "raw": "{{base_url}}/mesas/{{salon_mesa_id}}", "host": ["{{base_url}}"], "path": ["mesas", "{{salon_mesa_id}}"] }
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"numero\": {{salon_mesa_numero_edit}},\n  \"capacidad\": {{salon_mesa_capacidad}},\n  \"id_zona\": \"{{salon_zona_id}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/mesas/{{salon_mesa_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "mesas",
+                    "{{salon_mesa_id}}"
+                  ]
+                }
               },
               "response": [],
-              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-                "pm.test(\"Editar mesa retorna 200\", function () { pm.response.to.have.status(200); });",
-                "const response = pm.response.json();",
-                "pm.test(\"Response contiene mesa actualizada\", function () { pm.expect(response.mesa).to.exist; });"
-              ]}}]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Editar mesa retorna 200\", function () { pm.response.to.have.status(200); });",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Response contiene mesa actualizada\", function () { pm.expect(response.mesa).to.exist; });"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Mesa - Cambiar Disponibilidad",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PATCH",
                 "header": [],
-                "body": { "mode": "raw", "raw": "{\n  \"disponibilidad\": \"OCUPADA\"\n}", "options": { "raw": { "language": "json" } } },
-                "url": { "raw": "{{base_url}}/mesas/{{salon_mesa_id}}/disponibilidad", "host": ["{{base_url}}"], "path": ["mesas", "{{salon_mesa_id}}", "disponibilidad"] }
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"disponibilidad\": \"OCUPADA\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/mesas/{{salon_mesa_id}}/disponibilidad",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "mesas",
+                    "{{salon_mesa_id}}",
+                    "disponibilidad"
+                  ]
+                }
               },
               "response": [],
-              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-                "pm.test(\"Cambiar disponibilidad retorna 200\", function () { pm.response.to.have.status(200); });",
-                "const response = pm.response.json();",
-                "pm.test(\"Disponibilidad actualizada correctamente\", function () { pm.expect(response.mesa).to.exist; pm.expect(response.mesa.disponibilidad).to.eql(\"OCUPADA\"); });"
-              ]}}]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Cambiar disponibilidad retorna 200\", function () { pm.response.to.have.status(200); });",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Disponibilidad actualizada correctamente\", function () { pm.expect(response.mesa).to.exist; pm.expect(response.mesa.disponibilidad).to.eql(\"OCUPADA\"); });"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Mesa - Cambiar Estado",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PATCH",
                 "header": [],
-                "body": { "mode": "raw", "raw": "{\n  \"estado\": false\n}", "options": { "raw": { "language": "json" } } },
-                "url": { "raw": "{{base_url}}/mesas/{{salon_mesa_id}}/status", "host": ["{{base_url}}"], "path": ["mesas", "{{salon_mesa_id}}", "status"] }
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"estado\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/mesas/{{salon_mesa_id}}/status",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "mesas",
+                    "{{salon_mesa_id}}",
+                    "status"
+                  ]
+                }
               },
               "response": [],
-              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-                "pm.test(\"Cambiar estado mesa retorna 200\", function () { pm.response.to.have.status(200); });",
-                "const response = pm.response.json();",
-                "pm.test(\"Estado actualizado correctamente\", function () { pm.expect(response.mesa).to.exist; pm.expect(response.mesa.estado).to.eql(false); });"
-              ]}}]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Cambiar estado mesa retorna 200\", function () { pm.response.to.have.status(200); });",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Estado actualizado correctamente\", function () { pm.expect(response.mesa).to.exist; pm.expect(response.mesa.estado).to.eql(false); });"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Mesa - Eliminar",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "DELETE",
                 "header": [],
-                "url": { "raw": "{{base_url}}/mesas/{{salon_mesa_id}}", "host": ["{{base_url}}"], "path": ["mesas", "{{salon_mesa_id}}"] }
+                "url": {
+                  "raw": "{{base_url}}/mesas/{{salon_mesa_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "mesas",
+                    "{{salon_mesa_id}}"
+                  ]
+                }
               },
               "response": [],
-              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-                "pm.test(\"Eliminar mesa retorna 200\", function () { pm.response.to.have.status(200); });"
-              ]}}]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Eliminar mesa retorna 200\", function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Mesa - Listar con active_order_count",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [],
-                "url": { "raw": "{{base_url}}/mesas", "host": ["{{base_url}}"], "path": ["mesas"] }
+                "url": {
+                  "raw": "{{base_url}}/mesas",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "mesas"
+                  ]
+                }
               },
               "response": [],
-              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-                "pm.test(\"Listar mesas retorna 200\", function () { pm.response.to.have.status(200); });",
-                "const response = pm.response.json();",
-                "pm.test(\"Cada mesa tiene active_order_count\", function () {",
-                "    response.mesas.forEach(function (mesa) {",
-                "        pm.expect(mesa).to.have.property('active_order_count');",
-                "        pm.expect(Number(mesa.active_order_count)).to.be.at.least(0);",
-                "    });",
-                "});",
-                "pm.test(\"Cada mesa tiene active_total\", function () {",
-                "    response.mesas.forEach(function (mesa) {",
-                "        pm.expect(mesa).to.have.property('active_total');",
-                "    });",
-                "});",
-                "const ocupada = response.mesas.find(m => m.disponibilidad === 'OCUPADA');",
-                "if (ocupada) {",
-                "    pm.test(\"Mesa ocupada tiene active_order_count mayor a 0\", function () {",
-                "        pm.expect(Number(ocupada.active_order_count)).to.be.at.least(1);",
-                "    });",
-                "}"
-              ]}}]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Listar mesas retorna 200\", function () { pm.response.to.have.status(200); });",
+                      "const response = pm.response.json();",
+                      "pm.test(\"Cada mesa tiene active_order_count\", function () {",
+                      "    response.mesas.forEach(function (mesa) {",
+                      "        pm.expect(mesa).to.have.property('active_order_count');",
+                      "        pm.expect(Number(mesa.active_order_count)).to.be.at.least(0);",
+                      "    });",
+                      "});",
+                      "pm.test(\"Cada mesa tiene active_total\", function () {",
+                      "    response.mesas.forEach(function (mesa) {",
+                      "        pm.expect(mesa).to.have.property('active_total');",
+                      "    });",
+                      "});",
+                      "const ocupada = response.mesas.find(m => m.disponibilidad === 'OCUPADA');",
+                      "if (ocupada) {",
+                      "    pm.test(\"Mesa ocupada tiene active_order_count mayor a 0\", function () {",
+                      "        pm.expect(Number(ocupada.active_order_count)).to.be.at.least(1);",
+                      "    });",
+                      "}"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Mesa - Verificar OCUPADA tras crear orden POS",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{waiter_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{waiter_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [],
-                "url": { "raw": "{{base_url}}/mesas", "host": ["{{base_url}}"], "path": ["mesas"] },
+                "url": {
+                  "raw": "{{base_url}}/mesas",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "mesas"
+                  ]
+                },
                 "description": "Correr después de POS - Create Order. Valida que la mesa del pedido aparece OCUPADA con active_order_count >= 1."
               },
               "response": [],
-              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-                "pm.test(\"Listar mesas retorna 200\", function () { pm.response.to.have.status(200); });",
-                "const response = pm.response.json();",
-                "const tableId = pm.collectionVariables.get('pos_table_id');",
-                "const mesa = response.mesas.find(m => m.id_mesa === tableId);",
-                "pm.test(\"Mesa del pedido existe en el listado\", function () {",
-                "    pm.expect(mesa).to.exist;",
-                "});",
-                "if (mesa) {",
-                "    pm.test(\"Mesa está OCUPADA tras crear orden\", function () {",
-                "        pm.expect(mesa.disponibilidad).to.eql('OCUPADA');",
-                "    });",
-                "    pm.test(\"Mesa tiene al menos 1 orden activa\", function () {",
-                "        pm.expect(Number(mesa.active_order_count)).to.be.at.least(1);",
-                "    });",
-                "}"
-              ]}}]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Listar mesas retorna 200\", function () { pm.response.to.have.status(200); });",
+                      "const response = pm.response.json();",
+                      "const tableId = pm.collectionVariables.get('pos_table_id');",
+                      "const mesa = response.mesas.find(m => m.id_mesa === tableId);",
+                      "pm.test(\"Mesa del pedido existe en el listado\", function () {",
+                      "    pm.expect(mesa).to.exist;",
+                      "});",
+                      "if (mesa) {",
+                      "    pm.test(\"Mesa está OCUPADA tras crear orden\", function () {",
+                      "        pm.expect(mesa.disponibilidad).to.eql('OCUPADA');",
+                      "    });",
+                      "    pm.test(\"Mesa tiene al menos 1 orden activa\", function () {",
+                      "        pm.expect(Number(mesa.active_order_count)).to.be.at.least(1);",
+                      "    });",
+                      "}"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Mesa - Listar Sin Token",
-              "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/mesas", "host": ["{{base_url}}"], "path": ["mesas"] } },
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/mesas",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "mesas"
+                  ]
+                }
+              },
               "response": [],
-              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-                "pm.test(\"Sin token retorna 401\", function () { pm.response.to.have.status(401); });"
-              ]}}]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Sin token retorna 401\", function () { pm.response.to.have.status(401); });"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Mesa - Crear Sin Permiso",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{waiter_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{waiter_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [],
-                "body": { "mode": "raw", "raw": "{\n  \"numero\": {{salon_mesa_numero}},\n  \"capacidad\": {{salon_mesa_capacidad}},\n  \"id_zona\": \"{{salon_zona_id}}\"\n}", "options": { "raw": { "language": "json" } } },
-                "url": { "raw": "{{base_url}}/mesas", "host": ["{{base_url}}"], "path": ["mesas"] }
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"numero\": {{salon_mesa_numero}},\n  \"capacidad\": {{salon_mesa_capacidad}},\n  \"id_zona\": \"{{salon_zona_id}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/mesas",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "mesas"
+                  ]
+                }
               },
               "response": [],
-              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-                "pm.test(\"Sin permiso salon.gestionar retorna 403\", function () { pm.response.to.have.status(403); });"
-              ]}}]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Sin permiso salon.gestionar retorna 403\", function () { pm.response.to.have.status(403); });"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Mesa - Editar No Encontrada",
               "request": {
-                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PUT",
                 "header": [],
-                "body": { "mode": "raw", "raw": "{\n  \"numero\": 999,\n  \"capacidad\": 4,\n  \"id_zona\": \"{{salon_zona_id}}\"\n}", "options": { "raw": { "language": "json" } } },
-                "url": { "raw": "{{base_url}}/mesas/{{invalid_id}}", "host": ["{{base_url}}"], "path": ["mesas", "{{invalid_id}}"] }
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"numero\": 999,\n  \"capacidad\": 4,\n  \"id_zona\": \"{{salon_zona_id}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/mesas/{{invalid_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "mesas",
+                    "{{invalid_id}}"
+                  ]
+                }
               },
               "response": [],
-              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-                "pm.test(\"Mesa no encontrada retorna 404\", function () { pm.response.to.have.status(404); });"
-              ]}}]
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Mesa no encontrada retorna 404\", function () { pm.response.to.have.status(404); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Auth - Session Hardening",
+      "description": "Manual checks for AAT-10 auth hardening: refresh token rotation, logout revocation, strict request validation and login rate limiting. Keep this folder near the end of the collection so logout does not invalidate tokens needed by module tests.",
+      "item": [
+        {
+          "name": "Refresh - Current Session",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{auth_refresh_token}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Renews the current session using `auth_refresh_token`, stores the rotated refresh token and updates `auth_token`."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Refresh returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "const accessToken = response.accessToken || response.token;",
+                  "",
+                  "pm.test(\"Response contains rotated tokens\", function () {",
+                  "    pm.expect(accessToken).to.exist;",
+                  "    pm.expect(response.refreshToken).to.exist;",
+                  "});",
+                  "",
+                  "if (accessToken) {",
+                  "    pm.collectionVariables.set(\"auth_token\", accessToken);",
+                  "}",
+                  "",
+                  "if (response.refreshToken) {",
+                  "    pm.collectionVariables.set(\"auth_refresh_token\", response.refreshToken);",
+                  "}",
+                  "",
+                  "if (response.session) {",
+                  "    pm.collectionVariables.set(\"auth_session_id\", response.session.id_sesion);",
+                  "    pm.collectionVariables.set(\"auth_session_expires_at\", response.session.expira_at);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout - Current Session",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Revokes the current session represented by `auth_token`. Run after protected endpoint checks because the token will become invalid.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Logout returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Logout response contains message\", function () {",
+                  "    pm.expect(response.message).to.exist;",
+                  "});",
+                  "",
+                  "// Keep role-specific variables intact. Only clear current session helper variables.",
+                  "pm.collectionVariables.set(\"auth_token\", \"\");",
+                  "pm.collectionVariables.set(\"auth_refresh_token\", \"\");"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - Reject Unexpected Field",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{admin_identifier}}\",\n  \"password\": \"{{admin_password}}\",\n  \"remember\": {{admin_remember}},\n  \"isAdmin\": {{auth_validation_extra_field}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Validates strict login payloads. Extra fields such as `isAdmin` must be rejected."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Unexpected fields return 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Validation error is returned\", function () {",
+                  "    pm.expect(response.message).to.exist;",
+                  "    pm.expect(response.errors).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh - Missing Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Validates that refresh requires `refreshToken`."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Missing refresh token returns 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Validation error is returned\", function () {",
+                  "    pm.expect(response.message).to.exist;",
+                  "    pm.expect(response.errors).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh - Invalid Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{invalid_refresh_token}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Validates that malformed or unknown refresh tokens are rejected."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Invalid refresh token returns 400 or 401\", function () {",
+                  "    pm.expect([400, 401]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - Invalid Credentials / Rate Limit Probe",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{admin_identifier}}\",\n  \"password\": \"{{bad_password}}\",\n  \"remember\": {{admin_remember}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Run repeatedly to verify login rate limiting. It should return 401 first and 429 after the configured limit."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Invalid credentials or rate limit response\", function () {",
+                  "    pm.expect([401, 429]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "// Run this request repeatedly to verify AUTH_LOGIN_MAX_ATTEMPTS behavior."
+                ]
+              }
             }
           ]
         }
@@ -4074,55 +5581,55 @@
       "value": "00000000-0000-0000-0000-000000000000",
       "type": "string"
     },
-    { 
-      "key": "carta_categoria_id", 
-      "value": "", 
-      "type": "string" 
-    },
-    { 
-      "key": "carta_categoria_nombre", 
-      "value": "Categoría Test", 
+    {
+      "key": "carta_categoria_id",
+      "value": "",
       "type": "string"
     },
-    { 
-      "key": "carta_categoria_nombre_edit", 
-      "value": "Categoría Test Editada", 
-      "type": "string" 
+    {
+      "key": "carta_categoria_nombre",
+      "value": "Categoría Test",
+      "type": "string"
     },
-    { 
+    {
+      "key": "carta_categoria_nombre_edit",
+      "value": "Categoría Test Editada",
+      "type": "string"
+    },
+    {
       "key": "carta_categoria_descripcion",
-      "value": "Descripción de prueba", 
-      "type": "string" 
+      "value": "Descripción de prueba",
+      "type": "string"
     },
-    { 
-      "key": "carta_producto_id", 
-      "value": "", 
-      "type": "string" 
+    {
+      "key": "carta_producto_id",
+      "value": "",
+      "type": "string"
     },
-    { 
-      "key": "carta_producto_nombre", 
-      "value": "Producto Test", 
-      "type": "string" 
+    {
+      "key": "carta_producto_nombre",
+      "value": "Producto Test",
+      "type": "string"
     },
-    { 
-      "key": "carta_producto_nombre_edit", 
-      "value": "Producto Test Editado", 
-      "type": "string" 
+    {
+      "key": "carta_producto_nombre_edit",
+      "value": "Producto Test Editado",
+      "type": "string"
     },
-    { 
-      "key": "carta_producto_descripcion", 
-      "value": "Descripción de prueba", 
-      "type": "string" 
+    {
+      "key": "carta_producto_descripcion",
+      "value": "Descripción de prueba",
+      "type": "string"
     },
-    { 
-      "key": "carta_producto_precio", 
-      "value": "12.5", 
-      "type": "string" 
+    {
+      "key": "carta_producto_precio",
+      "value": "12.5",
+      "type": "string"
     },
-    { 
-      "key": "invalid_id", 
-      "value": "00000000-0000-0000-0000-000000000000", 
-      "type": "string" 
+    {
+      "key": "invalid_id",
+      "value": "00000000-0000-0000-0000-000000000000",
+      "type": "string"
     },
     {
       "key": "pos_table_id",
@@ -4164,43 +5671,175 @@
       "value": "00000000-0000-0000-0000-000000000000",
       "type": "string"
     },
-    { 
-      "key": "salon_zona_id", 
-      "value": "", 
-      "type": "string" 
+    {
+      "key": "salon_zona_id",
+      "value": "",
+      "type": "string"
     },
-    { 
-      "key": "salon_zona_nombre", 
-      "value": "Zona Test", 
-      "type": "string" 
+    {
+      "key": "salon_zona_nombre",
+      "value": "Zona Test",
+      "type": "string"
     },
-    { 
-      "key": "salon_zona_nombre_edit", 
+    {
+      "key": "salon_zona_nombre_edit",
       "value": "Zona Test Editada",
-      "type": "string" 
+      "type": "string"
     },
-    { 
-      "key": "salon_zona_descripcion", 
-      "value": "Descripción de prueba", 
-      "type": "string" 
+    {
+      "key": "salon_zona_descripcion",
+      "value": "Descripción de prueba",
+      "type": "string"
     },
-    { 
-      "key": "salon_mesa_id", 
-      "value": "", 
-      "type": "string" 
+    {
+      "key": "salon_mesa_id",
+      "value": "",
+      "type": "string"
     },
-    { 
-      "key": "salon_mesa_numero", 
-      "value": "99", 
-      "type": "string" 
+    {
+      "key": "salon_mesa_numero",
+      "value": "99",
+      "type": "string"
     },
-    { "key": "salon_mesa_numero_edit", 
-      "value": "98", 
-      "type": "string" 
+    {
+      "key": "salon_mesa_numero_edit",
+      "value": "98",
+      "type": "string"
     },
-    { 
-      "key": "salon_mesa_capacidad", 
-      "value": "4", 
-      "type": "string" }
+    {
+      "key": "salon_mesa_capacidad",
+      "value": "4",
+      "type": "string"
+    },
+    {
+      "key": "admin_remember",
+      "value": "false",
+      "type": "string"
+    },
+    {
+      "key": "admin_refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_session_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_session_expires_at",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "kds_remember",
+      "value": "false",
+      "type": "string"
+    },
+    {
+      "key": "kds_refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "kds_session_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "kds_session_expires_at",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cashier_remember",
+      "value": "false",
+      "type": "string"
+    },
+    {
+      "key": "cashier_refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cashier_session_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cashier_session_expires_at",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "waiter_remember",
+      "value": "false",
+      "type": "string"
+    },
+    {
+      "key": "waiter_refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "waiter_session_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "waiter_session_expires_at",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_remember",
+      "value": "false",
+      "type": "string"
+    },
+    {
+      "key": "user_refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_session_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_session_expires_at",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "auth_refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "auth_session_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "auth_session_expires_at",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "invalid_refresh_token",
+      "value": "invalid-refresh-token",
+      "type": "string"
+    },
+    {
+      "key": "auth_validation_extra_field",
+      "value": "true",
+      "type": "string"
+    },
+    {
+      "key": "bad_password",
+      "value": "PasswordIncorrecta",
+      "type": "string"
+    }
   ]
 }
