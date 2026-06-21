@@ -5,18 +5,18 @@
 }
 
 .login-form__header {
-  margin-bottom: 40px;
+  margin-bottom: 28px;
 }
 
 .login-form__header h1 {
-  max-width: 520px;
+  max-width: 420px;
 
   color: var(--color-text-primary);
 
-  font-size: clamp(34px, 3vw, 45px);
+  font-size: clamp(24,2.2vw,32);
   font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: -0.035em;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
 }
 
 .login-form__header strong {
@@ -24,25 +24,25 @@
 }
 
 .login-form__group {
-  margin-top: 26px;
+  margin-top: 18px;
 
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .login-form__group label {
   color: var(--color-text-primary);
 
-  font-size: 19px;
-  font-weight: 800;
+  font-size: 15px;
+  font-weight: 700;
   line-height: 1.2;
 }
 
 .login-form__group input {
   width: 100%;
-  height: 44px;
-  padding: 0 16px;
+  height: 46px;
+  padding: 0 15px;
 
   border: 1px solid transparent;
   border-radius: 4px;
@@ -50,7 +50,7 @@
   background: var(--color-surface-muted);
   color: var(--color-text-primary);
 
-  font-size: 17px;
+  font-size: 14px;
   font-weight: 500;
   outline: none;
 
@@ -75,16 +75,16 @@
 }
 
 .login-form__password input {
-  padding-right: 48px;
+  padding-right: 44px;
 }
 
 .login-form__password-toggle {
   position: absolute;
   top: 50%;
-  right: 14px;
+  right: 12px;
 
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
 
   display: inline-flex;
   align-items: center;
@@ -93,7 +93,7 @@
   color: var(--color-text-muted);
   transform: translateY(-50%);
 
-  font-size: 13px;
+  font-size: 12px;
 
   transition: color var(--transition-fast);
 }
@@ -103,7 +103,7 @@
 }
 
 .login-form__options {
-  margin-top: 30px;
+  margin-top: 20px;
 
   display: flex;
   align-items: center;
@@ -114,11 +114,11 @@
 .login-form__remember {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 
   color: var(--color-text-primary);
 
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
 
   cursor: pointer;
@@ -133,8 +133,8 @@
 .login-form__remember span {
   position: relative;
 
-  width: 48px;
-  height: 26px;
+  width: 40px;
+  height: 22px;
 
   display: inline-flex;
 
@@ -150,8 +150,8 @@
   top: 3px;
   left: 3px;
 
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
 
   border-radius: 50%;
   background: var(--color-surface);
@@ -164,13 +164,13 @@
 }
 
 .login-form__remember input:checked + span::after {
-  transform: translateX(22px);
+  transform: translateX(18px);
 }
 
 .login-form__forgot {
   color: color-mix(in srgb, var(--color-brand-main), transparent 20%);
 
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
 
   transition:
@@ -183,23 +183,23 @@
 }
 
 .login-form__help {
-  margin-top: 38px;
+  margin-top: 22px;
   color: color-mix(in srgb, var(--color-text-muted), transparent 15%);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   line-height: 1.45;
 }
 
 .login-form__copyright {
-  margin-top: 54px;
+  margin-top: 22px;
   color: color-mix(in srgb, var(--color-text-muted), transparent 30%);
   text-align: right;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
 }
 
 .login-form__submit {
-  margin-top: 40px;
+  margin-top: 24px;
   min-height: 48px;
 
   display: inline-flex;
@@ -264,29 +264,25 @@
 
 @media (max-width: 520px) {
   .login-form__header {
-    margin-bottom: 32px;
+    margin-bottom: 24px;
   }
 
   .login-form__header h1 {
-    font-size: 32px;
+    font-size: 24px;
   }
 
   .login-form__group label {
-    font-size: 17px;
+    font-size: 13px;
   }
 
   .login-form__group input {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .login-form__options {
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
-  }
-
-  .login-form__submit {
-    font-size: 18px;
+    gap: 14px;
   }
 
   .login-form__copyright {
