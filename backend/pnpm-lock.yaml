@@ -1247,7 +1247,7 @@ snapshots:
 
   require-main-filename@2.0.0: {}
 
-  router@2.2.0(supports-color@5.5.0):
+  router@2.2.0:
     dependencies:
       debug: 4.4.3(supports-color@5.5.0)
       depd: 2.0.0
