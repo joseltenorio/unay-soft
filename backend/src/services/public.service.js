@@ -64,4 +64,46 @@ async function getCartaPublica(idEstablecimiento) {
   }
 }
 
-module.exports = { getCartaPublica}
+async function getOrCreateQR(idEstablecimiento, baseUrl, slug) {
+  // Busca si el establecimiento ya tiene un QR generado en la BD
+  const existQ = await pool.query(
+    `SELECT id_codigo_qr, url_destino, imagen_qr 
+     FROM codigo_qr 
+     WHERE id_establecimiento = $1 AND tipo = 'CARTA_GENERAL'
+     LIMIT 1`,
+    [idEstablecimiento]
+  )
+
+  // Si ya existe, devuelve para no generar uno doble
+  if (existQ.rows.length > 0) {
+    return existQ.rows[0]
+  }
+
+  // Si no, arma la URL final del menú y lo crea
+  const urlDestino = `${baseUrl}/carta/${slug}`
+  const tipoQR = 'CARTA_GENERAL'
+
+  const insertQ = await pool.query(
+    `INSERT INTO codigo_qr (id_establecimiento, url_destino) 
+     VALUES ($1, $2, $3)
+     RETURNING id_codigo_qr, url_destino, imagen_qr`,
+    [idEstablecimiento, tipoQR,urlDestino]
+  )
+
+  return insertQ.rows[0]
+}
+
+async function saveQRImagen(idCodigoQr, imagenBase64) {
+  // Actualiza la fila guardando el string larguísimo de la imagen generada
+  const updateQ = await pool.query(
+    `UPDATE codigo_qr 
+     SET imagen_qr = $1 
+     WHERE id_codigo_qr = $2 
+     RETURNING id_codigo_qr, url_destino, imagen_qr`,
+    [imagenBase64, idCodigoQr]
+  )
+
+  return updateQ.rows[0]
+}
+
+module.exports = { getCartaPublica, getOrCreateQR, saveQRImagen}

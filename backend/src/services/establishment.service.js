@@ -17,6 +17,7 @@ async function getEstablishmentById(idEstablecimiento) {
       moneda_codigo,
       moneda_simbolo,
       estado,
+      slug,
       created_at,
       updated_at
     from establecimiento
