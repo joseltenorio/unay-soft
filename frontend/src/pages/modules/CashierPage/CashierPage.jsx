@@ -17,15 +17,11 @@ export default function CashierPage() {
     <div className="cashier-page">
       <div className="cashier-page__shell">
         <div className="cashier-page__header">
-          <div className="cashier-page__heading">
             <p className="cashier-page__eyebrow">Caja y pagos</p>
-
             <h1>Gestión de Caja</h1>
-
             <p>
               Turno activo · Cajero: Nombre
             </p>
-          </div>
         </div>
 
         <div className="cashier-tabs">
