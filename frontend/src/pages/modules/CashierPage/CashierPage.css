@@ -406,9 +406,44 @@
 }
 
 .cashier-pay-panel__methods {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
 }
 
 .cashier-method-btn {
+  min-height: 44px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(157, 190, 187, 0.4);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.78);
+  color: rgba(3, 25, 38, 0.68);
+  font-size: 0.84rem;
+  font-weight: 900;
   cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.cashier-method-btn:hover {
+  background: rgba(119, 172, 162, 0.13);
+  color: var(--color-brand-primary);
+}
+
+.cashier-method-btn--active {
+  background: var(--color-brand-primary);
+  color: var(--color-text-on-dark);
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 8px 20px rgba(3, 25, 38, 0.16);
+}
+
+.cashier-method-btn--active:hover {
+  background: var(--color-brand-primary);
+  color: var(--color-text-on-dark);
 }
