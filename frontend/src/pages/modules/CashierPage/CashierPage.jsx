@@ -13,15 +13,24 @@ export default function CashierPage() {
   const [activeTab, setActiveTab] = useState("cobrar")
   const [selectedOrder, setSelectedOrder] = useState(null)
 
+       
   return (
     <div className="cashier-page">
       <div className="cashier-page__shell">
+
         <div className="cashier-page__header">
+          <div className="cashier-page__heading">
             <p className="cashier-page__eyebrow">Caja y pagos</p>
             <h1>Gestión de Caja</h1>
-            <p>
-              Turno activo · Cajero: Nombre
-            </p>
+            <p>Turno activo · Cajero: Nombre</p>
+          </div>
+
+          <div className="cashier-page__summary">
+            <div><span>Ventas del día</span><strong>S/ 0.00</strong></div>
+            <div><span>Efectivo</span><strong>S/ 0.00</strong></div>
+            <div><span>Diferencia</span><strong>S/ 0.00</strong></div>
+            <div><span>Transacciones</span><strong>0</strong></div>
+          </div>
         </div>
 
         <div className="cashier-tabs">
@@ -47,6 +56,7 @@ export default function CashierPage() {
               selectedOrder={selectedOrder}
               onSelect={setSelectedOrder}
             />
+
             <CashierPayPanel
               order={selectedOrder}
             />
@@ -135,6 +145,8 @@ function CashierPayPanel({ order }) {
   return (
     <div className="cashier-pay-panel">
       <div className="cashier-pay-panel__detail">
+        <h3>Detalle de consumo</h3>
+
         {order.items.map((item, index) => (
           <div
             key={index}
@@ -156,28 +168,41 @@ function CashierPayPanel({ order }) {
         </div>
       </div>
 
-      <div className="cashier-pay-panel__methods">
-        {["efectivo", "tarjeta", "qr"].map((paymentMethod) => (
-          <button
-            key={paymentMethod}
-            className={
-              method === paymentMethod
-                ? "cashier-method-btn cashier-method-btn--active"
-                : "cashier-method-btn"
-            }
-            onClick={() => setMethod(paymentMethod)}
-          >
-            {paymentMethod}
-          </button>
-        ))}
+      <div className="cashier-pay-panel__payment-section">
+        <h3>Método de pago</h3>
+
+        <div className="cashier-pay-panel__methods">
+          {["efectivo", "tarjeta", "qr"].map((paymentMethod) => (
+            <button
+              key={paymentMethod}
+              type="button"
+              className={
+                method === paymentMethod
+                  ? "cashier-method-btn cashier-method-btn--active"
+                  : "cashier-method-btn"
+              }
+              onClick={() => setMethod(paymentMethod)}
+            >
+              {paymentMethod === "qr"
+                ? "QR"
+                : paymentMethod.charAt(0).toUpperCase() +
+                  paymentMethod.slice(1)}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {method === "efectivo" && (
+      {method === "efectivo" ? (
         <div className="cashier-pay-panel__received">
-          <label>Monto recibido</label>
+          <label htmlFor="cashier-received">
+            Monto recibido
+          </label>
 
           <input
+            id="cashier-received"
             type="number"
+            min="0"
+            step="0.01"
             value={received}
             placeholder="S/ 0.00"
             onChange={(event) =>
@@ -187,16 +212,29 @@ function CashierPayPanel({ order }) {
 
           {change !== null && (
             <div className="cashier-pay-panel__change">
-              Vuelto:
+              <span>Vuelto</span>
+
               <strong>
                 S/ {change.toFixed(2)}
               </strong>
             </div>
           )}
         </div>
+      ) : (
+        <div className="cashier-pay-panel__info">
+          <p>
+            El pago se registrará mediante{" "}
+            <strong>
+              {method === "qr" ? "QR" : "Tarjeta"}
+            </strong>.
+          </p>
+        </div>
       )}
 
-      <button className="cashier-pay-panel__submit">
+      <button
+        type="button"
+        className="cashier-pay-panel__submit"
+      >
         Registrar cobro
       </button>
     </div>
