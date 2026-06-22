@@ -32,18 +32,40 @@ console.log("imagen_referencial:", data?.imagen_referencial)
 
   async function handleSubmit(e) {
     e.preventDefault()
-     if (saving) return
- setSaving(true)
-  try {
-    await onSave(
-      { nombre, descripcion, precio_base: Number(precio), id_categoria: categoria, imagen_referencial: imagen, tag_ids: selectedTags, disponibilidad },
-      data?.id_producto
-    )
-  } finally {
-    setSaving(false)
-  }
-}
+    if (saving) return
+    setSaving(true)
 
+    try {
+      // 1. Validar longitud mínima del nombre de forma segura
+      if (nombre.trim().length < 3) {
+        alert("El nombre del producto debe tener al menos 3 caracteres.")
+        setSaving(false) // Apagamos el cargando antes de salir
+        return
+      }
+
+      // 2. Validar que el precio sea mayor a cero
+      if (Number(precio) <= 0) {
+        alert("Por favor, ingrese un precio mayor a 0.")
+        setSaving(false) // Apagamos el cargando antes de salir
+        return
+      }
+
+      await onSave(
+        { 
+          nombre: nombre.trim(), 
+          descripcion: descripcion.trim(), 
+          precio_base: Number(precio), 
+          id_categoria: categoria, 
+          imagen_referencial: imagen, 
+          tag_ids: selectedTags, 
+          disponibilidad 
+        },
+        data?.id_producto
+      )
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <div className="pm-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -56,7 +78,6 @@ console.log("imagen_referencial:", data?.imagen_referencial)
               <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
             </div>
             <div>
-              {/*<p className="pm__eyebrow">{data ? "EDITAR PRODUCTO" : "NUEVO PRODUCTO"}</p>*/}
               <h2 className="pm__title">{data ? "Editar producto" : "Crear nuevo producto"}</h2>
               <p className="pm__subtitle">{data ? "Modifica la información del producto." : "Completa los siguientes campos para agregar un nuevo producto."}</p>
             </div>
@@ -72,7 +93,20 @@ console.log("imagen_referencial:", data?.imagen_referencial)
             <label className="pm__label">Nombre del producto <span className="pm__required">*</span></label>
             <div className="pm__input-wrap">
               <svg className="pm__input-icon" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-              <input className="pm__input" type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej: Café molido 250g" required />
+              <input 
+                className="pm__input" 
+                type="text" 
+                value={nombre} 
+                minLength={3}
+                maxLength={80}
+                onChange={(e) => {
+                  // Sanitizado de caracteres idéntico a Categorías
+                  const valor = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s\-.,'()]/g, "")
+                  setNombre(valor)
+                }} 
+                placeholder="Ej: Café molido 250g" 
+                required 
+              />
             </div>
           </div>
 
@@ -81,8 +115,21 @@ console.log("imagen_referencial:", data?.imagen_referencial)
             <label className="pm__label">Descripción <span className="pm__optional">(opcional)</span></label>
             <div className="pm__input-wrap pm__input-wrap--textarea">
               <svg className="pm__input-icon pm__input-icon--top" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-              <textarea className="pm__textarea" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Ej: Café 100% arábica, tueste medio, ideal para todo tipo de preparación." rows={3} />
+              <textarea 
+                className="pm__textarea" 
+                value={descripcion} 
+                maxLength={250}
+                onChange={(e) => {
+                  const valor = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s0-9\-.,'()]/g, "")
+                  setDescripcion(valor)
+                }} 
+                placeholder="Ej: Café 100% arábica, tueste medio..." 
+                rows={3} 
+              />
             </div>
+            <p style={{ fontSize: 12, color: "#94a3b8", marginTop: 4, textAlign: "right" }}>
+              {descripcion.length}/250 caracteres
+            </p>
           </div>
 
           {/* Precio */}
@@ -90,10 +137,24 @@ console.log("imagen_referencial:", data?.imagen_referencial)
             <label className="pm__label">Precio <span className="pm__required">*</span></label>
             <div className="pm__input-wrap">
               <svg className="pm__input-icon" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6M12 18h.01"/></svg>
-              <input className="pm__input" type="number" step="0.1" min="0" value={precio} onChange={(e) => setPrecio(e.target.value)} placeholder="Ej: 12.90" required />
+              <input 
+                className="pm__input" 
+                type="number" 
+                step="0.01" 
+                min="0.01" 
+                value={precio} 
+                onChange={(e) => {
+                  // No permitir valores menores a 0 al tipear
+                  if (Number(e.target.value) < 0) return
+                  setPrecio(e.target.value)
+                }} 
+                placeholder="Ej: 12.90" 
+                required 
+              />
             </div>
           </div>
           
+          {/* Disponibilidad */}
           <div className="pm__field">
             <label className="pm__label">Disponibilidad</label>
             <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
@@ -106,6 +167,7 @@ console.log("imagen_referencial:", data?.imagen_referencial)
             </label>
           </div>
 
+          {/* Etiquetas */}
            <div className="pm__field">
             <label className="pm__label">Etiquetas <span className="pm__optional">(opcional)</span></label>
             <div className="pm__tags">
@@ -123,6 +185,7 @@ console.log("imagen_referencial:", data?.imagen_referencial)
             </div>
           </div>
 
+          {/* Categoría */}
           {!defaultCategoryId && (
           <div className="pm__field">
               <label className="pm__label">Categoría <span className="pm__required">*</span></label>
@@ -138,99 +201,103 @@ console.log("imagen_referencial:", data?.imagen_referencial)
             </div>
           )}
 
-       <div className="pm__field">
-        <label className="pm__label">Imagen <span className="pm__optional">(opcional)</span></label>
+          {/* Imagen */}
+          <div className="pm__field">
+            <label className="pm__label">Imagen <span className="pm__optional">(opcional)</span></label>
 
-        {imagen && (
-          <div style={{ position: "relative", marginBottom: 8 }}>
-            <img
-              src={imagen}
-              alt="Preview"
-              onError={(e) => { e.target.style.display = "none" }}
-              style={{ width: "100%", maxHeight: 160, objectFit: "cover", borderRadius: 8 }}
-            />
-            <button
-              type="button"
-              onClick={() => setImagen("")}
-              style={{
-                position: "absolute",
-                top: 8,
-                right: 8,
-                background: "rgba(0,0,0,0.6)",
-                color: "white",
-                border: "none",
-                borderRadius: 6,
-                padding: "4px 10px",
-                cursor: "pointer",
-                fontSize: 12,
-                fontWeight: 600,
-              }}
-            >
-              ✕ Quitar imagen
-            </button>
-          </div>
-        )}
-
-        {data?.id_producto ? (
-          <>
-            <label
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "8px 16px",
-                borderRadius: 8,
-                border: "1.5px solid #cbd5e1",
-                background: "#f8fafc",
-                color: "#475569",
-                fontSize: 14,
-                fontWeight: 500,
-                cursor: isUploadingImagen ? "not-allowed" : "pointer",
-                opacity: isUploadingImagen ? 0.6 : 1,
-                marginTop: 6,
-              }}
-            >
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
-              {isUploadingImagen ? "Subiendo..." : "Subir imagen (.jpg, .png)"}
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                disabled={isUploadingImagen}
-                style={{ display: "none" }}
-                onChange={async (e) => {
-                  const file = e.target.files[0]
-                  if (!file) return
-                  setIsUploadingImagen(true)
-                  try {
-                    const producto = await uploadImagenProducto(data.id_producto, file)
-                    setImagen(producto.imagen_referencial)
-                  } catch (err) {
-                    alert("Error al subir imagen: " + err.message)
-                  } finally {
-                    setIsUploadingImagen(false)
-                  }
-                }}              />
-            </label>
-            {isUploadingImagen && (
-              <p style={{ fontSize: 13, marginTop: 4, color: "#64748b" }}>Subiendo imagen...</p>
+            {imagen && (
+              <div style={{ position: "relative", marginBottom: 8 }}>
+                <img
+                  src={imagen}
+                  alt="Preview"
+                  onError={(e) => { e.target.style.display = "none" }}
+                  style={{ width: "100%", maxHeight: 160, objectFit: "cover", borderRadius: 8 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setImagen("")}
+                  style={{
+                    position: "absolute",
+                    top: 8,
+                    right: 8,
+                    background: "rgba(0,0,0,0.6)",
+                    color: "white",
+                    border: "none",
+                    borderRadius: 6,
+                    padding: "4px 10px",
+                    cursor: "pointer",
+                    fontSize: 12,
+                    fontWeight: 600,
+                  }}
+                >
+                  ✕ Quitar imagen
+                </button>
+              </div>
             )}
-          </>
-        ) : (
-          <p style={{ fontSize: 13, color: "#888" }}>
-            Podrás subir la imagen después de crear el producto.
-          </p>
-        )}
-      </div>
+
+            {data?.id_producto ? (
+              <>
+                <label
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "8px 16px",
+                    borderRadius: 8,
+                    border: "1.5px solid #cbd5e1",
+                    background: "#f8fafc",
+                    color: "#475569",
+                    fontSize: 14,
+                    fontWeight: 500,
+                    cursor: isUploadingImagen ? "not-allowed" : "pointer",
+                    opacity: isUploadingImagen ? 0.6 : 1,
+                    marginTop: 6,
+                  }}
+                >
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  {isUploadingImagen ? "Subiendo..." : "Subir imagen (.jpg, .png)"}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    disabled={isUploadingImagen}
+                    style={{ display: "none" }}
+                    onChange={async (e) => {
+                      const file = e.target.files[0]
+                      if (!file) return
+                      setIsUploadingImagen(true)
+                      try {
+                        const producto = await uploadImagenProducto(data.id_producto, file)
+                        setImagen(producto.imagen_referencial)
+                      } catch (err) {
+                        alert("Error al subir imagen: " + err.message)
+                      } finally {
+                        setIsUploadingImagen(false)
+                      }
+                    }}
+                  />
+                </label>
+                {isUploadingImagen && (
+                  <p style={{ fontSize: 13, marginTop: 4, color: "#64748b" }}>Subiendo imagen...</p>
+                )}
+              </>
+            ) : (
+              <p style={{ fontSize: 13, color: "#888" }}>
+                Podrás subir la imagen después de crear el producto.
+              </p>
+            )}
+          </div>
+
+          {/* Botones de acción */}
           <div className="pm__actions">
             <button type="button" className="pm__btn-cancel" onClick={onClose}>Cancelar</button>
             <button type="submit" className="pm__btn-save" disabled={saving}>
-          {saving ? "Guardando..." : data ? "Guardar producto" : "Crear producto"}
-        </button>
-        </div>
+              {saving ? "Guardando..." : data ? "Guardar producto" : "Crear producto"}
+            </button>
+          </div>
 
         </form>
       </div>
