@@ -1,0 +1,10 @@
+/* src/pages/modules/CashierPage/tabs/HistorialTab.css */
+
+.historial-tab {
+  min-height: 300px;
+  padding: 24px;
+  border-radius: 20px;
+  border: 1px solid rgba(70, 129, 137, 0.12);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--color-text-muted);
+}
