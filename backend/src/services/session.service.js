@@ -1,5 +1,6 @@
 // backend/src/services/session.service.js
 
+const { authConfig } = require("../config/auth")
 const { pool } = require("../config/database")
 const {
   generateOpaqueToken,
@@ -19,6 +20,47 @@ function getRequestMetadata(req) {
   }
 }
 
+function resolveIdleTimeoutMinutes(user) {
+  const roleName = String(user?.rol || "").trim().toLowerCase()
+
+  if (roleName.includes("cajero")) {
+    return authConfig.cashierIdleTimeoutMinutes
+  }
+
+  if (
+    roleName.includes("cocina") ||
+    roleName.includes("kds") ||
+    roleName.includes("kitchen")
+  ) {
+    return authConfig.kdsIdleTimeoutMinutes
+  }
+
+  return authConfig.idleTimeoutMinutes
+}
+
+function isSessionIdleExpired(session, timeoutMinutes) {
+  if (!session?.last_seen_at) {
+    return false
+  }
+
+  const parsedTimeout = Number(timeoutMinutes)
+
+  if (!Number.isFinite(parsedTimeout) || parsedTimeout <= 0) {
+    return false
+  }
+
+  const lastSeenAt = new Date(session.last_seen_at)
+
+  if (Number.isNaN(lastSeenAt.getTime())) {
+    return false
+  }
+
+  const elapsedMs = Date.now() - lastSeenAt.getTime()
+  const timeoutMs = parsedTimeout * 60 * 1000
+
+  return elapsedMs > timeoutMs
+}
+
 async function createUserSession({
   id_usuario,
   remember = false,
@@ -35,13 +77,15 @@ async function createUserSession({
       refresh_token_hash,
       ip_origen,
       user_agent,
-      expira_at
+      expira_at,
+      last_seen_at
     )
-    values ($1, $2, $3, $4, $5)
+    values ($1, $2, $3, $4, $5, now())
     returning
       id_sesion,
       id_usuario,
       expira_at,
+      last_seen_at,
       created_at;
   `
 
@@ -67,7 +111,8 @@ async function rotateUserSession(refreshToken) {
       s.id_sesion,
       s.id_usuario,
       s.expira_at,
-      s.revocado_at
+      s.revocado_at,
+      s.last_seen_at
     from sesion_usuario s
     where s.refresh_token_hash = $1
       and s.revocado_at is null
@@ -90,12 +135,15 @@ async function rotateUserSession(refreshToken) {
 
   const updateQuery = `
     update sesion_usuario
-    set refresh_token_hash = $1
+    set
+      refresh_token_hash = $1,
+      last_seen_at = now()
     where id_sesion = $2
     returning
       id_sesion,
       id_usuario,
       expira_at,
+      last_seen_at,
       created_at;
   `
 
@@ -121,6 +169,7 @@ async function getActiveSessionById(id_sesion, id_usuario) {
       id_usuario,
       expira_at,
       revocado_at,
+      last_seen_at,
       created_at
     from sesion_usuario
     where id_sesion = $1
@@ -128,6 +177,32 @@ async function getActiveSessionById(id_sesion, id_usuario) {
       and revocado_at is null
       and expira_at > now()
     limit 1;
+  `
+
+  const { rows } = await pool.query(query, [id_sesion, id_usuario])
+
+  return rows[0] || null
+}
+
+async function touchUserSession(id_sesion, id_usuario) {
+  if (!id_sesion || !id_usuario) {
+    return null
+  }
+
+  const query = `
+    update sesion_usuario
+    set last_seen_at = now()
+    where id_sesion = $1
+      and id_usuario = $2
+      and revocado_at is null
+      and expira_at > now()
+    returning
+      id_sesion,
+      id_usuario,
+      expira_at,
+      revocado_at,
+      last_seen_at,
+      created_at;
   `
 
   const { rows } = await pool.query(query, [id_sesion, id_usuario])
@@ -157,6 +232,9 @@ module.exports = {
   createUserSession,
   getActiveSessionById,
   getRequestMetadata,
+  isSessionIdleExpired,
+  resolveIdleTimeoutMinutes,
   revokeUserSession,
   rotateUserSession,
+  touchUserSession,
 }
