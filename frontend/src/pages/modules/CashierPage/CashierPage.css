@@ -87,7 +87,9 @@
 }
 
 .cashier-cobrar {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 20px;
 }
 
 .cashier-orders {
@@ -112,4 +114,42 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.cashier-pay-panel {
+  min-height: 400px;
+}
+
+.cashier-pay-panel--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cashier-pay-panel__detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.cashier-pay-panel__line {
+  display: flex;
+  justify-content: space-between;
+}
+
+.cashier-pay-panel__total {
+  display: flex;
+  justify-content: space-between;
+}
+
+.cashier-pay-panel__methods {
+  display: flex;
+}
+
+.cashier-pay-panel__received {
+  display: flex;
+  flex-direction: column;
+}
+
+.cashier-method-btn {
+  cursor: pointer;
 }
