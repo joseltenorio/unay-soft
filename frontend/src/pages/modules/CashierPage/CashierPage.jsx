@@ -208,7 +208,7 @@ function CashierPayPanel({ order }) {
   const change = received
     ? Math.max(0, parseFloat(received) - (order?.total ?? 0))
     : null
-
+  
   if (!order) {
     return (
       <div className="cashier-pay-panel cashier-pay-panel--empty">
