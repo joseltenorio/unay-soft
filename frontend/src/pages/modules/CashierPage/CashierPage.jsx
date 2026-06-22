@@ -9,10 +9,85 @@ const TABS = [
   { id: "cierre", label: "Cierre" },
 ]
 
+const orders = [
+  {
+    id: 1,
+    mesa: "Mesa 1",
+    total: 48.5,
+    items: [
+      {
+        nombre: "Lomo Saltado",
+        qty: 1,
+        precio: 28.5,
+      },
+      {
+        nombre: "Chicha Morada",
+        qty: 2,
+        precio: 5,
+      },
+      {
+        nombre: "Pie de Limón",
+        qty: 1,
+        precio: 10,
+      },
+    ],
+  },
+  {
+    id: 2,
+    mesa: "Mesa 5",
+    total: 96,
+    items: [
+      {
+        nombre: "Parrilla Familiar",
+        qty: 1,
+        precio: 78,
+      },
+      {
+        nombre: "Inca Kola",
+        qty: 2,
+        precio: 9,
+      },
+    ],
+  },
+  {
+    id: 3,
+    mesa: "Mesa 8",
+    total: 32,
+    items: [
+      {
+        nombre: "Hamburguesa Clásica",
+        qty: 2,
+        precio: 16,
+      },
+    ],
+  },
+  {
+    id: 4,
+    mesa: "Mesa 12",
+    total: 114,
+    items: [
+      {
+        nombre: "Ceviche Mixto",
+        qty: 2,
+        precio: 42,
+      },
+      {
+        nombre: "Limonada",
+        qty: 2,
+        precio: 8,
+      },
+      {
+        nombre: "Tres Leches",
+        qty: 1,
+        precio: 14,
+      },
+    ],
+  },
+]
+
 export default function CashierPage() {
   const [activeTab, setActiveTab] = useState("cobrar")
   const [selectedOrder, setSelectedOrder] = useState(null)
-
        
   return (
     <div className="cashier-page">
@@ -53,6 +128,7 @@ export default function CashierPage() {
         {activeTab === "cobrar" && (
           <div className="cashier-cobrar">
             <CashierOrderList
+              orders={orders}
               selectedOrder={selectedOrder}
               onSelect={setSelectedOrder}
             />
@@ -79,8 +155,7 @@ export default function CashierPage() {
   )
 }
 
-function CashierOrderList({ selectedOrder, onSelect }) {
-  const orders = []
+function CashierOrderList({ orders,selectedOrder, onSelect }) {
 
   return (
     <div className="cashier-orders">
@@ -91,7 +166,7 @@ function CashierOrderList({ selectedOrder, onSelect }) {
 
       {orders.length === 0 ? (
         <div className="cashier-orders__empty">
-          <p>No hay órdenes pendientes de cobro</p>
+          <p>No hay órdenes pendientes de cobro 💵</p>
         </div>
       ) : (
         <ul className="cashier-orders__list">

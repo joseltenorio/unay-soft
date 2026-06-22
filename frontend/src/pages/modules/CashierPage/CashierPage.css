@@ -211,19 +211,20 @@
   scrollbar-color: rgba(157, 190, 187, 0.4) transparent;
 }
 
+
 .cashier-orders__empty {
   flex: 1;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  padding: 24px;
   min-height: 280px;
   border: 1px dashed rgba(70, 129, 137, 0.28);
   border-radius: 20px;
-  background: rgba(252, 249, 242, 0.56);
+  background: var(--pos-surface-soft);
+  color: var(--pos-text-secondary);
   text-align: center;
-  padding: 24px;
+
 }
 
 .cashier-pay-panel--empty {
