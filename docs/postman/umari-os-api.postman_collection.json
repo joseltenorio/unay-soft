@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "a5e711cc-b091-4037-928d-3e7c606a6ea7",
     "name": "Umari OS API",
-    "description": "Postman collection for Umarí OS API.\n\nThis collection uses variables and does not store real credentials or tokens. Set local values in Postman before running the requests.\n\nAuth session hardening notes:\n- Login requests now send `remember` and store access, refresh and session variables.\n- Protected requests keep using role access tokens such as `admin_token`, `waiter_token`, `kds_token`, `cashier_token` and `user_token`.\n- Session utilities use `auth_token` and `auth_refresh_token` for manual refresh/logout checks.\n\nAuth audit notes:\n- AAT-11 audit checks are grouped under `Auth - Audit Events`.\n- The audit requests trigger authentication events; verification is done in the database table `auditoria` using the SQL query documented in the README.\n- Audit metadata must not store passwords, access tokens, refresh tokens or refresh token hashes.",
+    "description": "Postman collection for Umarí OS API.\n\nThis collection is organized by backend module and uses collection variables for credentials, tokens, IDs and reusable data. It must be exported without real credentials, tokens or private establishment data.\n\nUse the Auth folders to initialize tokens before running protected module requests.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "54524212"
   },
@@ -5334,6 +5334,174 @@
       ]
     },
     {
+      "name": "Auth - Idle Timeout",
+      "item": [
+        {
+          "name": "Idle Timeout - Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Starts a session dedicated to idle-timeout checks and stores `idle_timeout_token` and `idle_timeout_session_id`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{admin_identifier}}\",\n  \"password\": \"{{admin_password}}\",\n  \"remember\": {{admin_remember}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Idle timeout login returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "const accessToken = response.accessToken || response.token;",
+                  "",
+                  "pm.test(\"Response contains access token\", function () {",
+                  "    pm.expect(accessToken).to.exist;",
+                  "});",
+                  "",
+                  "pm.test(\"Response contains session metadata\", function () {",
+                  "    pm.expect(response.session).to.exist;",
+                  "    pm.expect(response.session.id_sesion).to.exist;",
+                  "});",
+                  "",
+                  "if (accessToken) {",
+                  "    pm.collectionVariables.set(\"idle_timeout_token\", accessToken);",
+                  "}",
+                  "",
+                  "if (response.session) {",
+                  "    pm.collectionVariables.set(\"idle_timeout_session_id\", response.session.id_sesion);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Idle Timeout - Protected Request",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Uses `idle_timeout_token` on a protected endpoint while the session is active.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{idle_timeout_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Protected request returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response contains authenticated user\", function () {",
+                  "    pm.expect(response.user).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Idle Timeout - Protected Request After Inactivity",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Reuses `idle_timeout_token` after the session is considered inactive by the backend.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{idle_timeout_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Inactive session returns 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response contains session message\", function () {",
+                  "    pm.expect(response.message).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Auth - Audit Events",
       "description": "Folder de validación manual para AAT-11. Estos requests no consultan directamente la tabla `auditoria`; disparan eventos de autenticación que deben verificarse en base de datos con la consulta documentada en el README.\n\nEventos esperados:\n- `AUTH_LOGIN_SUCCESS`\n- `AUTH_LOGIN_FAILED`\n- `AUTH_REFRESH_SUCCESS`\n- `AUTH_REFRESH_FAILED`\n- `AUTH_LOGOUT`\n\nConsulta recomendada:\n\n```sql\nselect\n  id_auditoria,\n  id_usuario,\n  id_establecimiento,\n  tabla_afectada,\n  registro_id,\n  accion,\n  datos_nuevos,\n  ip_origen,\n  user_agent,\n  created_at\nfrom auditoria\nwhere accion like 'AUTH_%'\norder by created_at desc\nlimit 30;\n```\n\nLa auditoría no debe guardar contraseñas, access tokens, refresh tokens ni hashes de refresh token.",
       "item": [
@@ -6149,6 +6317,16 @@
     {
       "key": "bad_password",
       "value": "PasswordIncorrecta",
+      "type": "string"
+    },
+    {
+      "key": "idle_timeout_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "idle_timeout_session_id",
+      "value": "",
       "type": "string"
     }
   ]
