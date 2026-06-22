@@ -17,9 +17,9 @@
 .cashier-page__header {
   padding: clamp(22px, 3vw, 32px);
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: space-between;
+  gap: 24px;
   border: 1px solid rgba(157, 190, 187, 0.46);
   border-radius: 28px;
   background:
@@ -30,6 +30,10 @@
     0 1px 4px rgba(3, 25, 38, 0.05);
 }
 
+.cashier-page__heading {
+  flex: 1;
+  min-width: 0;
+}
 
 .cashier-page__eyebrow {
   margin-bottom: 8px;
@@ -58,6 +62,39 @@
   font-size: 1rem;
   font-weight: 600;
   line-height: 1.55;
+}
+
+.cashier-page__summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.cashier-page__summary div {
+  min-width: 120px;
+  padding: 14px 16px;
+  border: 1px solid rgba(70, 129, 137, 0.16);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.cashier-page__summary span {
+  display: block;
+  color: rgba(3, 25, 38, 0.58);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.cashier-page__summary strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--color-brand-primary);
+  font-size: 1.58rem;
+  font-weight: 900;
+  line-height: 1;
 }
 
 .cashier-tabs {
@@ -162,6 +199,18 @@
   font-weight: 600;
 }
 
+.cashier-orders__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  list-style: none;
+  overflow-y: auto;
+  max-height: 520px;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(157, 190, 187, 0.4) transparent;
+}
+
 .cashier-orders__empty {
   flex: 1;
   display: flex;
@@ -175,22 +224,6 @@
   background: rgba(252, 249, 242, 0.56);
   text-align: center;
   padding: 24px;
-}
-
-.cashier-orders__list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  list-style: none;
-  overflow-y: auto;
-  max-height: 520px;
-  padding-right: 4px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(157, 190, 187, 0.4) transparent;
-}
-
-.cashier-pay-panel {
-  min-height: 400px;
 }
 
 .cashier-pay-panel--empty {
@@ -225,4 +258,8 @@
 
 .cashier-method-btn {
   cursor: pointer;
+}
+
+.cashier-pay-panel {
+  min-height: 400px;
 }
