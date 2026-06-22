@@ -1,10 +1,8 @@
 # Postman Collection
 
-Esta carpeta contiene la colección de Postman utilizada para validar los endpoints principales del backend de Umarí OS.
+Colección oficial de Postman para consumir y validar manualmente los endpoints principales del backend de Umarí OS.
 
-La colección está organizada por módulos para facilitar la validación de autenticación, autorización por perfiles, mantenimiento de usuarios, configuración del establecimiento, carta, salón, POS, KDS, sesiones y auditoría de autenticación.
-
-La colección trabaja con variables y no debe almacenar credenciales reales, tokens reales, cadenas de conexión ni datos privados del establecimiento.
+La colección está organizada por módulos y usa variables de colección para credenciales de prueba, tokens, IDs y datos reutilizables. El archivo exportado no debe contener credenciales reales, tokens reales, cadenas de conexión ni datos privados del establecimiento.
 
 ---
 
@@ -18,34 +16,25 @@ umari-os-api.postman_collection.json
 
 ## Requisitos previos
 
-Antes de ejecutar la colección, el backend debe estar levantado localmente.
-
-Desde la carpeta del backend:
-
-```txt
-cd backend
-npm run dev
-```
-
-El backend debe estar disponible en:
+El backend debe estar levantado localmente y disponible en:
 
 ```txt
 http://localhost:3000
 ```
 
-La variable base de la colección debe apuntar a:
+La colección debe usar:
 
 ```txt
 base_url = http://localhost:3000/api
 ```
 
-También debe existir el archivo de variables de entorno del backend:
+El backend debe tener configurado su archivo local:
 
 ```txt
 backend/.env
 ```
 
-Puedes tomar como referencia:
+Referencia:
 
 ```txt
 backend/.env.example
@@ -93,17 +82,16 @@ Umari OS API
 │  ├─ Categorías
 │  └─ Productos
 │
+├─ Salón
+│  ├─ Zonas
+│  └─ Mesas
+│
 ├─ POS - Orders
 │  ├─ POS - List Tables
 │  ├─ POS - List Menu
 │  ├─ POS - Create Order
 │  ├─ POS - List Tables After Order
-│  ├─ POS - Create Order Without Token
-│  ├─ POS - Create Order Denied
-│  ├─ POS - Reject Order Without Table
-│  ├─ POS - Reject Order Without Items
-│  ├─ POS - Reject Invalid Table
-│  └─ POS - Reject Invalid Product
+│  └─ Casos negativos de token, permisos y datos inválidos
 │
 ├─ KDS - Kitchen Monitor
 │  ├─ KDS - List Kitchen Orders
@@ -111,7 +99,7 @@ Umari OS API
 │  ├─ KDS - Change Item Status to In Preparation
 │  ├─ KDS - Change Item Status to Ready
 │  ├─ KDS - Change Order Status to Ready
-│  └─ Validaciones negativas de permisos, estados y recursos inexistentes
+│  └─ Casos negativos de permisos, estados y recursos inexistentes
 │
 ├─ KDS - Service Notifications
 │  ├─ KDS - Create Ready Order Service Call
@@ -119,11 +107,7 @@ Umari OS API
 │  ├─ KDS - List Kitchen Service Calls
 │  ├─ KDS - Attend Kitchen Service Call
 │  ├─ KDS - Confirm Delivered Order
-│  └─ Validaciones negativas de permisos, tipos y recursos inexistentes
-│
-├─ Salón
-│  ├─ Zonas
-│  └─ Mesas
+│  └─ Casos negativos de permisos, tipos y recursos inexistentes
 │
 ├─ Auth - Session Hardening
 │  ├─ Refresh - Current Session
@@ -132,6 +116,11 @@ Umari OS API
 │  ├─ Refresh - Missing Token
 │  ├─ Refresh - Invalid Token
 │  └─ Login - Invalid Credentials / Rate Limit Probe
+│
+├─ Auth - Idle Timeout
+│  ├─ Idle Timeout - Login
+│  ├─ Idle Timeout - Protected Request
+│  └─ Idle Timeout - Protected Request After Inactivity
 │
 └─ Auth - Audit Events
    ├─ Audit - Trigger Login Success
@@ -143,11 +132,9 @@ Umari OS API
 
 ---
 
-## Variables recomendadas
+## Variables principales
 
-La colección utiliza variables para evitar valores fijos dentro de las peticiones y para mantener el archivo exportado libre de credenciales y tokens reales.
-
-Las variables están definidas en inglés y con formato `snake_case`.
+La colección utiliza variables en formato `snake_case`.
 
 ```txt
 base_url = http://localhost:3000/api
@@ -182,6 +169,9 @@ user_refresh_token =
 user_session_id =
 user_session_expires_at =
 
+idle_timeout_token =
+idle_timeout_session_id =
+
 admin_identifier =
 admin_password =
 admin_remember = false
@@ -214,25 +204,25 @@ invalid_item_id = 00000000-0000-0000-0000-000000000000
 invalid_service_call_id = 00000000-0000-0000-0000-000000000000
 ```
 
-La colección también utiliza variables funcionales para datos de usuarios, roles, establecimiento, carta, salón, POS y KDS. Estas variables deben completarse con datos de prueba locales antes de ejecutar los flujos correspondientes.
+Las carpetas funcionales usan variables adicionales para usuarios, roles, establecimiento, carta, salón, POS y KDS. Esas variables deben completarse con datos de prueba locales antes de ejecutar cada flujo.
 
 ---
 
 ## Uso de variables
 
-Ejemplo de endpoint parametrizado:
+Endpoint parametrizado:
 
 ```txt
 {{base_url}}/users
 ```
 
-Ejemplo de header para rutas protegidas:
+Header para rutas protegidas:
 
 ```txt
 Authorization: Bearer {{admin_token}}
 ```
 
-Ejemplo de body parametrizado para login:
+Body de login:
 
 ```json
 {
@@ -242,7 +232,7 @@ Ejemplo de body parametrizado para login:
 }
 ```
 
-Ejemplo de body parametrizado para editar usuario:
+Body de edición de usuario:
 
 ```json
 {
@@ -256,7 +246,7 @@ Ejemplo de body parametrizado para editar usuario:
 }
 ```
 
-Ejemplo de body parametrizado para actualizar establecimiento:
+Body de actualización de establecimiento:
 
 ```json
 {
@@ -275,87 +265,37 @@ Ejemplo de body parametrizado para actualizar establecimiento:
 
 Los valores booleanos y numéricos deben enviarse sin comillas.
 
-Ejemplos:
-
-```txt
-"estado": {{edit_user_status}}
-"remember": {{admin_remember}}
-"igv_porcentaje": {{establishment_igv_percentage}}
-```
-
 ---
 
-## Flujo recomendado de validación
+## Flujo recomendado de uso
 
-### Health
-
-Ejecutar:
+### 1. Verificar disponibilidad
 
 ```txt
 Health / Health Check
 ```
 
-Confirma que el backend está activo y responde correctamente.
-
----
-
-### Autenticación base
-
-Ejecutar:
+### 2. Inicializar autenticación
 
 ```txt
 Auth / Login - Admin
 Auth / Auth - Me
 ```
 
-El login de administrador guarda las variables principales de sesión:
+El login guarda tokens y datos de sesión en variables reutilizables por la colección.
 
-```txt
-admin_token
-admin_refresh_token
-admin_session_id
-admin_session_expires_at
-auth_token
-auth_refresh_token
-auth_session_id
-auth_session_expires_at
-```
-
-`Auth - Me` valida que el access token actual esté asociado a una sesión activa y devuelve usuario, permisos y módulos.
-
----
-
-### Autorización por perfiles
-
-Ejecutar la carpeta:
+### 3. Ejecutar módulos administrativos
 
 ```txt
 Authorization / Profiles
-```
-
-Estas pruebas validan el acceso permitido o denegado según permisos asociados al rol del usuario.
-
----
-
-### Mantenimiento administrativo
-
-Ejecutar según necesidad:
-
-```txt
 Roles
 User Maintenance
 Establishment
 ```
 
-Estas carpetas cubren listado de roles, mantenimiento de usuarios y configuración del establecimiento. Deben ejecutarse con un usuario que tenga permisos administrativos.
+### 4. Ejecutar módulos operativos
 
----
-
-### Carta, salón, POS y KDS
-
-Las carpetas funcionales deben ejecutarse con variables coherentes entre sí.
-
-Flujo operativo sugerido:
+Orden sugerido cuando se requiere generar datos entre módulos:
 
 ```txt
 1. Auth / Login - Admin
@@ -370,119 +310,15 @@ Flujo operativo sugerido:
 10. KDS - Service Notifications
 ```
 
-Este orden permite generar datos reutilizables entre módulos, como categorías, productos, mesas, órdenes, ítems y avisos de servicio.
-
----
-
-## Auth - Session Hardening
-
-Esta carpeta valida el endurecimiento de sesión implementado en el backend.
-
-Cubre:
+### 5. Ejecutar carpetas de autenticación avanzada
 
 ```txt
-Refresh de sesión actual
-Logout de sesión actual
-Rechazo de campos inesperados en login
-Rechazo de refresh sin token
-Rechazo de refresh inválido
-Prueba de credenciales inválidas y rate limit
+Auth - Session Hardening
+Auth - Idle Timeout
+Auth - Audit Events
 ```
 
-La petición `Refresh - Current Session` usa:
-
-```txt
-auth_refresh_token
-```
-
-y actualiza:
-
-```txt
-auth_token
-auth_refresh_token
-auth_session_id
-auth_session_expires_at
-```
-
-La petición `Logout - Current Session` usa:
-
-```txt
-auth_token
-```
-
-y revoca la sesión actual en backend.
-
-Después de ejecutar logout, cualquier request protegido con ese token debe fallar porque la sesión ya no está activa.
-
----
-
-## Auth - Audit Events
-
-Esta carpeta valida la integración de auditoría backend para la HU AAT-11.
-
-Los requests de esta carpeta no consultan directamente la tabla `auditoria`. Su función es disparar eventos de autenticación y permitir la verificación posterior en base de datos.
-
-Eventos esperados:
-
-```txt
-AUTH_LOGIN_SUCCESS
-AUTH_LOGIN_FAILED
-AUTH_REFRESH_SUCCESS
-AUTH_REFRESH_FAILED
-AUTH_LOGOUT
-```
-
-Flujo recomendado:
-
-```txt
-1. Audit - Trigger Login Success
-2. Audit - Trigger Login Failed
-3. Audit - Trigger Refresh Success
-4. Audit - Trigger Refresh Failed
-5. Audit - Trigger Logout
-```
-
-Validación SQL recomendada:
-
-```sql
-select
-  id_auditoria,
-  id_usuario,
-  id_establecimiento,
-  tabla_afectada,
-  registro_id,
-  accion,
-  datos_nuevos,
-  ip_origen,
-  user_agent,
-  created_at
-from auditoria
-where accion like 'AUTH_%'
-order by created_at desc
-limit 30;
-```
-
-Resultados esperados:
-
-```txt
-AUTH_LOGIN_SUCCESS debe registrar id_usuario, id_establecimiento y registro_id de sesión.
-AUTH_LOGIN_FAILED puede registrar id_usuario e id_establecimiento como null si el usuario no se identifica.
-AUTH_REFRESH_SUCCESS debe registrar la sesión renovada y rotated = true.
-AUTH_REFRESH_FAILED no debe guardar el refresh token enviado.
-AUTH_LOGOUT debe registrar la sesión revocada.
-```
-
-La auditoría no debe almacenar:
-
-```txt
-password
-accessToken
-refreshToken
-refresh_token_hash
-JWT completo
-service role key
-headers completos
-```
+Estas carpetas usan variables propias para refresh, logout, sesiones, inactividad y disparo de eventos de autenticación.
 
 ---
 
@@ -490,95 +326,66 @@ headers completos
 
 ### Health
 
-Contiene la prueba básica para verificar que el backend está activo.
+Verifica que el backend esté disponible.
 
 ### Auth
 
-Contiene las pruebas de inicio de sesión por perfil y validación de sesión autenticada.
-
-Los logins guardan tokens, refresh tokens y metadata de sesión en variables de colección para ser reutilizadas por rutas protegidas.
+Contiene login por perfil y consulta de sesión autenticada.
 
 ### Authorization / Profiles
 
-Contiene pruebas para validar acceso permitido o denegado según el perfil operativo.
+Agrupa requests de acceso permitido o denegado por perfil operativo.
 
 ### Roles
 
-Contiene la prueba para listar roles disponibles dentro del establecimiento autenticado.
+Lista roles disponibles para el establecimiento autenticado.
 
 ### User Maintenance
 
-Contiene las pruebas principales de mantenimiento de usuarios: consulta, creación, edición, activación/desactivación y validación de acceso sin permiso.
+Agrupa requests de consulta, creación, edición y cambio de estado de usuarios.
 
 ### Establishment
 
-Contiene las pruebas principales de configuración del establecimiento: consulta y actualización de datos fiscales, parámetros de venta e identidad visual.
+Agrupa requests de consulta y edición de configuración del establecimiento.
 
 ### Carta
 
-Contiene las pruebas de categorías y productos. Incluye operaciones CRUD, cambios de estado, cambios de disponibilidad, carga de imágenes y validaciones de permisos.
+Agrupa requests de categorías y productos.
 
 ### Salón
 
-Contiene las pruebas de zonas y mesas. Incluye operaciones CRUD, cambios de disponibilidad, cambios de estado y validaciones de permisos.
+Agrupa requests de zonas y mesas.
 
 ### POS - Orders
 
-Contiene las pruebas de mesas, carta disponible para POS y creación de comandas. También incluye validaciones negativas para token ausente, permisos insuficientes, mesa inválida, productos inválidos y body incompleto.
+Agrupa requests de mesas, carta disponible para POS y creación de comandas.
 
 ### KDS - Kitchen Monitor
 
-Contiene las pruebas principales del monitor de cocina.
-
-Estados de comanda usados:
-
-```txt
-ABIERTA
-EN_PREPARACION
-LISTA
-```
-
-Estados de ítems usados:
-
-```txt
-PENDIENTE
-EN_PREPARACION
-LISTO
-```
+Agrupa requests del monitor de cocina y actualización de estados de comandas e ítems.
 
 ### KDS - Service Notifications
 
-Contiene las pruebas de notificación entre cocina y salón.
-
-Tipos permitidos:
-
-```txt
-PEDIDO_LISTO
-INCIDENCIA_COCINA
-```
-
-Estados permitidos:
-
-```txt
-PENDIENTE
-ATENDIDA
-CANCELADA
-```
-
-Estados usados para entrega:
-
-```txt
-orden: ENTREGADA
-item_orden: ENTREGADO
-```
+Agrupa requests de avisos de servicio entre cocina y salón.
 
 ### Auth - Session Hardening
 
-Contiene pruebas de refresh, logout, validación estricta de payloads y escenarios negativos de sesión.
+Agrupa requests de refresh, logout y escenarios negativos básicos de sesión.
+
+### Auth - Idle Timeout
+
+Agrupa requests para usar una sesión dedicada al flujo de inactividad.
+
+Variables usadas por esta carpeta:
+
+```txt
+idle_timeout_token
+idle_timeout_session_id
+```
 
 ### Auth - Audit Events
 
-Contiene requests diseñados para disparar eventos `AUTH_%` y validar trazabilidad en la tabla `auditoria`.
+Agrupa requests que disparan eventos de autenticación para revisión posterior fuera de Postman.
 
 ---
 
@@ -598,9 +405,9 @@ URLs con credenciales
 Variables de entorno locales
 ```
 
-La colección debe trabajar con datos de prueba y variables locales de Postman.
+Antes de exportar la colección, deben quedar vacías las variables sensibles de credenciales, tokens, refresh tokens, sesiones e IDs operativos.
 
-Variables que deben quedar vacías antes de subir la colección:
+Variables sensibles principales:
 
 ```txt
 admin_identifier
@@ -626,6 +433,7 @@ user_token
 user_refresh_token
 auth_token
 auth_refresh_token
+idle_timeout_token
 
 admin_session_id
 cashier_session_id
@@ -633,6 +441,7 @@ waiter_session_id
 kds_session_id
 user_session_id
 auth_session_id
+idle_timeout_session_id
 
 order_id
 item_id
@@ -649,16 +458,15 @@ incident_service_call_id
 
 Antes de exportar la colección desde Postman:
 
-1. Verificar que las peticiones estén agrupadas en carpetas.
+1. Verificar que las requests estén agrupadas en carpetas.
 2. Eliminar requests vacíos o temporales.
-3. Confirmar que no existan tokens reales guardados en headers, variables o bodies.
-4. Confirmar que no existan contraseñas reales en los bodies.
-5. Confirmar que las URLs usen `{{base_url}}`.
-6. Confirmar que los IDs de usuarios, roles, órdenes e ítems estén parametrizados.
-7. Confirmar que las variables sensibles estén vacías.
-8. Exportar la colección actualizada.
-9. Abrir el archivo exportado y buscar posibles secretos antes de commitear.
-10. Reemplazar el archivo oficial de la colección en el repo.
+3. Confirmar que las URLs usen `{{base_url}}`.
+4. Confirmar que no existan tokens reales en headers, variables o bodies.
+5. Confirmar que no existan contraseñas reales en los bodies.
+6. Confirmar que los IDs operativos estén parametrizados.
+7. Exportar la colección actualizada.
+8. Abrir el archivo exportado y buscar posibles secretos antes de commitear.
+9. Reemplazar el archivo oficial en el repositorio.
 
 Archivo esperado:
 
@@ -689,13 +497,7 @@ Si aparece un token, contraseña real o cadena de conexión real, no se debe sub
 
 No se recomienda subir un environment local de Postman con valores reales.
 
-Si se desea documentar las variables necesarias, se puede crear un archivo de ejemplo sin credenciales ni tokens reales:
-
-```txt
-umari-os-api.example.postman_environment.json
-```
-
-Este archivo debe contener únicamente variables vacías o valores de ejemplo no sensibles.
+Si se documenta un environment de ejemplo, debe contener únicamente variables vacías o valores no sensibles.
 
 Ejemplo permitido:
 
@@ -715,10 +517,8 @@ DATABASE_URL = cadena_real_de_conexion
 
 ---
 
-## Alcance de la colección
+## Alcance
 
-La colección permite validar de forma manual y controlada los principales flujos backend de Umarí OS.
+La colección permite consumir y validar manualmente los principales flujos backend de Umarí OS.
 
-No reemplaza pruebas automatizadas de backend, pruebas unitarias, pruebas de integración ni validaciones de despliegue.
-
-La colección no debe almacenar información sensible y debe mantenerse como un artefacto reproducible para el equipo.
+No reemplaza pruebas unitarias, pruebas de integración, pruebas automatizadas ni validaciones de despliegue.
