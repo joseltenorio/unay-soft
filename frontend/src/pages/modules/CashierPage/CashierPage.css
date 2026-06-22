@@ -309,25 +309,100 @@
 
 /* PAY PANEL */
 .cashier-pay-panel {
-  min-height: 400px;
+  padding: clamp(20px, 3vw, 26px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border: 1px solid rgba(157, 190, 187, 0.46);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 18px 50px rgba(3, 25, 38, 0.07),
+    0 3px 10px rgba(3, 25, 38, 0.04);
+  position: sticky;
+  top: 20px;
 }
 
 .cashier-pay-panel--empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  min-height: 400px;
+  display: grid;
+  place-items: center;
 }
 
-.cashier-pay-panel__detail,
-.cashier-pay-panel__received {
+.cashier-pay-panel__empty-content {
+  width: min(100%, 520px);
+  padding: clamp(24px, 4vw, 44px);
+  border: 1px dashed rgba(70, 129, 137, 0.34);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(119, 172, 162, 0.14), transparent 34%),
+    rgba(252, 249, 242, 0.68);
+  text-align: center;
+}
+
+.cashier-pay-panel__empty-content p {
+  color: var(--color-text-muted);
+  font-size: 0.94rem;
+  font-weight: 650;
+  line-height: 1.55;
+}
+
+.cashier-pay-panel__detail {
+  padding: 16px;
+  border: 1px solid rgba(157, 190, 187, 0.3);
+  border-radius: 18px;
+  background: rgba(252, 249, 242, 0.6);
   display: flex;
   flex-direction: column;
 }
 
-.cashier-pay-panel__line,
+.cashier-pay-panel__line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(157, 190, 187, 0.2);
+}
+
+.cashier-pay-panel__line:last-of-type {
+  border-bottom: none;
+}
+
+.cashier-pay-panel__line span:first-child {
+  color: var(--color-text-muted);
+  font-size: 0.86rem;
+  font-weight: 650;
+}
+
+.cashier-pay-panel__line span:last-child {
+  color: var(--color-brand-primary);
+  font-size: 0.86rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
 .cashier-pay-panel__total {
   display: flex;
+  align-items: center;
   justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  margin-top: 4px;
+  border-top: 1.5px solid rgba(70, 129, 137, 0.2);
+}
+
+.cashier-pay-panel__total strong:first-child {
+  color: var(--color-brand-primary);
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.cashier-pay-panel__total strong:last-child {
+  color: var(--color-brand-primary);
+  font-size: 1.45rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
 }
 
 .cashier-pay-panel__methods {
