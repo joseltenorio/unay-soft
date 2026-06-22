@@ -1,5 +1,3 @@
-// src/pages/modules/CartaPage/components/QRModal.jsx
-
 import { useEffect, useState } from "react"
 import { getQR } from "../../../../services/qrService"
 
@@ -7,6 +5,7 @@ export default function QRModal({ onClose }) {
   const [qr, setQr] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [copiado, setCopiado] = useState(false)
 
   useEffect(() => {
     getQR()
@@ -15,17 +14,42 @@ export default function QRModal({ onClose }) {
       .finally(() => setLoading(false))
   }, [])
 
-  function handleDescargar() {
+  async function handleDescargar() {
     if (!qr?.imagen_qr) return
-    const link = document.createElement("a")
-    link.href = qr.imagen_qr
-    link.download = "qr-carta-umari.png"
-    link.click()
+    
+    try {
+      // Validamos y aseguramos la descarga directa incluso si es URL externa (CORS safe)
+      const response = await fetch(qr.imagen_qr)
+      const blob = await response.blob()
+      const urlBlob = window.URL.createObjectURL(blob)
+      
+      const link = document.createElement("a")
+      link.href = urlBlob
+      link.download = "qr-carta-umari.png"
+      document.body.appendChild(link)
+      link.click()
+      
+      // Limpieza de memoria
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(urlBlob)
+    } catch (err) {
+      // Fallback clásico por si falla la descarga asíncrona
+      const link = document.createElement("a")
+      link.href = qr.imagen_qr
+      link.target = "_blank"
+      link.download = "qr-carta-umari.png"
+      link.click()
+    }
   }
 
   function handleCopiarLink() {
     if (!qr?.url_destino) return
     navigator.clipboard.writeText(qr.url_destino)
+      .then(() => {
+        setCopiado(true)
+        setTimeout(() => setCopiado(false), 2000) // Regresa al estado original en 2 segundos
+      })
+      .catch(() => alert("No se pudo copiar el enlace automáticamente."))
   }
 
   return (
@@ -63,8 +87,9 @@ export default function QRModal({ onClose }) {
                 className="carta__btn carta__btn--secondary"
                 type="button"
                 onClick={handleCopiarLink}
+                style={copiado ? { backgroundColor: "#e2e8f0", color: "#0f172a" } : {}}
               >
-                Copiar link
+                {copiado ? "¡Copiado! ✓" : "Copiar link"}
               </button>
               <button
                 className="carta__btn carta__btn--primary"
