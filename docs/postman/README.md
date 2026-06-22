@@ -2,7 +2,9 @@
 
 Esta carpeta contiene la colección de Postman utilizada para validar los endpoints principales del backend de Umarí OS.
 
-La colección está organizada por módulos para facilitar la validación de autenticación, autorización por perfiles, roles, mantenimiento de usuarios, configuración del establecimiento, monitor de cocina y notificaciones de servicio.
+La colección está organizada por módulos para facilitar la validación de autenticación, autorización por perfiles, mantenimiento de usuarios, configuración del establecimiento, carta, salón, POS, KDS, sesiones y auditoría de autenticación.
+
+La colección trabaja con variables y no debe almacenar credenciales reales, tokens reales, cadenas de conexión ni datos privados del establecimiento.
 
 ---
 
@@ -31,7 +33,13 @@ El backend debe estar disponible en:
 http://localhost:3000
 ```
 
-También debe existir el archivo de variables de entorno:
+La variable base de la colección debe apuntar a:
+
+```txt
+base_url = http://localhost:3000/api
+```
+
+También debe existir el archivo de variables de entorno del backend:
 
 ```txt
 backend/.env
@@ -47,8 +55,6 @@ backend/.env.example
 
 ## Estructura de la colección
 
-La colección está organizada de la siguiente manera:
-
 ```txt
 Umari OS API
 ├─ Health
@@ -56,18 +62,18 @@ Umari OS API
 │
 ├─ Auth
 │  ├─ Login - Admin
-│  ├─ Auth - Me
+│  ├─ Login - KDS
 │  ├─ Login - Cashier
 │  ├─ Login - Waiter
-│  ├─ Login - Kitchen
-│  └─ Login - User
+│  ├─ Login - User
+│  └─ Auth - Me
 │
 ├─ Authorization / Profiles
 │  ├─ Permission - Admin Check
-│  ├─ Cashier - Cashier Area Allowed
-│  ├─ Cashier - POS Area Denied
-│  ├─ Waiter - Cashier Area Denied
-│  └─ Waiter - POS Area Allowed
+│  ├─ Cajero - Caja Permitido
+│  ├─ Cajero - POS Denegado
+│  ├─ Mesero - Caja Denegado
+│  └─ Mesero - POS Permitido
 │
 ├─ Roles
 │  └─ Admin Roles
@@ -80,8 +86,12 @@ Umari OS API
 │  └─ Create User No Permission
 │
 ├─ Establishment
-│  ├─ Get Establishment
-│  └─ Update Establishment
+│  ├─ Visual Establishment
+│  └─ Edit Establishment
+│
+├─ Carta
+│  ├─ Categorías
+│  └─ Productos
 │
 ├─ POS - Orders
 │  ├─ POS - List Tables
@@ -96,42 +106,46 @@ Umari OS API
 │  └─ POS - Reject Invalid Product
 │
 ├─ KDS - Kitchen Monitor
-│  ├─ List Kitchen Orders
-│  ├─ List Kitchen Orders Without Token
-│  ├─ List Kitchen Orders Denied
-│  ├─ Change Order Status to In Preparation
-│  ├─ Change Order Status to Ready
-│  ├─ Change Item Status to In Preparation
-│  ├─ Change Item Status to Ready
-│  ├─ Reject Item Ready Before Order Starts
-│  ├─ Reject Order Invalid Status
-│  ├─ Reject Item Invalid Status
-│  ├─ Reject Order Status Without Body
-│  ├─ Reject Missing Order
-│  └─ Reject Missing Item
+│  ├─ KDS - List Kitchen Orders
+│  ├─ KDS - Change Order Status to In Preparation
+│  ├─ KDS - Change Item Status to In Preparation
+│  ├─ KDS - Change Item Status to Ready
+│  ├─ KDS - Change Order Status to Ready
+│  └─ Validaciones negativas de permisos, estados y recursos inexistentes
 │
-└─ KDS - Service Notifications
-   ├─ Create Ready Order Service Call
-   ├─ Create Kitchen Incident Service Call
-   ├─ List Kitchen Service Calls
-   ├─ Attend Kitchen Service Call
-   ├─ Confirm Delivered Order
-   ├─ Reject Service Call Without Token
-   ├─ Reject Service Call Without Permission
-   ├─ Reject Service Calls List Without Permission
-   ├─ Reject Attend Service Call Without Permission
-   ├─ Reject Delivered Order Without Permission
-   ├─ Reject Delivered Order Not Ready
-   ├─ Reject Missing Service Call
-   ├─ Reject Missing Service Call Type
-   └─ Reject Invalid Service Call Type
+├─ KDS - Service Notifications
+│  ├─ KDS - Create Ready Order Service Call
+│  ├─ KDS - Create Kitchen Incident Service Call
+│  ├─ KDS - List Kitchen Service Calls
+│  ├─ KDS - Attend Kitchen Service Call
+│  ├─ KDS - Confirm Delivered Order
+│  └─ Validaciones negativas de permisos, tipos y recursos inexistentes
+│
+├─ Salón
+│  ├─ Zonas
+│  └─ Mesas
+│
+├─ Auth - Session Hardening
+│  ├─ Refresh - Current Session
+│  ├─ Logout - Current Session
+│  ├─ Login - Reject Unexpected Field
+│  ├─ Refresh - Missing Token
+│  ├─ Refresh - Invalid Token
+│  └─ Login - Invalid Credentials / Rate Limit Probe
+│
+└─ Auth - Audit Events
+   ├─ Audit - Trigger Login Success
+   ├─ Audit - Trigger Login Failed
+   ├─ Audit - Trigger Refresh Success
+   ├─ Audit - Trigger Refresh Failed
+   └─ Audit - Trigger Logout
 ```
 
 ---
 
 ## Variables recomendadas
 
-La colección utiliza variables de Postman para evitar valores fijos dentro de las peticiones y para permitir que el archivo exportado no contenga credenciales, tokens o IDs reales.
+La colección utiliza variables para evitar valores fijos dentro de las peticiones y para mantener el archivo exportado libre de credenciales y tokens reales.
 
 Las variables están definidas en inglés y con formato `snake_case`.
 
@@ -139,84 +153,68 @@ Las variables están definidas en inglés y con formato `snake_case`.
 base_url = http://localhost:3000/api
 
 auth_token =
+auth_refresh_token =
+auth_session_id =
+auth_session_expires_at =
+
 admin_token =
+admin_refresh_token =
+admin_session_id =
+admin_session_expires_at =
+
 cashier_token =
+cashier_refresh_token =
+cashier_session_id =
+cashier_session_expires_at =
+
 waiter_token =
+waiter_refresh_token =
+waiter_session_id =
+waiter_session_expires_at =
+
 kds_token =
+kds_refresh_token =
+kds_session_id =
+kds_session_expires_at =
+
 user_token =
+user_refresh_token =
+user_session_id =
+user_session_expires_at =
 
 admin_identifier =
 admin_password =
+admin_remember = false
 
 cashier_identifier =
 cashier_password =
+cashier_remember = false
 
 waiter_identifier =
 waiter_password =
+waiter_remember = false
 
 kds_identifier =
 kds_password =
+kds_remember = false
 
 user_identifier =
 user_password =
+user_remember = false
 
-create_user_first_name =
-create_user_last_name =
-create_user_email =
-create_user_username =
-create_user_mobile =
-create_user_password =
-create_user_role_id =
-create_user_status = true
+bad_password =
+invalid_refresh_token =
+auth_validation_extra_field = true
 
-edit_user_id =
-edit_user_first_name =
-edit_user_last_name =
-edit_user_email =
-edit_user_username =
-edit_user_mobile =
-edit_user_role_id =
-edit_user_status = true
-
-status_user_id =
-status_user_status = true
-
-establishment_trade_name =
-establishment_legal_name =
-establishment_ruc =
-establishment_address =
-establishment_phone =
-establishment_email =
-establishment_logo_url =
-establishment_igv_percentage = 18
-establishment_currency_code = PEN
-establishment_currency_symbol = S/.
-
-order_id =
-item_id =
-open_order_id =
-open_order_item_id =
-
-pos_table_id =
-pos_product_id =
-pos_product_id_secondary =
-pos_order_id =
-pos_order_notes = Pedido registrado desde Postman.
-pos_item_notes =
-
+invalid_id = 00000000-0000-0000-0000-000000000000
 invalid_table_id = 00000000-0000-0000-0000-000000000000
 invalid_product_id = 00000000-0000-0000-0000-000000000000
-ready_order_id =
-service_call_id =
-incident_service_call_id =
-incident_reason = Apoyo requerido
-incident_message = Se requiere apoyo en cocina.
-
 invalid_order_id = 00000000-0000-0000-0000-000000000000
 invalid_item_id = 00000000-0000-0000-0000-000000000000
 invalid_service_call_id = 00000000-0000-0000-0000-000000000000
-invalid_service_call_id = 00000000-0000-0000-0000-000000000000
 ```
+
+La colección también utiliza variables funcionales para datos de usuarios, roles, establecimiento, carta, salón, POS y KDS. Estas variables deben completarse con datos de prueba locales antes de ejecutar los flujos correspondientes.
 
 ---
 
@@ -239,7 +237,8 @@ Ejemplo de body parametrizado para login:
 ```json
 {
   "identifier": "{{admin_identifier}}",
-  "password": "{{admin_password}}"
+  "password": "{{admin_password}}",
+  "remember": "{{admin_remember}}"
 }
 ```
 
@@ -253,7 +252,7 @@ Ejemplo de body parametrizado para editar usuario:
   "username": "{{edit_user_username}}",
   "celular": "{{edit_user_mobile}}",
   "id_rol": "{{edit_user_role_id}}",
-  "estado": {{edit_user_status}}
+  "estado": "{{edit_user_status}}"
 }
 ```
 
@@ -268,43 +267,9 @@ Ejemplo de body parametrizado para actualizar establecimiento:
   "telefono": "{{establishment_phone}}",
   "email": "{{establishment_email}}",
   "logo_url": "{{establishment_logo_url}}",
-  "igv_porcentaje": {{establishment_igv_percentage}},
+  "igv_porcentaje": "{{establishment_igv_percentage}}",
   "moneda_codigo": "{{establishment_currency_code}}",
   "moneda_simbolo": "{{establishment_currency_symbol}}"
-}
-```
-
-Ejemplo de body para actualizar el estado de una comanda de cocina:
-
-```json
-{
-  "status": "EN_PREPARACION"
-}
-```
-
-Ejemplo de body para actualizar el estado de un ítem de cocina:
-
-```json
-{
-  "status": "LISTO"
-}
-```
-
-Ejemplo de body para crear un aviso de pedido listo:
-
-```json
-{
-  "type": "PEDIDO_LISTO"
-}
-```
-
-Ejemplo de body para crear una incidencia de cocina:
-
-```json
-{
-  "type": "INCIDENCIA_COCINA",
-  "motivo": "{{incident_reason}}",
-  "mensaje": "{{incident_message}}"
 }
 ```
 
@@ -314,14 +279,15 @@ Ejemplos:
 
 ```txt
 "estado": {{edit_user_status}}
+"remember": {{admin_remember}}
 "igv_porcentaje": {{establishment_igv_percentage}}
 ```
 
 ---
 
-## Flujo recomendado de pruebas
+## Flujo recomendado de validación
 
-### 1. Verificar backend
+### Health
 
 Ejecutar:
 
@@ -329,279 +295,194 @@ Ejecutar:
 Health / Health Check
 ```
 
-Endpoint:
-
-```txt
-GET /api/health
-```
-
-Esta prueba confirma que el backend está activo.
+Confirma que el backend está activo y responde correctamente.
 
 ---
 
-### 2. Iniciar sesión como administrador
+### Autenticación base
 
 Ejecutar:
 
 ```txt
 Auth / Login - Admin
-```
-
-Endpoint:
-
-```txt
-POST /api/auth/login
-```
-
-Esta petición devuelve un token JWT de administrador.
-
-El token debe guardarse en:
-
-```txt
-admin_token
-```
-
-También puede guardarse en:
-
-```txt
-auth_token
-```
-
----
-
-### 3. Validar sesión autenticada
-
-Ejecutar:
-
-```txt
 Auth / Auth - Me
 ```
 
-Endpoint:
+El login de administrador guarda las variables principales de sesión:
 
 ```txt
-GET /api/auth/me
+admin_token
+admin_refresh_token
+admin_session_id
+admin_session_expires_at
+auth_token
+auth_refresh_token
+auth_session_id
+auth_session_expires_at
 ```
 
-Esta prueba valida el usuario autenticado, sus permisos y sus módulos disponibles.
+`Auth - Me` valida que el access token actual esté asociado a una sesión activa y devuelve usuario, permisos y módulos.
 
 ---
 
-### 4. Validar permisos de administrador
+### Autorización por perfiles
 
-Ejecutar:
-
-```txt
-Authorization / Profiles / Permission - Admin Check
-```
-
-Esta prueba confirma que el usuario administrador accede correctamente a rutas protegidas por permisos.
-
----
-
-### 5. Probar acceso por perfiles
-
-Ejecutar las pruebas de la carpeta:
+Ejecutar la carpeta:
 
 ```txt
 Authorization / Profiles
 ```
 
-Casos incluidos:
-
-```txt
-Cashier - Cashier Area Allowed
-Cashier - POS Area Denied
-Waiter - Cashier Area Denied
-Waiter - POS Area Allowed
-```
-
-Estas pruebas validan que cada perfil acceda únicamente a las áreas permitidas.
+Estas pruebas validan el acceso permitido o denegado según permisos asociados al rol del usuario.
 
 ---
 
-### 6. Probar roles
+### Mantenimiento administrativo
 
-Ejecutar:
-
-```txt
-Roles / Admin Roles
-```
-
-Endpoint:
+Ejecutar según necesidad:
 
 ```txt
-GET /api/roles
-```
-
-Esta prueba lista los roles disponibles para el mantenimiento de usuarios.
-
-Debe ejecutarse con un token de administrador.
-
----
-
-### 7. Probar mantenimiento de usuarios
-
-Ejecutar las pruebas de la carpeta:
-
-```txt
+Roles
 User Maintenance
-```
-
-Endpoints principales:
-
-```txt
-GET    /api/users
-POST   /api/users
-PUT    /api/users/:id
-PATCH  /api/users/:id/status
-```
-
-Operaciones incluidas:
-
-```txt
-Listar usuarios
-Crear usuario
-Editar usuario
-Activar o desactivar usuario
-Validar acceso denegado para usuario sin permiso
-```
-
----
-
-### 8. Probar configuración del establecimiento
-
-Ejecutar las pruebas de la carpeta:
-
-```txt
 Establishment
 ```
 
-Endpoints principales:
-
-```txt
-GET /api/establishment
-PUT /api/establishment
-```
-
-Operaciones incluidas:
-
-```txt
-Consultar datos del establecimiento
-Actualizar datos fiscales
-Actualizar parámetros de venta
-Actualizar identidad visual
-Validar acceso denegado para usuario sin permiso
-```
-
-Debe ejecutarse con un token de administrador o con un usuario que tenga los permisos correspondientes:
-
-```txt
-establishment.ver
-establishment.editar
-```
+Estas carpetas cubren listado de roles, mantenimiento de usuarios y configuración del establecimiento. Deben ejecutarse con un usuario que tenga permisos administrativos.
 
 ---
 
-### 9. Probar monitor de cocina
+### Carta, salón, POS y KDS
 
-Ejecutar las pruebas de la carpeta:
+Las carpetas funcionales deben ejecutarse con variables coherentes entre sí.
 
-```txt
-KDS - Kitchen Monitor
-```
-
-Endpoints principales:
+Flujo operativo sugerido:
 
 ```txt
-GET   /api/kds/orders
-PATCH /api/kds/orders/:id/status
-PATCH /api/kds/items/:id/status
+1. Auth / Login - Admin
+2. Carta / Categorías
+3. Carta / Productos
+4. Salón / Zonas
+5. Salón / Mesas
+6. Auth / Login - Waiter
+7. POS - Orders
+8. Auth / Login - KDS
+9. KDS - Kitchen Monitor
+10. KDS - Service Notifications
 ```
 
-Operaciones incluidas:
-
-```txt
-Listar comandas activas de cocina
-Guardar automáticamente IDs de comanda e ítem
-Cambiar comanda a EN_PREPARACION
-Cambiar comanda a LISTA
-Cambiar ítem a EN_PREPARACION
-Cambiar ítem a LISTO
-Validar rechazo de listado sin token
-Validar rechazo de listado sin permiso
-Validar rechazo de actualización sin permiso
-Validar rechazo de estados no permitidos
-Validar rechazo de body sin status
-Validar rechazo de comanda inexistente
-Validar rechazo de ítem inexistente
-```
-
-Debe ejecutarse con un usuario que tenga los permisos correspondientes:
-
-```txt
-kds.ver
-kds.actualizar_estado
-```
-
-Para pruebas negativas de autorización, debe usarse un usuario sin permisos del monitor de cocina.
+Este orden permite generar datos reutilizables entre módulos, como categorías, productos, mesas, órdenes, ítems y avisos de servicio.
 
 ---
 
-### 10. Probar notificaciones de servicio y entrega
+## Auth - Session Hardening
 
-Ejecutar las pruebas de la carpeta:
+Esta carpeta valida el endurecimiento de sesión implementado en el backend.
 
-```txt
-KDS - Service Notifications
-```
-
-Endpoints principales:
+Cubre:
 
 ```txt
-POST  /api/kds/orders/:id/service-calls
-GET   /api/kds/service-calls
-PATCH /api/kds/service-calls/:id/attend
-PATCH /api/kds/orders/:id/delivered
+Refresh de sesión actual
+Logout de sesión actual
+Rechazo de campos inesperados en login
+Rechazo de refresh sin token
+Rechazo de refresh inválido
+Prueba de credenciales inválidas y rate limit
 ```
 
-Operaciones incluidas:
+La petición `Refresh - Current Session` usa:
 
 ```txt
-Crear aviso de pedido listo para salón
-Crear incidencia de cocina con motivo y mensaje
-Listar avisos pendientes de cocina
-Marcar aviso como atendido
-Confirmar entrega de una comanda lista
-Validar rechazo de creación sin token
-Validar rechazo de creación sin permiso
-Validar rechazo de listado sin permiso
-Validar rechazo de atención sin permiso
-Validar rechazo de confirmación de entrega sin permiso
-Validar rechazo de entrega cuando la comanda no está LISTA
-Validar rechazo de aviso inexistente
-Validar rechazo de tipo de aviso faltante o inválido
+auth_refresh_token
 ```
 
-Debe ejecutarse con usuarios que tengan los permisos correspondientes:
+y actualiza:
 
 ```txt
-kds.notificar_servicio
-pos.ver_avisos_cocina
-pos.atender_avisos_cocina
-pos.confirmar_entrega
+auth_token
+auth_refresh_token
+auth_session_id
+auth_session_expires_at
 ```
 
-Para el flujo positivo, cocina crea el aviso y salón confirma la entrega.
-
-El cambio de entrega esperado es:
+La petición `Logout - Current Session` usa:
 
 ```txt
-orden: LISTA -> ENTREGADA
-item_orden: LISTO -> ENTREGADO
+auth_token
 ```
 
-La colección usa `ready_order_id` para confirmar entregas y `service_call_id` para atender avisos.
+y revoca la sesión actual en backend.
+
+Después de ejecutar logout, cualquier request protegido con ese token debe fallar porque la sesión ya no está activa.
+
+---
+
+## Auth - Audit Events
+
+Esta carpeta valida la integración de auditoría backend para la HU AAT-11.
+
+Los requests de esta carpeta no consultan directamente la tabla `auditoria`. Su función es disparar eventos de autenticación y permitir la verificación posterior en base de datos.
+
+Eventos esperados:
+
+```txt
+AUTH_LOGIN_SUCCESS
+AUTH_LOGIN_FAILED
+AUTH_REFRESH_SUCCESS
+AUTH_REFRESH_FAILED
+AUTH_LOGOUT
+```
+
+Flujo recomendado:
+
+```txt
+1. Audit - Trigger Login Success
+2. Audit - Trigger Login Failed
+3. Audit - Trigger Refresh Success
+4. Audit - Trigger Refresh Failed
+5. Audit - Trigger Logout
+```
+
+Validación SQL recomendada:
+
+```sql
+select
+  id_auditoria,
+  id_usuario,
+  id_establecimiento,
+  tabla_afectada,
+  registro_id,
+  accion,
+  datos_nuevos,
+  ip_origen,
+  user_agent,
+  created_at
+from auditoria
+where accion like 'AUTH_%'
+order by created_at desc
+limit 30;
+```
+
+Resultados esperados:
+
+```txt
+AUTH_LOGIN_SUCCESS debe registrar id_usuario, id_establecimiento y registro_id de sesión.
+AUTH_LOGIN_FAILED puede registrar id_usuario e id_establecimiento como null si el usuario no se identifica.
+AUTH_REFRESH_SUCCESS debe registrar la sesión renovada y rotated = true.
+AUTH_REFRESH_FAILED no debe guardar el refresh token enviado.
+AUTH_LOGOUT debe registrar la sesión revocada.
+```
+
+La auditoría no debe almacenar:
+
+```txt
+password
+accessToken
+refreshToken
+refresh_token_hash
+JWT completo
+service role key
+headers completos
+```
 
 ---
 
@@ -613,48 +494,43 @@ Contiene la prueba básica para verificar que el backend está activo.
 
 ### Auth
 
-Contiene las pruebas de inicio de sesión y validación de sesión autenticada.
+Contiene las pruebas de inicio de sesión por perfil y validación de sesión autenticada.
 
-Los logins guardan tokens en variables de colección para que puedan reutilizarse en las rutas protegidas.
-
-Variables de token usadas:
-
-```txt
-admin_token
-cashier_token
-waiter_token
-kds_token
-user_token
-auth_token
-```
+Los logins guardan tokens, refresh tokens y metadata de sesión en variables de colección para ser reutilizadas por rutas protegidas.
 
 ### Authorization / Profiles
 
-Contiene pruebas para validar el acceso permitido o denegado según el perfil del usuario.
+Contiene pruebas para validar acceso permitido o denegado según el perfil operativo.
 
 ### Roles
 
-Contiene la prueba para listar roles disponibles dentro del sistema.
+Contiene la prueba para listar roles disponibles dentro del establecimiento autenticado.
 
 ### User Maintenance
 
-Contiene las pruebas principales del mantenimiento de usuarios.
-
-Incluye operaciones de consulta, creación, edición y cambio de estado.
+Contiene las pruebas principales de mantenimiento de usuarios: consulta, creación, edición, activación/desactivación y validación de acceso sin permiso.
 
 ### Establishment
 
-Contiene las pruebas principales de configuración del establecimiento.
+Contiene las pruebas principales de configuración del establecimiento: consulta y actualización de datos fiscales, parámetros de venta e identidad visual.
 
-Incluye operaciones de consulta y actualización de datos fiscales, parámetros de venta e identidad visual.
+### Carta
+
+Contiene las pruebas de categorías y productos. Incluye operaciones CRUD, cambios de estado, cambios de disponibilidad, carga de imágenes y validaciones de permisos.
+
+### Salón
+
+Contiene las pruebas de zonas y mesas. Incluye operaciones CRUD, cambios de disponibilidad, cambios de estado y validaciones de permisos.
+
+### POS - Orders
+
+Contiene las pruebas de mesas, carta disponible para POS y creación de comandas. También incluye validaciones negativas para token ausente, permisos insuficientes, mesa inválida, productos inválidos y body incompleto.
 
 ### KDS - Kitchen Monitor
 
 Contiene las pruebas principales del monitor de cocina.
 
-Incluye operaciones de consulta de comandas activas, actualización de estado de comanda, actualización de estado de ítems y validaciones de permisos.
-
-Los estados permitidos para comanda en estas pruebas son:
+Estados de comanda usados:
 
 ```txt
 ABIERTA
@@ -662,7 +538,7 @@ EN_PREPARACION
 LISTA
 ```
 
-Los estados permitidos para ítems de cocina en estas pruebas son:
+Estados de ítems usados:
 
 ```txt
 PENDIENTE
@@ -670,22 +546,18 @@ EN_PREPARACION
 LISTO
 ```
 
-No se incluyen pruebas de entrega, despacho o cierre final de atención en esta carpeta.
-
 ### KDS - Service Notifications
 
-Contiene las pruebas de notificación de servicio entre cocina y salón.
+Contiene las pruebas de notificación entre cocina y salón.
 
-Incluye creación de avisos de pedido listo, registro de incidencias de cocina, listado de avisos pendientes, atención de avisos y confirmación de entrega.
-
-Los tipos permitidos para avisos de servicio son:
+Tipos permitidos:
 
 ```txt
 PEDIDO_LISTO
 INCIDENCIA_COCINA
 ```
 
-Los estados permitidos para avisos de servicio son:
+Estados permitidos:
 
 ```txt
 PENDIENTE
@@ -693,14 +565,20 @@ ATENDIDA
 CANCELADA
 ```
 
-Los estados usados para confirmar entrega son:
+Estados usados para entrega:
 
 ```txt
 orden: ENTREGADA
 item_orden: ENTREGADO
 ```
 
-Esta carpeta no implementa pagos, caja, impresión, aplicación móvil ni comunicación por WebSockets.
+### Auth - Session Hardening
+
+Contiene pruebas de refresh, logout, validación estricta de payloads y escenarios negativos de sesión.
+
+### Auth - Audit Events
+
+Contiene requests diseñados para disparar eventos `AUTH_%` y validar trazabilidad en la tabla `auditoria`.
 
 ---
 
@@ -710,9 +588,10 @@ No se deben subir al repositorio:
 
 ```txt
 Tokens reales
+Refresh tokens reales
 Contraseñas reales
 Credenciales personales
-Datos sensibles de conexión
+Cadenas de conexión
 Datos privados del establecimiento
 IDs reales innecesarios
 URLs con credenciales
@@ -720,8 +599,6 @@ Variables de entorno locales
 ```
 
 La colección debe trabajar con datos de prueba y variables locales de Postman.
-
-Los valores sensibles deben mantenerse vacíos en la colección exportada.
 
 Variables que deben quedar vacías antes de subir la colección:
 
@@ -736,12 +613,27 @@ kds_identifier
 kds_password
 user_identifier
 user_password
+
 admin_token
+admin_refresh_token
 cashier_token
+cashier_refresh_token
 waiter_token
+waiter_refresh_token
 kds_token
+kds_refresh_token
 user_token
+user_refresh_token
 auth_token
+auth_refresh_token
+
+admin_session_id
+cashier_session_id
+waiter_session_id
+kds_session_id
+user_session_id
+auth_session_id
+
 order_id
 item_id
 open_order_id
@@ -759,14 +651,16 @@ Antes de exportar la colección desde Postman:
 
 1. Verificar que las peticiones estén agrupadas en carpetas.
 2. Eliminar requests vacíos o temporales.
-3. Confirmar que no existan tokens reales guardados en los headers.
+3. Confirmar que no existan tokens reales guardados en headers, variables o bodies.
 4. Confirmar que no existan contraseñas reales en los bodies.
 5. Confirmar que las URLs usen `{{base_url}}`.
 6. Confirmar que los IDs de usuarios, roles, órdenes e ítems estén parametrizados.
 7. Confirmar que las variables sensibles estén vacías.
 8. Exportar la colección actualizada.
 9. Abrir el archivo exportado y buscar posibles secretos antes de commitear.
-10. Reemplazar el archivo:
+10. Reemplazar el archivo oficial de la colección en el repo.
+
+Archivo esperado:
 
 ```txt
 docs/postman/umari-os-api.postman_collection.json
@@ -779,10 +673,12 @@ eyJ
 Bearer
 password
 token
+refreshToken
 postgresql
 supabase
 DATABASE_URL
 JWT_SECRET
+SERVICE_ROLE
 ```
 
 Si aparece un token, contraseña real o cadena de conexión real, no se debe subir el archivo hasta limpiarlo.
@@ -819,47 +715,10 @@ DATABASE_URL = cadena_real_de_conexion
 
 ---
 
-## Pruebas POS / Salón
+## Alcance de la colección
 
-Las pruebas de POS / Salón validan el registro de comandas desde una mesa y la disponibilidad de información necesaria para el flujo POS → KDS.
+La colección permite validar de forma manual y controlada los principales flujos backend de Umarí OS.
 
-Endpoints cubiertos:
+No reemplaza pruebas automatizadas de backend, pruebas unitarias, pruebas de integración ni validaciones de despliegue.
 
-```txt
-GET  {{base_url}}/pos/tables
-GET  {{base_url}}/pos/menu
-POST {{base_url}}/pos/orders
-```
-
-Variables utilizadas:
-
-```txt
-waiter_token
-pos_table_id
-pos_product_id
-pos_product_id_secondary
-pos_order_id
-pos_order_notes
-pos_item_notes
-invalid_table_id
-invalid_product_id
-user_token
-```
-
-Body base para registrar una comanda:
-
-```json
-{
-  "id_mesa": "{{pos_table_id}}",
-  "observaciones": "{{pos_order_notes}}",
-  "items": [
-    {
-      "id_producto": "{{pos_product_id}}",
-      "cantidad": 1,
-      "notas_cocina": "{{pos_item_notes}}"
-    }
-  ]
-}
-```
-
-La prueba de registro almacena `pos_order_id`, `order_id` y `open_order_id` para reutilización en validaciones posteriores.
+La colección no debe almacenar información sensible y debe mantenerse como un artefacto reproducible para el equipo.
