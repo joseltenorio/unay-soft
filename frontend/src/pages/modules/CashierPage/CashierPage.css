@@ -14,7 +14,7 @@
   gap: 20px;
 }
 
-/* HEADER */
+/* ── HEADER ──────────────────────────────────────────────────────── */
 .cashier-page__header {
   padding: clamp(22px, 3vw, 32px);
   display: flex;
@@ -62,7 +62,7 @@
   line-height: 1.55;
 }
 
-/* SUMMARY */
+/* ── SUMMARY ─────────────────────────────────────────────────────── */
 .cashier-page__summary {
   display: grid;
   grid-template-columns: repeat(2, minmax(120px, 1fr));
@@ -96,7 +96,7 @@
   line-height: 1;
 }
 
-/* TABS */
+/* ── TABS ────────────────────────────────────────────────────────── */
 .cashier-tabs {
   padding: 6px;
   display: inline-flex;
@@ -147,406 +147,7 @@
   color: var(--color-text-on-dark);
 }
 
-/* TAB PANEL */
-.cashier-tab-panel {
-  min-height: 300px;
-  padding: 24px;
-  border-radius: 20px;
-  border: 1px solid rgba(70, 129, 137, 0.12);
-  background: rgba(255, 255, 255, 0.8);
-}
-
-/* COBRAR LAYOUT */
-.cashier-cobrar {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 20px;
-  align-items: start;
-}
-
-/* ORDERS */
-.cashier-orders {
-  min-height: 500px;
-  padding: clamp(20px, 3vw, 28px);
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  border: 1px solid rgba(157, 190, 187, 0.46);
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow:
-    0 18px 50px rgba(3, 25, 38, 0.07),
-    0 3px 10px rgba(3, 25, 38, 0.04);
-}
-
-.cashier-orders__header h2 {
-  color: var(--color-brand-primary);
-  font-size: clamp(1.4rem, 2vw, 1.8rem);
-  font-weight: 900;
-  letter-spacing: -0.04em;
-}
-
-.cashier-orders__header p {
-  margin-top: 4px;
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-/* LIST */
-.cashier-orders__list {
-  display: flex;
-  flex-direction: column;
-  padding: 2px;
-  gap: 12px;
-  list-style: none;
-  overflow-y: auto;
-  max-height: 520px;
-  padding-right: 4px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(157, 190, 187, 0.4) transparent;
-}
-
-.cashier-orders__list::-webkit-scrollbar {
-  width: 4px;
-}
-
-.cashier-orders__list::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.cashier-orders__list::-webkit-scrollbar-thumb {
-  background: rgba(157, 190, 187, 0.4);
-  border-radius: 4px;
-}
-
-/* EMPTY STATE */
-.cashier-orders__empty {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  min-height: 280px;
-  border: 1px dashed rgba(70, 129, 137, 0.28);
-  border-radius: 20px;
-  background: var(--pos-surface-soft);
-  color: var(--pos-text-secondary);
-  text-align: center;
-}
-
-.cashier-orders__empty p {
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-  font-weight: 650;
-  line-height: 1.55;
-}
-
-/* ORDER CARD */
-.cashier-order-card {
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  border: 1px solid rgba(157, 190, 187, 0.34);
-  border-left: 4px solid transparent;
-  border-left-color: rgba(70, 129, 137, 0.5);
-  border-radius: 18px;
-  background: #ffffff;
-  cursor: pointer;
-  transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast),
-    transform var(--transition-fast);
-  box-shadow: 0 2px 8px rgba(3, 25, 38, 0.04);
-}
-
-.cashier-order-card:hover {
-  box-shadow: 0 8px 24px rgba(3, 25, 38, 0.08);
-  transform: translateY(-1px);
-}
-
-.cashier-order-card--selected {
-  border-left-color: var(--color-brand-primary);
-  border-top-color: rgba(70, 129, 137, 0.3);
-  border-right-color: rgba(70, 129, 137, 0.3);
-  border-bottom-color: rgba(70, 129, 137, 0.3);
-  background: rgba(252, 249, 242, 0.7);
-  box-shadow: 0 2px 10px rgba(3, 25, 38, 0.1);
-}
-
-.cashier-order-card__info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-
-.cashier-order-card__info strong {
-  color: var(--color-brand-primary);
-  font-size: 0.94rem;
-  font-weight: 900;
-}
-
-.cashier-order-card__info span {
-  color: var(--color-text-muted);
-  font-size: 0.82rem;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 280px;
-}
-
-.cashier-order-card__total {
-  color: var(--color-brand-primary);
-  font-size: 1.1rem;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  flex-shrink: 0;
-}
-
-/* PAY PANEL */
-.cashier-pay-panel {
-  padding: clamp(20px, 3vw, 26px);
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  border: 1px solid rgba(157, 190, 187, 0.46);
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow:
-    0 18px 50px rgba(3, 25, 38, 0.07),
-    0 3px 10px rgba(3, 25, 38, 0.04);
-  position: sticky;
-  top: 20px;
-}
-
-.cashier-pay-panel--empty {
-  min-height: 400px;
-  display: grid;
-  place-items: center;
-}
-
-.cashier-pay-panel__empty-content {
-  width: min(100%, 520px);
-  padding: clamp(24px, 4vw, 44px);
-  border: 1px dashed rgba(70, 129, 137, 0.34);
-  border-radius: 24px;
-  background:
-    radial-gradient(circle at top left, rgba(119, 172, 162, 0.14), transparent 34%),
-    rgba(252, 249, 242, 0.68);
-  text-align: center;
-}
-
-.cashier-pay-panel__empty-content p {
-  color: var(--color-text-muted);
-  font-size: 0.94rem;
-  font-weight: 650;
-  line-height: 1.55;
-}
-
-.cashier-pay-panel__detail {
-  padding: 16px;
-  border: 1px solid rgba(157, 190, 187, 0.3);
-  border-radius: 18px;
-  background: rgba(252, 249, 242, 0.6);
-  display: flex;
-  flex-direction: column;
-}
-
-.cashier-pay-panel__line {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 7px 0;
-  border-bottom: 1px solid rgba(157, 190, 187, 0.2);
-}
-
-.cashier-pay-panel__line:last-of-type {
-  border-bottom: none;
-}
-
-.cashier-pay-panel__line span:first-child {
-  color: var(--color-text-muted);
-  font-size: 0.86rem;
-  font-weight: 650;
-}
-
-.cashier-pay-panel__line span:last-child {
-  color: var(--color-brand-primary);
-  font-size: 0.86rem;
-  font-weight: 800;
-  flex-shrink: 0;
-}
-
-.cashier-pay-panel__total {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-top: 12px;
-  margin-top: 4px;
-  border-top: 1.5px solid rgba(70, 129, 137, 0.2);
-}
-
-.cashier-pay-panel__total strong:first-child {
-  color: var(--color-brand-primary);
-  font-size: 0.9rem;
-  font-weight: 900;
-}
-
-.cashier-pay-panel__total strong:last-child {
-  color: var(--color-brand-primary);
-  font-size: 1.45rem;
-  font-weight: 900;
-  letter-spacing: -0.03em;
-}
-
-.cashier-pay-panel__methods {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
-.cashier-method-btn {
-  min-height: 44px;
-  padding: 0 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(157, 190, 187, 0.4);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.78);
-  color: rgba(3, 25, 38, 0.68);
-  font-size: 0.84rem;
-  font-weight: 900;
-  cursor: pointer;
-  transition:
-    background-color var(--transition-fast),
-    color var(--transition-fast),
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
-}
-
-.cashier-method-btn:hover {
-  background: rgba(119, 172, 162, 0.13);
-  color: var(--color-brand-primary);
-}
-
-.cashier-method-btn--active {
-  background: var(--color-brand-primary);
-  color: var(--color-text-on-dark);
-  border-color: var(--color-brand-primary);
-  box-shadow: 0 8px 20px rgba(3, 25, 38, 0.16);
-}
-
-.cashier-method-btn--active:hover {
-  background: var(--color-brand-primary);
-  color: var(--color-text-on-dark);
-}
-
-.cashier-pay-panel__received {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.cashier-pay-panel__received label {
-  color: var(--color-brand-primary);
-  font-size: 0.82rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.cashier-pay-panel__received input {
-  width: 100%;
-  min-height: 52px;
-  padding: 0 16px;
-  border: 1.5px solid rgba(70, 129, 137, 0.3);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--color-brand-primary);
-  font-size: 1.35rem;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  outline: none;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-  box-sizing: border-box;
-}
-
-.cashier-pay-panel__received input:focus {
-  border-color: var(--color-brand-main);
-  box-shadow: 0 0 0 4px rgba(70, 129, 137, 0.12);
-}
-
-.cashier-pay-panel__received input::placeholder {
-  color: rgba(3, 25, 38, 0.28);
-  font-weight: 700;
-}
-
-.cashier-pay-panel__change {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-radius: 14px;
-  background: rgba(75, 156, 115, 0.1);
-  border: 1px solid rgba(75, 156, 115, 0.22);
-}
-
-.cashier-pay-panel__change span {
-  color: rgba(3, 25, 38, 0.6);
-  font-size: 0.84rem;
-  font-weight: 800;
-}
-
-.cashier-pay-panel__change strong {
-  color: #2f7552;
-  font-size: 1.3rem;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-}
-
-.cashier-pay-panel__submit {
-  min-height: 52px;
-  border: none;
-  border-radius: 16px;
-  background: var(--color-brand-primary);
-  color: var(--color-text-on-dark);
-  font-size: 0.96rem;
-  font-weight: 900;
-  cursor: pointer;
-  transition:
-    background-color var(--transition-fast),
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast);
-  box-shadow: 0 10px 26px rgba(3, 25, 38, 0.18);
-}
-
-.cashier-pay-panel__submit:hover:not(:disabled) {
-  background: var(--color-brand-primary-light);
-  transform: translateY(-1px);
-  box-shadow: 0 14px 32px rgba(3, 25, 38, 0.22);
-}
-
-.cashier-pay-panel__submit:disabled {
-  cursor: not-allowed;
-  opacity: 0.56;
-  transform: none;
-  box-shadow: none;
-}
-
 /* ── Responsive ──────────────────────────────────────────────────── */
-@media (max-width: 1100px) {
-  .cashier-cobrar {
-    grid-template-columns: 1fr 300px;
-  }
-}
-
 @media (max-width: 900px) {
   .cashier-page {
     padding: 20px;
@@ -559,18 +160,6 @@
 
   .cashier-page__summary {
     width: 100%;
-  }
-
-  .cashier-cobrar {
-    grid-template-columns: 1fr;
-  }
-
-  .cashier-pay-panel {
-    position: static;
-  }
-
-  .cashier-cierre {
-    grid-template-columns: 1fr;
   }
 
   .cashier-tabs {
@@ -601,17 +190,10 @@
   .cashier-tabs__button {
     width: 100%;
   }
-
-  .cashier-pay-panel__methods {
-    grid-template-columns: 1fr;
-  }
-
-@media (prefers-reduced-motion: reduce) {
-  .cashier-order-card,
-  .cashier-method-btn,
-  .cashier-pay-panel__submit {
-    transition: none;
-  }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .cashier-tabs__button {
+    transition: none;
+  }
 }
