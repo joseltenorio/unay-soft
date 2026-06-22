@@ -277,7 +277,7 @@ function CashierPayPanel({ order }) {
             id="cashier-received"
             type="number"
             min="0"
-            step="0.01"
+            step="0.10"
             value={received}
             placeholder="S/ 0.00"
             onChange={(event) =>
