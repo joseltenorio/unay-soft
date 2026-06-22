@@ -51,6 +51,9 @@ export default function CashierPage() {
               selectedOrder={selectedOrder}
               onSelect={setSelectedOrder}
             />
+            <CashierPayPanel
+              order={selectedOrder}
+            />
           </div>
         )}
 
@@ -113,6 +116,93 @@ function CashierOrderList({ selectedOrder, onSelect }) {
           ))}
         </ul>
       )}
+    </div>
+  )
+}
+
+function CashierPayPanel({ order }) {
+  const [method, setMethod] = useState("efectivo")
+  const [received, setReceived] = useState("")
+
+  const change = received
+    ? Math.max(0, parseFloat(received) - (order?.total ?? 0))
+    : null
+
+  if (!order) {
+    return (
+      <div className="cashier-pay-panel cashier-pay-panel--empty">
+        <p>Selecciona una orden para cobrar</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="cashier-pay-panel">
+      <div className="cashier-pay-panel__detail">
+        {order.items.map((item, index) => (
+          <div
+            key={index}
+            className="cashier-pay-panel__line"
+          >
+            <span>
+              {item.qty}× {item.nombre}
+            </span>
+
+            <span>
+              S/ {(item.precio * item.qty).toFixed(2)}
+            </span>
+          </div>
+        ))}
+
+        <div className="cashier-pay-panel__total">
+          <strong>Total</strong>
+          <strong>S/ {order.total.toFixed(2)}</strong>
+        </div>
+      </div>
+
+      <div className="cashier-pay-panel__methods">
+        {["efectivo", "tarjeta", "qr"].map((paymentMethod) => (
+          <button
+            key={paymentMethod}
+            className={
+              method === paymentMethod
+                ? "cashier-method-btn cashier-method-btn--active"
+                : "cashier-method-btn"
+            }
+            onClick={() => setMethod(paymentMethod)}
+          >
+            {paymentMethod}
+          </button>
+        ))}
+      </div>
+
+      {method === "efectivo" && (
+        <div className="cashier-pay-panel__received">
+          <label>Monto recibido</label>
+
+          <input
+            type="number"
+            value={received}
+            placeholder="S/ 0.00"
+            onChange={(event) =>
+              setReceived(event.target.value)
+            }
+          />
+
+          {change !== null && (
+            <div className="cashier-pay-panel__change">
+              Vuelto:
+              <strong>
+                S/ {change.toFixed(2)}
+              </strong>
+            </div>
+          )}
+        </div>
+      )}
+
+      <button className="cashier-pay-panel__submit">
+        Registrar cobro
+      </button>
     </div>
   )
 }
