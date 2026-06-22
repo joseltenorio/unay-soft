@@ -539,3 +539,79 @@
   transform: none;
   box-shadow: none;
 }
+
+/* ── Responsive ──────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .cashier-cobrar {
+    grid-template-columns: 1fr 300px;
+  }
+}
+
+@media (max-width: 900px) {
+  .cashier-page {
+    padding: 20px;
+  }
+
+  .cashier-page__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .cashier-page__summary {
+    width: 100%;
+  }
+
+  .cashier-cobrar {
+    grid-template-columns: 1fr;
+  }
+
+  .cashier-pay-panel {
+    position: static;
+  }
+
+  .cashier-cierre {
+    grid-template-columns: 1fr;
+  }
+
+  .cashier-tabs {
+    width: 100%;
+    align-self: stretch;
+    overflow-x: auto;
+  }
+
+  .cashier-tabs__button {
+    flex: 1;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 560px) {
+  .cashier-page {
+    padding: 14px;
+  }
+
+  .cashier-page__summary {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cashier-tabs {
+    flex-direction: column;
+  }
+
+  .cashier-tabs__button {
+    width: 100%;
+  }
+
+  .cashier-pay-panel__methods {
+    grid-template-columns: 1fr;
+  }
+
+@media (prefers-reduced-motion: reduce) {
+  .cashier-order-card,
+  .cashier-method-btn,
+  .cashier-pay-panel__submit {
+    transition: none;
+  }
+}
+
+}
