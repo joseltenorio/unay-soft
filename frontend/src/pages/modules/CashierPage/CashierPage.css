@@ -40,7 +40,7 @@
   letter-spacing: 0.14em;
 }
 
-.pos-page__header h1 {
+.cashier-page__header h1 {
   color: var(--color-brand-primary);
 
   font-size: clamp(2rem, 4vw, 3.1rem);
@@ -49,7 +49,7 @@
   letter-spacing: -0.055em;
 }
 
-.pos-page__header p {
+.cashier-page__header p {
   max-width: 680px;
   margin-top: 12px;
 
