@@ -8,7 +8,7 @@ const { authorizePermission } = require("../middlewares/permission.middleware")
 
 const router = express.Router()
 
-router.get("/carta/:id_establecimiento", cartaPublica)
+router.get("/carta/:public_identifier", cartaPublica)
 
 router.get(
   "/qr",

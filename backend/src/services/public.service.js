@@ -4,36 +4,198 @@ const { pool } = require("../config/database")
 
 const QR_TYPE_CARTA_GENERAL = "CARTA_GENERAL"
 
+const RESERVED_PUBLIC_SLUGS = new Set([
+  "api",
+  "app",
+  "assets",
+  "carta",
+  "login",
+  "restore-password",
+  "unauthorized",
+])
+
 function normalizeBaseUrl(baseUrl) {
   return String(baseUrl || "http://localhost:5173").replace(/\/+$/, "")
 }
 
-function buildCartaUrl(baseUrl, idEstablecimiento) {
-  return `${normalizeBaseUrl(baseUrl)}/carta/${idEstablecimiento}`
+function normalizeTenantSlug(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-{2,}/g, "-")
 }
 
-async function getCartaPublica(idEstablecimiento) {
-  const establishmentQuery = `
+function getShortId(idEstablecimiento) {
+  return String(idEstablecimiento || "").replace(/-/g, "").slice(0, 8)
+}
+
+function buildCartaUrl(baseUrl, tenantSlug) {
+  return `${normalizeBaseUrl(baseUrl)}/carta/${tenantSlug}`
+}
+
+function assertPublicIdentifier(identifier) {
+  const value = String(identifier || "").trim()
+
+  if (!value) {
+    const error = new Error("El establecimiento es requerido.")
+    error.statusCode = 400
+    throw error
+  }
+
+  if (value.includes("/") || value.includes("..")) {
+    const error = new Error("El identificador público del establecimiento no es válido.")
+    error.statusCode = 400
+    throw error
+  }
+
+  return value
+}
+
+async function findActiveEstablishmentById(idEstablecimiento) {
+  const query = `
     select
       id_establecimiento,
       nombre_comercial,
       logo_url,
-      moneda_simbolo
+      moneda_simbolo,
+      slug
     from establecimiento
     where id_establecimiento = $1
       and estado = true
     limit 1;
   `
 
-  const establishmentResult = await pool.query(establishmentQuery, [
-    idEstablecimiento,
-  ])
+  const { rows } = await pool.query(query, [idEstablecimiento])
 
-  if (establishmentResult.rows.length === 0) {
+  return rows[0] || null
+}
+
+async function isSlugTaken(slug, idEstablecimiento) {
+  const query = `
+    select 1
+    from establecimiento
+    where lower(slug) = lower($1)
+      and id_establecimiento <> $2
+    limit 1;
+  `
+
+  const { rows } = await pool.query(query, [slug, idEstablecimiento])
+
+  return rows.length > 0
+}
+
+async function buildUniqueTenantSlug(baseSlug, idEstablecimiento) {
+  const fallbackSlug = `restaurante-${getShortId(idEstablecimiento)}`
+  let candidate = normalizeTenantSlug(baseSlug) || fallbackSlug
+
+  if (RESERVED_PUBLIC_SLUGS.has(candidate)) {
+    candidate = `${candidate}-restaurante`
+  }
+
+  if (!(await isSlugTaken(candidate, idEstablecimiento))) {
+    return candidate
+  }
+
+  candidate = `${candidate}-${getShortId(idEstablecimiento)}`
+
+  if (!(await isSlugTaken(candidate, idEstablecimiento))) {
+    return candidate
+  }
+
+  let counter = 2
+  while (await isSlugTaken(`${candidate}-${counter}`, idEstablecimiento)) {
+    counter += 1
+  }
+
+  return `${candidate}-${counter}`
+}
+
+async function ensureTenantSlug(idEstablecimiento) {
+  const establishment = await findActiveEstablishmentById(idEstablecimiento)
+
+  if (!establishment) {
     const error = new Error("Establecimiento no encontrado.")
     error.statusCode = 404
     throw error
   }
+
+  const normalizedCurrentSlug = normalizeTenantSlug(establishment.slug)
+  const baseSlug = normalizedCurrentSlug || normalizeTenantSlug(establishment.nombre_comercial)
+  const tenantSlug = await buildUniqueTenantSlug(baseSlug, establishment.id_establecimiento)
+
+  if (establishment.slug === tenantSlug) {
+    return {
+      ...establishment,
+      slug: tenantSlug,
+    }
+  }
+
+  const updateQuery = `
+    update establecimiento
+    set
+      slug = $1,
+      updated_at = now()
+    where id_establecimiento = $2
+      and estado = true
+    returning
+      id_establecimiento,
+      nombre_comercial,
+      logo_url,
+      moneda_simbolo,
+      slug;
+  `
+
+  const { rows } = await pool.query(updateQuery, [
+    tenantSlug,
+    establishment.id_establecimiento,
+  ])
+
+  return rows[0]
+}
+
+async function resolvePublicEstablishment(identifier) {
+  const publicIdentifier = assertPublicIdentifier(identifier)
+  const normalizedSlug = normalizeTenantSlug(publicIdentifier)
+
+  const query = `
+    select
+      id_establecimiento,
+      nombre_comercial,
+      logo_url,
+      moneda_simbolo,
+      slug
+    from establecimiento
+    where estado = true
+      and (
+        id_establecimiento::text = $1
+        or lower(slug) = lower($2)
+      )
+    limit 1;
+  `
+
+  const { rows } = await pool.query(query, [publicIdentifier, normalizedSlug])
+
+  if (rows.length === 0) {
+    const error = new Error("Establecimiento no encontrado.")
+    error.statusCode = 404
+    throw error
+  }
+
+  const establishment = rows[0]
+
+  if (!establishment.slug || establishment.slug !== normalizeTenantSlug(establishment.slug)) {
+    return ensureTenantSlug(establishment.id_establecimiento)
+  }
+
+  return establishment
+}
+
+async function getCartaPublica(publicIdentifier) {
+  const establishment = await resolvePublicEstablishment(publicIdentifier)
 
   const categoriesQuery = `
     select
@@ -80,16 +242,19 @@ async function getCartaPublica(idEstablecimiento) {
     order by c.orden_display asc, c.nombre asc;
   `
 
-  const categoriesResult = await pool.query(categoriesQuery, [idEstablecimiento])
+  const categoriesResult = await pool.query(categoriesQuery, [
+    establishment.id_establecimiento,
+  ])
 
   return {
-    establecimiento: establishmentResult.rows[0],
+    establecimiento: establishment,
     categorias: categoriesResult.rows,
   }
 }
 
 async function getOrCreateQR(idEstablecimiento, baseUrl) {
-  const urlDestino = buildCartaUrl(baseUrl, idEstablecimiento)
+  const establishment = await ensureTenantSlug(idEstablecimiento)
+  const urlDestino = buildCartaUrl(baseUrl, establishment.slug)
 
   const existingQuery = `
     select
@@ -115,7 +280,10 @@ async function getOrCreateQR(idEstablecimiento, baseUrl) {
     const existingQr = existingResult.rows[0]
 
     if (existingQr.url_destino === urlDestino) {
-      return existingQr
+      return {
+        ...existingQr,
+        tenant_slug: establishment.slug,
+      }
     }
 
     const updateQuery = `
@@ -139,7 +307,10 @@ async function getOrCreateQR(idEstablecimiento, baseUrl) {
       existingQr.id_codigo_qr,
     ])
 
-    return updateResult.rows[0]
+    return {
+      ...updateResult.rows[0],
+      tenant_slug: establishment.slug,
+    }
   }
 
   const insertQuery = `
@@ -163,7 +334,10 @@ async function getOrCreateQR(idEstablecimiento, baseUrl) {
     urlDestino,
   ])
 
-  return insertResult.rows[0]
+  return {
+    ...insertResult.rows[0],
+    tenant_slug: establishment.slug,
+  }
 }
 
 async function saveQRImagen(idCodigoQr, imagenBase64) {
@@ -197,7 +371,9 @@ async function saveQRImagen(idCodigoQr, imagenBase64) {
 }
 
 module.exports = {
+  buildCartaUrl,
   getCartaPublica,
   getOrCreateQR,
+  normalizeTenantSlug,
   saveQRImagen,
 }

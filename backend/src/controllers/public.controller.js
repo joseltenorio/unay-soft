@@ -10,15 +10,15 @@ const {
 
 async function cartaPublica(req, res) {
   try {
-    const { id_establecimiento } = req.params
+    const { public_identifier } = req.params
 
-    if (!id_establecimiento) {
+    if (!public_identifier) {
       return res.status(400).json({
         message: "El establecimiento es requerido.",
       })
     }
 
-    const data = await getCartaPublica(id_establecimiento)
+    const data = await getCartaPublica(public_identifier)
 
     return res.status(200).json(data)
   } catch (error) {
@@ -51,13 +51,18 @@ async function generarQR(req, res) {
         },
       })
 
-      qr = await saveQRImagen(qr.id_codigo_qr, imagenBase64)
+      const updatedQr = await saveQRImagen(qr.id_codigo_qr, imagenBase64)
+      qr = {
+        ...updatedQr,
+        tenant_slug: qr.tenant_slug,
+      }
     }
 
     return res.status(200).json({
       message: "QR obtenido correctamente.",
       qr: {
         id_codigo_qr: qr.id_codigo_qr,
+        tenant_slug: qr.tenant_slug,
         url_destino: qr.url_destino,
         imagen_qr: qr.imagen_qr,
       },
