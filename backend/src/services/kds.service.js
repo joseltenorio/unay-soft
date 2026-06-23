@@ -4,17 +4,19 @@ const { pool } = require("../config/database")
 
 const ORDER_STATUS = {
   OPEN: "ABIERTA",
-  IN_PREPARATION: "EN_PREPARACION",
+  IN_PROGRESS: "EN_PREPARACION",
   READY: "LISTA",
+  DELIVERED: "ENTREGADA",
 }
 
-const ITEM_STATUS = {
+const ITEM_KITCHEN_STATUS = {
   PENDING: "PENDIENTE",
-  IN_PREPARATION: "EN_PREPARACION",
+  IN_PROGRESS: "EN_PREPARACION",
   READY: "LISTO",
+  DELIVERED: "ENTREGADO",
 }
 
-const SERVICE_NOTIFICATION_TYPE = {
+const SERVICE_NOTIFICATION_TYPES = {
   READY_ORDER: "PEDIDO_LISTO",
   KITCHEN_INCIDENT: "INCIDENCIA_COCINA",
 }
@@ -31,12 +33,24 @@ function createBusinessError(message, statusCode = 400) {
   return error
 }
 
-function isValidOrderStatus(status) {
-  return Object.values(ORDER_STATUS).includes(status)
+function normalizeText(value) {
+  if (value === undefined || value === null) return null
+  const normalized = String(value).trim().replace(/\s+/g, " ")
+  return normalized || null
 }
 
-function isValidItemStatus(status) {
-  return Object.values(ITEM_STATUS).includes(status)
+function assertMaxLength(value, max, fieldName) {
+  if (value && value.length > max) {
+    throw createBusinessError(`${fieldName} no debe superar ${max} caracteres.`, 400)
+  }
+}
+
+function normalizeStatus(value, allowedValues, fieldName) {
+  const normalized = String(value || "").trim().toUpperCase()
+  if (!allowedValues.includes(normalized)) {
+    throw createBusinessError(`${fieldName} no es valido.`, 400)
+  }
+  return normalized
 }
 
 async function getKitchenOrders(idEstablecimiento) {
@@ -285,9 +299,15 @@ async function updateKitchenOrderStatus({
   idEstablecimiento,
   nextStatus,
 }) {
-  if (!isValidOrderStatus(nextStatus)) {
-    throw createBusinessError("Estado de orden no permitido para KDS.")
-  }
+  const normalizedNextStatus = normalizeStatus(
+    nextStatus,
+    [
+      ORDER_STATUS.OPEN,
+      ORDER_STATUS.IN_PROGRESS,
+      ORDER_STATUS.READY,
+    ],
+    "Estado de orden",
+  )
 
   const client = await pool.connect()
 
@@ -306,7 +326,7 @@ async function updateKitchenOrderStatus({
         join usuario u on u.id_usuario = o.id_usuario
         where o.id_orden = $1
           and u.id_establecimiento = $2
-        for update;
+        for update of o;
       `,
       [idOrden, idEstablecimiento],
     )
@@ -317,14 +337,13 @@ async function updateKitchenOrderStatus({
 
     const currentOrder = currentOrderResult.rows[0]
 
-    await validateOrderTransition({
-      client,
-      idOrden,
-      currentStatus: currentOrder.estado,
-      nextStatus,
-    })
+    validateOrderTransition(currentOrder.estado, normalizedNextStatus)
 
-    if (nextStatus === ORDER_STATUS.IN_PREPARATION) {
+    if (normalizedNextStatus === ORDER_STATUS.READY) {
+      await assertOrderItemsReady({ client, idOrden })
+    }
+
+    if (normalizedNextStatus === ORDER_STATUS.IN_PROGRESS) {
       await client.query(
         `
           update item_orden
@@ -366,9 +385,8 @@ async function updateKitchenOrderStatus({
           end,
           lista_at = case
             when $3::varchar(30) = 'LISTA'
+             and lista_at is null
               then now()
-            when $3::varchar(30) = 'EN_PREPARACION'
-              then null
             else lista_at
           end,
           updated_at = now()
@@ -388,7 +406,7 @@ async function updateKitchenOrderStatus({
           lista_at,
           updated_at;
       `,
-      [idOrden, idEstablecimiento, nextStatus],
+      [idOrden, idEstablecimiento, normalizedNextStatus],
     )
 
     await client.query("commit")
@@ -407,7 +425,17 @@ async function updateKitchenItemStatus({
   idEstablecimiento,
   nextStatus,
 }) {
-  if (!isValidItemStatus(nextStatus)) {
+  const normalizedNextStatus = normalizeStatus(
+    nextStatus,
+    [
+      ITEM_KITCHEN_STATUS.PENDING,
+      ITEM_KITCHEN_STATUS.IN_PROGRESS,
+      ITEM_KITCHEN_STATUS.READY,
+    ],
+    "Estado de item",
+  )
+
+  if (!Object.values(ITEM_KITCHEN_STATUS).includes(normalizedNextStatus)) {
     throw createBusinessError("Estado de ítem no permitido para KDS.")
   }
 
@@ -430,7 +458,7 @@ async function updateKitchenItemStatus({
         join usuario u on u.id_usuario = o.id_usuario
         where io.id_item_orden = $1
           and u.id_establecimiento = $2
-        for update;
+        for update of io, o;
       `,
       [idItemOrden, idEstablecimiento],
     )
@@ -444,7 +472,7 @@ async function updateKitchenItemStatus({
     validateItemTransition({
       currentItemStatus: currentItem.estado_cocina,
       currentOrderStatus: currentItem.estado_orden,
-      nextStatus,
+      nextStatus: normalizedNextStatus,
     })
 
     const updateResult = await client.query(
@@ -459,8 +487,6 @@ async function updateKitchenItemStatus({
             else preparacion_inicio_at
           end,
           listo_at = case
-            when $3::varchar(30) = 'EN_PREPARACION'
-              then null
             when listo_at is null
              and $3::varchar(30) = 'LISTO'
               then now()
@@ -483,8 +509,29 @@ async function updateKitchenItemStatus({
           listo_at,
           updated_at;
       `,
-      [idItemOrden, idEstablecimiento, nextStatus],
+      [idItemOrden, idEstablecimiento, normalizedNextStatus],
     )
+
+    if (
+      currentItem.estado_orden === ORDER_STATUS.READY &&
+      normalizedNextStatus === ITEM_KITCHEN_STATUS.IN_PROGRESS
+    ) {
+      await client.query(
+        `
+          update orden
+          set
+            estado = 'EN_PREPARACION',
+            preparacion_inicio_at = case
+              when preparacion_inicio_at is null then now()
+              else preparacion_inicio_at
+            end,
+            updated_at = now()
+          where id_orden = $1
+            and estado = 'LISTA';
+        `,
+        [currentItem.id_orden],
+      )
+    }
 
     await syncOrderStatusFromItems({
       client,
@@ -503,69 +550,51 @@ async function updateKitchenItemStatus({
   }
 }
 
-async function validateOrderTransition({
-  client,
-  idOrden,
-  currentStatus,
-  nextStatus,
-}) {
-  if (
-    currentStatus === ORDER_STATUS.READY &&
-    nextStatus === ORDER_STATUS.IN_PREPARATION
-  ) {
-    const pendingServiceCallResult = await client.query(
-      `
-        select count(*)::int as pending_service_calls
-        from orden_notificacion_servicio
-        where id_orden = $1
-          and tipo = 'PEDIDO_LISTO'
-          and estado = 'PENDIENTE';
-      `,
-      [idOrden],
-    )
-
-    const pendingServiceCalls =
-      pendingServiceCallResult.rows[0]?.pending_service_calls || 0
-
-    if (pendingServiceCalls > 0) {
-      throw createBusinessError(
-        "No se puede abortar una comanda lista que ya fue notificada al mesero.",
-      )
-    }
-
-    return
+function validateOrderTransition(currentStatus, nextStatus) {
+  if (!Object.values(ORDER_STATUS).includes(currentStatus)) {
+    throw createBusinessError("No se puede modificar esta comanda desde KDS.", 409)
   }
 
-  if (currentStatus === ORDER_STATUS.READY && nextStatus !== ORDER_STATUS.READY) {
-    throw createBusinessError("Una comanda lista no puede cambiar a ese estado.")
+  if (currentStatus === ORDER_STATUS.DELIVERED) {
+    throw createBusinessError("No se puede modificar una comanda ya entregada.", 409)
   }
 
   if (
-    currentStatus === ORDER_STATUS.IN_PREPARATION &&
+    currentStatus === ORDER_STATUS.IN_PROGRESS &&
     nextStatus === ORDER_STATUS.OPEN
   ) {
-    throw createBusinessError("Una comanda en preparación no puede volver a abierta.")
+    throw createBusinessError(
+      "Una comanda en preparacion no puede volver a abierta.",
+      409,
+    )
   }
 
-  if (nextStatus === ORDER_STATUS.READY) {
-    const pendingItemsResult = await client.query(
-      `
-        select count(*)::int as pending_items
-        from item_orden
-        where id_orden = $1
-          and estado_cocina <> 'ANULADO'
-          and estado_cocina <> 'LISTO';
-      `,
-      [idOrden],
+  if (
+    currentStatus === ORDER_STATUS.READY &&
+    nextStatus === ORDER_STATUS.OPEN
+  ) {
+    throw createBusinessError("Una comanda lista no puede volver a abierta.", 409)
+  }
+}
+
+async function assertOrderItemsReady({ client, idOrden }) {
+  const pendingItemsResult = await client.query(
+    `
+      select count(*)::int as pending_items
+      from item_orden
+      where id_orden = $1
+        and estado_cocina not in ('LISTO', 'ANULADO', 'ENTREGADO');
+    `,
+    [idOrden],
+  )
+
+  const pendingItems = pendingItemsResult.rows[0]?.pending_items || 0
+
+  if (pendingItems > 0) {
+    throw createBusinessError(
+      "No se puede finalizar la comanda mientras existan items pendientes.",
+      409,
     )
-
-    const pendingItems = pendingItemsResult.rows[0]?.pending_items || 0
-
-    if (pendingItems > 0) {
-      throw createBusinessError(
-        "No se puede finalizar la comanda mientras existan ítems pendientes.",
-      )
-    }
   }
 }
 
@@ -574,26 +603,52 @@ function validateItemTransition({
   currentOrderStatus,
   nextStatus,
 }) {
-  if (currentOrderStatus === ORDER_STATUS.OPEN && nextStatus === ITEM_STATUS.READY) {
-    throw createBusinessError(
-      "No se puede marcar un ítem como listo antes de iniciar la preparación de la comanda.",
-    )
+  if (
+    ![
+      ITEM_KITCHEN_STATUS.PENDING,
+      ITEM_KITCHEN_STATUS.IN_PROGRESS,
+      ITEM_KITCHEN_STATUS.READY,
+    ].includes(currentItemStatus)
+  ) {
+    throw createBusinessError("No se puede modificar este item desde KDS.", 409)
   }
 
-  if (currentOrderStatus === ORDER_STATUS.READY) {
-    throw createBusinessError("No se puede modificar un ítem de una comanda lista.")
+  if (currentOrderStatus === ORDER_STATUS.DELIVERED) {
+    throw createBusinessError("No se puede modificar una comanda ya entregada.", 409)
   }
 
   if (
-    currentItemStatus === ITEM_STATUS.READY &&
-    nextStatus === ITEM_STATUS.IN_PREPARATION &&
-    currentOrderStatus === ORDER_STATUS.IN_PREPARATION
+    currentOrderStatus === ORDER_STATUS.OPEN &&
+    nextStatus === ITEM_KITCHEN_STATUS.READY
+  ) {
+    throw createBusinessError(
+      "No se puede marcar un item como listo antes de iniciar la preparacion de la comanda.",
+      409,
+    )
+  }
+
+  if (
+    currentItemStatus === ITEM_KITCHEN_STATUS.IN_PROGRESS &&
+    nextStatus === ITEM_KITCHEN_STATUS.PENDING
+  ) {
+    throw createBusinessError(
+      "Un item en preparacion no puede volver a pendiente.",
+      409,
+    )
+  }
+
+  if (
+    currentItemStatus === ITEM_KITCHEN_STATUS.READY &&
+    nextStatus === ITEM_KITCHEN_STATUS.IN_PROGRESS
   ) {
     return
   }
 
-  if (currentItemStatus === ITEM_STATUS.READY && nextStatus !== ITEM_STATUS.READY) {
-    throw createBusinessError("Un ítem listo no puede cambiar a ese estado.")
+  if (
+    currentItemStatus === ITEM_KITCHEN_STATUS.READY &&
+    nextStatus !== ITEM_KITCHEN_STATUS.READY
+  ) {
+  throw createBusinessError("Un item listo no puede cambiar a ese estado.", 409)
   }
 }
 
@@ -643,20 +698,6 @@ async function syncOrderStatusFromItems({ client, idOrden, idEstablecimiento }) 
   }
 }
 
-function normalizeOptionalText(value) {
-  if (value === undefined || value === null) {
-    return null
-  }
-
-  const normalizedValue = String(value).trim()
-
-  return normalizedValue.length > 0 ? normalizedValue : null
-}
-
-function isValidServiceNotificationType(type) {
-  return Object.values(SERVICE_NOTIFICATION_TYPE).includes(type)
-}
-
 async function createServiceNotification({
   idOrden,
   idEstablecimiento,
@@ -665,12 +706,27 @@ async function createServiceNotification({
   motivo,
   mensaje,
 }) {
-  if (!isValidServiceNotificationType(type)) {
-    throw createBusinessError("Tipo de aviso de servicio no permitido.")
-  }
+  const normalizedType = normalizeStatus(
+    type,
+    Object.values(SERVICE_NOTIFICATION_TYPES),
+    "Tipo de aviso de servicio",
+  )
+  const normalizedMotivo = normalizeText(motivo)
+  const normalizedMensaje = normalizeText(mensaje)
 
-  const normalizedMotivo = normalizeOptionalText(motivo)
-  const normalizedMensaje = normalizeOptionalText(mensaje)
+  assertMaxLength(normalizedMotivo, 80, "Motivo")
+  assertMaxLength(normalizedMensaje, 300, "Mensaje")
+
+  if (
+    normalizedType === SERVICE_NOTIFICATION_TYPES.KITCHEN_INCIDENT &&
+    !normalizedMotivo &&
+    !normalizedMensaje
+  ) {
+    throw createBusinessError(
+      "Debe ingresar un motivo o mensaje para pedir apoyo.",
+      400,
+    )
+  }
 
   const client = await pool.connect()
 
@@ -687,7 +743,7 @@ async function createServiceNotification({
         join usuario u on u.id_usuario = o.id_usuario
         where o.id_orden = $1
           and u.id_establecimiento = $2
-        for update;
+        for update of o;
       `,
       [idOrden, idEstablecimiento],
     )
@@ -699,34 +755,26 @@ async function createServiceNotification({
     const order = orderResult.rows[0]
 
     if (
-      type === SERVICE_NOTIFICATION_TYPE.READY_ORDER &&
+      normalizedType === SERVICE_NOTIFICATION_TYPES.READY_ORDER &&
       order.estado !== ORDER_STATUS.READY
     ) {
       throw createBusinessError(
-        "Solo se puede llamar al mesero cuando la comanda está lista.",
+        "Solo se puede llamar al mesero cuando la comanda esta lista.",
+        409,
       )
     }
 
     if (
-      type === SERVICE_NOTIFICATION_TYPE.KITCHEN_INCIDENT &&
-      ![ORDER_STATUS.OPEN, ORDER_STATUS.IN_PREPARATION].includes(order.estado)
+      normalizedType === SERVICE_NOTIFICATION_TYPES.KITCHEN_INCIDENT &&
+      order.estado === ORDER_STATUS.DELIVERED
     ) {
       throw createBusinessError(
-        "Solo se puede pedir apoyo en comandas abiertas o en preparación.",
+        "No se puede pedir apoyo en una comanda ya entregada.",
+        409,
       )
     }
 
-    if (
-      type === SERVICE_NOTIFICATION_TYPE.KITCHEN_INCIDENT &&
-      !normalizedMotivo &&
-      !normalizedMensaje
-    ) {
-      throw createBusinessError(
-        "Debe ingresar un motivo o mensaje para pedir apoyo.",
-      )
-    }
-
-    if (type === SERVICE_NOTIFICATION_TYPE.READY_ORDER) {
+    if (normalizedType === SERVICE_NOTIFICATION_TYPES.READY_ORDER) {
       const existingNotificationResult = await client.query(
         `
           select
@@ -745,6 +793,7 @@ async function createServiceNotification({
           where id_orden = $1
             and tipo = 'PEDIDO_LISTO'
             and estado = 'PENDIENTE'
+          order by created_at asc, id_notificacion asc
           limit 1;
         `,
         [idOrden],
@@ -789,7 +838,7 @@ async function createServiceNotification({
       `,
       [
         idOrden,
-        type,
+        normalizedType,
         normalizedMotivo,
         normalizedMensaje,
         idUsuario,
@@ -819,7 +868,7 @@ async function getServiceNotifications({
   idEstablecimiento,
   status = SERVICE_NOTIFICATION_STATUS.PENDING,
 }) {
-  const normalizedStatus = normalizeOptionalText(status)
+  const normalizedStatus = normalizeText(status)
 
   const query = `
     select
@@ -1119,14 +1168,28 @@ async function attendServiceNotification({
     [idNotificacion, idEstablecimiento, idUsuario],
   )
 
-  if (updateResult.rowCount === 0) {
-    throw createBusinessError(
-      "Aviso de servicio no encontrado o ya fue atendido.",
-      404,
-    )
+  if (updateResult.rowCount > 0) {
+    return updateResult.rows[0]
   }
 
-  return updateResult.rows[0]
+  const existingResult = await pool.query(
+    `
+      select ns.estado
+      from orden_notificacion_servicio ns
+      join orden o on o.id_orden = ns.id_orden
+      join usuario creador on creador.id_usuario = o.id_usuario
+      where ns.id_notificacion = $1
+        and creador.id_establecimiento = $2
+      limit 1;
+    `,
+    [idNotificacion, idEstablecimiento],
+  )
+
+  if (existingResult.rowCount === 0) {
+    throw createBusinessError("Aviso de servicio no encontrado.", 404)
+  }
+
+  throw createBusinessError("El aviso de servicio ya fue atendido.", 409)
 }
 
 async function markOrderAsDelivered({
@@ -1151,7 +1214,7 @@ async function markOrderAsDelivered({
         join usuario u on u.id_usuario = o.id_usuario
         where o.id_orden = $1
           and u.id_establecimiento = $2
-        for update;
+        for update of o;
       `,
       [idOrden, idEstablecimiento],
     )
@@ -1162,9 +1225,14 @@ async function markOrderAsDelivered({
 
     const currentOrder = orderResult.rows[0]
 
+    if (currentOrder.estado === ORDER_STATUS.DELIVERED) {
+      throw createBusinessError("La comanda ya fue entregada.", 409)
+    }
+
     if (currentOrder.estado !== ORDER_STATUS.READY) {
       throw createBusinessError(
         "Solo se puede confirmar entrega de comandas listas.",
+        409,
       )
     }
 
