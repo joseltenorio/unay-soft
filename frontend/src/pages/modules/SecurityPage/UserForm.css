@@ -1,24 +1,16 @@
-/*
- * src/pages/modules/SecurityPage/UserForm.css
- * Styles for the UserForm component in the SecurityPage module.
- */
+/* src/pages/modules/SecurityPage/UserForm.css */
 
 .user-form {
   margin-top: 0;
-  padding:
-    clamp(22px, 3vw, 28px)
-    clamp(30px, 4vw, 40px);
-
+  padding: clamp(22px, 3vw, 28px) clamp(30px, 4vw, 40px);
   border: 1px solid rgba(157, 190, 187, 0.38);
   border-radius: 28px;
-
   background: rgba(255, 255, 255);
   box-shadow: var(--shadow-app-card);
 }
 
 .user-form__header {
-  margin-bottom: 24px;
-
+  margin-bottom: 22px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -27,9 +19,7 @@
 
 .user-form__eyebrow {
   margin-bottom: 8px;
-
   color: var(--color-app-accent);
-
   font-size: 12px;
   font-weight: 950;
   letter-spacing: 0.14em;
@@ -38,7 +28,6 @@
 
 .user-form__header h2 {
   color: var(--color-app-text);
-
   font-size: clamp(22px, 2.2vw, 30px);
   font-weight: 950;
   line-height: 1.12;
@@ -48,9 +37,7 @@
 .user-form__header p {
   max-width: 620px;
   margin-top: 10px;
-
   color: var(--color-app-text-muted);
-
   font-size: 15px;
   font-weight: 650;
   line-height: 1.5;
@@ -62,23 +49,17 @@
   width: 42px;
   height: 42px;
   flex: 0 0 42px;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   border: none;
   border-radius: 50%;
-
   background: transparent;
   color: var(--color-app-accent-strong);
-
   font-size: 30px;
   font-weight: 300;
   line-height: 1;
-
   cursor: pointer;
-
   transition:
     transform var(--transition-fast),
     background-color var(--transition-fast),
@@ -97,23 +78,27 @@
 }
 
 .user-form__error {
+  min-height: 54px;
   margin-bottom: 20px;
   padding: 16px 18px;
-
+  display: flex;
+  align-items: center;
   border: 1px solid var(--color-app-danger-border);
   border-radius: 18px;
-
   background: var(--color-app-danger-soft);
   color: var(--color-error);
-
   font-size: 14px;
   font-weight: 850;
+}
+
+.user-form__error--empty {
+  visibility: hidden;
 }
 
 .user-form__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  gap: 14px 18px;
 }
 
 .user-form__field {
@@ -129,9 +114,13 @@
 .user-form__field span,
 .user-form__switch {
   color: var(--color-app-text-muted);
-
   font-size: 13px;
   font-weight: 850;
+}
+
+.user-form__field span strong {
+  color: var(--color-error);
+  font-size: 13px;
 }
 
 .user-form__field input,
@@ -139,17 +128,13 @@
   width: 100%;
   height: 48px;
   padding: 0 15px;
-
   border: 1px solid rgba(157, 190, 187, 0.42);
   border-radius: 16px;
   outline: none;
-
   background: #ffffff;
   color: var(--color-app-text);
-
   font-size: 15px;
   font-weight: 750;
-
   transition:
     border-color var(--transition-fast),
     box-shadow var(--transition-fast),
@@ -187,10 +172,63 @@
   box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12);
 }
 
+.user-form__phone {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  border: 1px solid rgba(157, 190, 187, 0.42);
+  border-radius: 16px;
+  background: #ffffff;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.user-form__phone:focus-within {
+  border-color: var(--color-app-accent);
+  box-shadow: 0 0 0 4px var(--color-app-accent-soft);
+}
+
+.user-form__phone--invalid {
+  border-color: var(--color-error);
+  background: var(--color-app-danger-soft);
+}
+
+.user-form__phone--invalid:focus-within {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12);
+}
+
+.user-form__phone-prefix {
+  height: 48px;
+  padding-left: 15px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-app-text);
+  font-size: 15px;
+  font-weight: 850;
+}
+
+.user-form__phone input {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.user-form__phone input:focus,
+.user-form__phone input[aria-invalid="true"],
+.user-form__phone input[aria-invalid="true"]:focus {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 .user-form__hint,
 .user-form__field-error {
+  min-height: 34px;
   margin-top: -3px;
-
+  display: block;
   font-size: 12px;
   font-weight: 750;
   line-height: 1.4;
@@ -206,33 +244,25 @@
 
 .user-form__switch {
   position: relative;
-
   display: inline-flex;
   align-items: center;
   gap: 12px;
-
   cursor: pointer;
 }
 
 .user-form__switch input {
   position: absolute;
-
   opacity: 0;
   pointer-events: none;
 }
 
 .user-form__switch span {
   position: relative;
-
   width: 48px;
   height: 26px;
-
   display: inline-flex;
-
   border-radius: var(--radius-pill);
-
   background: rgba(3, 25, 38, 0.14);
-
   transition:
     background-color var(--transition-fast),
     box-shadow var(--transition-fast);
@@ -240,19 +270,14 @@
 
 .user-form__switch span::after {
   content: "";
-
   position: absolute;
   top: 3px;
   left: 3px;
-
   width: 20px;
   height: 20px;
-
   border-radius: 50%;
-
   background: #ffffff;
   box-shadow: 0 4px 10px rgba(3, 25, 38, 0.12);
-
   transition: transform var(--transition-fast);
 }
 
@@ -270,7 +295,6 @@
 
 .user-form__actions {
   margin-top: 26px;
-
   display: flex;
   justify-content: flex-end;
   gap: 14px;
@@ -279,16 +303,12 @@
 .user-form__button {
   min-height: 46px;
   padding: 0 22px;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   border-radius: var(--radius-pill);
-
   font-size: 14px;
   font-weight: 950;
-
   transition:
     transform var(--transition-fast),
     background-color var(--transition-fast),
