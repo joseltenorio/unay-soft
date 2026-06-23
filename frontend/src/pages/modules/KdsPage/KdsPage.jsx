@@ -418,8 +418,16 @@ function ItemRow({ order, item, isLast, updatingItemId, onToggleItem }) {
   const isBlockedAfterReady = order.status === "done"
   const isDisabled = isUpdating || isBlockedBeforeStart || isBlockedAfterReady
 
+  const itemClassName = [
+    "kds-card-item",
+    isLast ? "kds-card-item--last" : "",
+    isBlockedBeforeStart ? "kds-card-item--blocked" : "",
+  ]
+    .filter(Boolean)
+    .join(" ")
+
   return (
-    <div className={`kds-card-item${isLast ? " kds-card-item--last" : ""}`}>
+    <div className={itemClassName}>
       <button
         className={
           item.done
