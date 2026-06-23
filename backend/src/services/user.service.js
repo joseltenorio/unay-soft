@@ -32,6 +32,34 @@ function normalizeUserPayload(userData, { includePassword = false } = {}) {
   return normalizedUser
 }
 
+function mapDuplicateConstraintError(error) {
+  if (error.code !== "23505") {
+    return null
+  }
+
+  const constraintName = String(error.constraint || "").toLowerCase()
+  const detail = String(error.detail || "").toLowerCase()
+
+  if (constraintName.includes("email") || detail.includes("email")) {
+    return createBusinessError(
+      "Ya existe un usuario registrado con ese correo.",
+      409,
+    )
+  }
+
+  if (constraintName.includes("username") || detail.includes("username")) {
+    return createBusinessError(
+      "Ya existe un usuario registrado con ese nombre de usuario.",
+      409,
+    )
+  }
+
+  return createBusinessError(
+    "Ya existe un usuario registrado con esos datos.",
+    409,
+  )
+}
+
 async function getUsers(idEstablecimiento) {
   const query = `
     select
@@ -192,19 +220,29 @@ async function createUser(idEstablecimiento, userData) {
       created_at;
   `
 
-  const { rows } = await pool.query(insertQuery, [
-    idEstablecimiento,
-    id_rol,
-    nombres,
-    apellidos,
-    email,
-    username,
-    passwordHash,
-    celular,
-    estado,
-  ])
+  try {
+    const { rows } = await pool.query(insertQuery, [
+      idEstablecimiento,
+      id_rol,
+      nombres,
+      apellidos,
+      email,
+      username,
+      passwordHash,
+      celular,
+      estado,
+    ])
 
-  return rows[0]
+    return rows[0]
+  } catch (error) {
+    const mappedError = mapDuplicateConstraintError(error)
+
+    if (mappedError) {
+      throw mappedError
+    }
+
+    throw error
+  }
 }
 
 async function updateUser(idEstablecimiento, idUsuario, userData) {
@@ -254,19 +292,29 @@ async function updateUser(idEstablecimiento, idUsuario, userData) {
       updated_at;
   `
 
-  const { rows } = await pool.query(updateQuery, [
-    id_rol,
-    nombres,
-    apellidos,
-    email,
-    username,
-    celular,
-    estado,
-    idUsuario,
-    idEstablecimiento,
-  ])
+  try {
+    const { rows } = await pool.query(updateQuery, [
+      id_rol,
+      nombres,
+      apellidos,
+      email,
+      username,
+      celular,
+      estado,
+      idUsuario,
+      idEstablecimiento,
+    ])
 
-  return rows[0]
+    return rows[0]
+  } catch (error) {
+    const mappedError = mapDuplicateConstraintError(error)
+
+    if (mappedError) {
+      throw mappedError
+    }
+
+    throw error
+  }
 }
 
 async function updateUserStatus(
