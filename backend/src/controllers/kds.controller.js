@@ -31,7 +31,7 @@ async function changeKitchenOrderStatus(req, res) {
     const { id } = req.params
     const { status } = req.body
 
-    if (!status) {
+    if (!String(status || "").trim()) {
       return res.status(400).json({
         message: "El estado de la comanda es obligatorio.",
       })
@@ -59,7 +59,7 @@ async function changeKitchenItemStatus(req, res) {
     const { id } = req.params
     const { status } = req.body
 
-    if (!status) {
+    if (!String(status || "").trim()) {
       return res.status(400).json({
         message: "El estado del ítem es obligatorio.",
       })
@@ -87,7 +87,7 @@ async function createKitchenServiceCall(req, res) {
     const { id } = req.params
     const { type, motivo, mensaje } = req.body
 
-    if (!type) {
+    if (!String(type || "").trim()) {
       return res.status(400).json({
         message: "El tipo de aviso de servicio es obligatorio.",
       })
