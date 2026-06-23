@@ -290,8 +290,13 @@ function PayPanel({ order }) {
 
     PAYMENTS_MOCK.push(paymentData)
 
+    //Cambio de estado a pagado
+    order.estado = "PAGADA"
+
     console.log("Pago registrado")
     console.log(paymentData)
+
+    setSelectedOrder(null)
   }
 
   const canSubmit =
