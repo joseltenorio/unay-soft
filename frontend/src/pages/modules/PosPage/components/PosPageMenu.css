@@ -328,6 +328,55 @@
   overflow-wrap: break-word;
 }
 
+
+.pos-order-item-note {
+  margin-top: 10px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pos-order-item-note span {
+  color: var(--pos-text-secondary);
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.pos-order-item-note textarea {
+  width: 100%;
+  min-height: 58px;
+  padding: 9px 10px;
+
+  resize: vertical;
+
+  border: 1px solid var(--pos-border);
+  border-radius: 12px;
+  outline: none;
+
+  background: var(--pos-surface-soft);
+  color: var(--pos-text);
+
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.pos-order-item-note textarea:focus {
+  border-color: var(--pos-primary);
+  box-shadow: 0 0 0 3px rgba(50, 83, 88, 0.1);
+}
+
+.pos-order-item-note textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
 .pos-order-item strong {
   flex-shrink: 0;
   font-size: 13px;
