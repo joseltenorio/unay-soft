@@ -693,9 +693,30 @@
               "path": [
                 "users"
               ]
-            }
+            },
+            "description": "Lista usuarios del establecimiento autenticado con token administrador."
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Users protected returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Response contains users array\", function () {",
+                  "    pm.expect(response.users).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Create User",
@@ -714,7 +735,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombres\": \"{{user_create_first_name}}\",\n  \"apellidos\": \"{{user_create_last_name}}\",\n  \"email\": \"{{user_create_email}}\",\n  \"username\": \"{{user_create_identifier}}\",\n  \"password\": \"{{user_create_password}}\",\n  \"celular\": \"{{user_create_mobile}}\",\n  \"id_rol\": \"{{role_id}}\",\n  \"estado\": \"{{user_status}}\"\n}",
+              "raw": "{\n  \"nombres\": \"{{user_create_first_name}}\",\n  \"apellidos\": \"{{user_create_last_name}}\",\n  \"email\": \"{{user_create_email}}\",\n  \"username\": \"{{user_create_identifier}}\",\n  \"password\": \"{{user_create_password}}\",\n  \"celular\": \"{{user_create_mobile}}\",\n  \"id_rol\": \"{{role_id}}\",\n  \"estado\": {{user_status}}\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -729,9 +750,36 @@
               "path": [
                 "users"
               ]
-            }
+            },
+            "description": "Crea un usuario con token administrador. El body usa datos válidos de usuario y guarda `user_id_edit` cuando la creación es correcta."
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Create user returns 201 or duplicate 409\", function () {",
+                  "    pm.expect([201, 409]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.test(\"Response contains created user\", function () {",
+                  "        pm.expect(response.user).to.exist;",
+                  "        pm.expect(response.user.id_usuario).to.exist;",
+                  "        pm.expect(response.user.email).to.exist;",
+                  "        pm.expect(response.user.username).to.exist;",
+                  "    });",
+                  "    pm.collectionVariables.set(\"user_id_edit\", response.user.id_usuario);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Edit User",
@@ -750,7 +798,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombres\": \"{{user_create_first_name}}\",\n  \"apellidos\": \"{{user_create_last_name}}\",\n  \"email\": \"{{user_create_email}}\",\n  \"username\": \"{{user_create_identifier}}\",\n  \"celular\": \"{{user_create_mobile}}\",\n  \"id_rol\": \"{{role_id}}\",\n  \"estado\": \"{{user_status}}\"\n}",
+              "raw": "{\n  \"nombres\": \"{{edit_user_first_name}}\",\n  \"apellidos\": \"{{edit_user_last_name}}\",\n  \"email\": \"{{edit_user_email}}\",\n  \"username\": \"{{edit_user_username}}\",\n  \"celular\": \"{{edit_user_mobile}}\",\n  \"id_rol\": \"{{edit_user_role_id}}\",\n  \"estado\": {{edit_user_status}}\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -766,9 +814,32 @@
                 "users",
                 "{{user_id_edit}}"
               ]
-            }
+            },
+            "description": "Edita un usuario existente usando `user_id_edit`. El body debe conservar formatos válidos de identidad, correo, celular, rol y estado."
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Edit user returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Response contains updated user\", function () {",
+                  "    pm.expect(response.user).to.exist;",
+                  "    pm.expect(response.user.id_usuario).to.exist;",
+                  "    pm.expect(response.user.email).to.eql(pm.collectionVariables.get(\"edit_user_email\").toLowerCase());",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Edit Status User",
@@ -787,7 +858,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"estado\": \"{{user_status_edit}}\"\n}",
+              "raw": "{\n  \"estado\": {{user_status_edit}}\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -804,9 +875,31 @@
                 "{{user_id_edit}}",
                 "status"
               ]
-            }
+            },
+            "description": "Actualiza únicamente el estado del usuario identificado por `user_id_edit`. El valor debe enviarse como booleano JSON."
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Edit user status returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Response contains updated status\", function () {",
+                  "    pm.expect(response.user).to.exist;",
+                  "    pm.expect(response.user.estado).to.eql(pm.collectionVariables.get(\"user_status_edit\") === \"true\");",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Create User No Permission",
@@ -825,7 +918,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombres\": \"{{user_create_first_name}}\",\n  \"apellidos\": \"{{user_create_last_name}}\",\n  \"email\": \"{{user_create_email}}\",\n  \"username\": \"{{user_create_identifier}}\",\n  \"password\": \"{{user_create_password}}\",\n  \"celular\": \"{{user_create_mobile}}\",\n  \"id_rol\": \"{{role_id}}\",\n  \"estado\": \"{{user_status}}\"\n}",
+              "raw": "{\n  \"nombres\": \"{{user_create_first_name}}\",\n  \"apellidos\": \"{{user_create_last_name}}\",\n  \"email\": \"{{user_create_email}}\",\n  \"username\": \"{{user_create_identifier}}\",\n  \"password\": \"{{user_create_password}}\",\n  \"celular\": \"{{user_create_mobile}}\",\n  \"id_rol\": \"{{role_id}}\",\n  \"estado\": {{user_status}}\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -840,9 +933,506 @@
               "path": [
                 "users"
               ]
-            }
+            },
+            "description": "Valida que un perfil sin permiso `security.gestionar_usuarios` no pueda crear usuarios."
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Create user without permission returns 403\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "User Maintenance - Validation",
+      "description": "Casos de validación manual para creación y edición de usuarios. Cubre nombres, apellidos, correo, username, contraseña, celular peruano, parámetros UUID, campos inesperados y booleanos estrictos.",
+      "item": [
+        {
+          "name": "Create User - Valid Identity Format",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"{{user_validation_first_name}}\",\n  \"apellidos\": \"{{user_validation_last_name}}\",\n  \"email\": \"{{user_validation_email}}\",\n  \"username\": \"{{user_validation_username}}\",\n  \"password\": \"{{user_validation_password}}\",\n  \"celular\": \"{{user_validation_mobile}}\",\n  \"id_rol\": \"{{role_id}}\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Valida creación con nombre compuesto, apellido con apóstrofe, correo válido, username permitido, contraseña fuerte y celular peruano `+51`."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Valid identity returns 201 or duplicate 409\", function () {",
+                  "    pm.expect([201, 409]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"user_validation_id\", response.user.id_usuario);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create User - Reject Name With Number",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"{{invalid_user_first_name}}\",\n  \"apellidos\": \"{{user_validation_last_name}}\",\n  \"email\": \"{{user_validation_email}}\",\n  \"username\": \"{{user_validation_username}}\",\n  \"password\": \"{{user_validation_password}}\",\n  \"celular\": \"{{user_validation_mobile}}\",\n  \"id_rol\": \"{{role_id}}\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Valida rechazo de nombres con números."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Invalid name returns 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create User - Reject Invalid Email",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"{{user_validation_first_name}}\",\n  \"apellidos\": \"{{user_validation_last_name}}\",\n  \"email\": \"{{invalid_user_email}}\",\n  \"username\": \"{{user_validation_username}}\",\n  \"password\": \"{{user_validation_password}}\",\n  \"celular\": \"{{user_validation_mobile}}\",\n  \"id_rol\": \"{{role_id}}\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Valida rechazo de correo sin formato válido."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Invalid email returns 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create User - Reject Invalid Peru Phone",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"{{user_validation_first_name}}\",\n  \"apellidos\": \"{{user_validation_last_name}}\",\n  \"email\": \"{{user_validation_email}}\",\n  \"username\": \"{{user_validation_username}}\",\n  \"password\": \"{{user_validation_password}}\",\n  \"celular\": \"{{invalid_user_mobile}}\",\n  \"id_rol\": \"{{role_id}}\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Valida rechazo de celular peruano que no inicia con 9."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Invalid Peru phone returns 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create User - Reject Reserved Username",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"{{user_validation_first_name}}\",\n  \"apellidos\": \"{{user_validation_last_name}}\",\n  \"email\": \"{{user_validation_email}}\",\n  \"username\": \"{{reserved_username}}\",\n  \"password\": \"{{user_validation_password}}\",\n  \"celular\": \"{{user_validation_mobile}}\",\n  \"id_rol\": \"{{role_id}}\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Valida rechazo de usernames reservados."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Reserved username returns 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create User - Reject Weak Password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"{{user_validation_first_name}}\",\n  \"apellidos\": \"{{user_validation_last_name}}\",\n  \"email\": \"{{user_validation_email}}\",\n  \"username\": \"{{user_validation_username}}\",\n  \"password\": \"{{weak_user_password}}\",\n  \"celular\": \"{{user_validation_mobile}}\",\n  \"id_rol\": \"{{role_id}}\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Valida rechazo de contraseña sin la complejidad mínima esperada."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Weak password returns 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create User - Reject Unexpected Field",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"{{user_validation_first_name}}\",\n  \"apellidos\": \"{{user_validation_last_name}}\",\n  \"email\": \"{{user_validation_email}}\",\n  \"username\": \"{{user_validation_username}}\",\n  \"password\": \"{{user_validation_password}}\",\n  \"celular\": \"{{user_validation_mobile}}\",\n  \"id_rol\": \"{{role_id}}\",\n  \"estado\": true,\n  \"campo_extra\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Valida rechazo de campos no permitidos por el contrato del endpoint."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Unexpected field returns 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Edit User - Reject Malformed User ID",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{malformed_user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{malformed_user_id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"{{edit_user_first_name}}\",\n  \"apellidos\": \"{{edit_user_last_name}}\",\n  \"email\": \"{{edit_user_email}}\",\n  \"username\": \"{{edit_user_username}}\",\n  \"celular\": \"{{edit_user_mobile}}\",\n  \"id_rol\": \"{{edit_user_role_id}}\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Valida rechazo de parámetro `id` que no cumple formato UUID."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Malformed user id returns 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Edit Status User - Reject String Boolean",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id_edit}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id_edit}}",
+                "status"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"false\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Valida rechazo de estado enviado como string en lugar de booleano JSON."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"String boolean status returns 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -5951,32 +6541,32 @@
     },
     {
       "key": "user_create_first_name",
-      "value": "",
+      "value": "José Luis",
       "type": "string"
     },
     {
       "key": "user_create_last_name",
-      "value": "",
+      "value": "O'Connor Rojas",
       "type": "string"
     },
     {
       "key": "user_create_email",
-      "value": "",
+      "value": "aat16.user@example.test",
       "type": "string"
     },
     {
       "key": "user_create_identifier",
-      "value": "",
+      "value": "aat16.user",
       "type": "string"
     },
     {
       "key": "user_create_password",
-      "value": "",
+      "value": "Caja123*",
       "type": "string"
     },
     {
       "key": "user_create_mobile",
-      "value": "",
+      "value": "+51 999 888 777",
       "type": "string"
     },
     {
@@ -6327,6 +6917,106 @@
     {
       "key": "idle_timeout_session_id",
       "value": "",
+      "type": "string"
+    },
+    {
+      "key": "edit_user_first_name",
+      "value": "José Luis",
+      "type": "string"
+    },
+    {
+      "key": "edit_user_last_name",
+      "value": "O'Connor Editado",
+      "type": "string"
+    },
+    {
+      "key": "edit_user_email",
+      "value": "aat16.user.edit@example.test",
+      "type": "string"
+    },
+    {
+      "key": "edit_user_username",
+      "value": "aat16.user.edit",
+      "type": "string"
+    },
+    {
+      "key": "edit_user_mobile",
+      "value": "+51 988 777 666",
+      "type": "string"
+    },
+    {
+      "key": "edit_user_role_id",
+      "value": "{{role_id}}",
+      "type": "string"
+    },
+    {
+      "key": "edit_user_status",
+      "value": "true",
+      "type": "string"
+    },
+    {
+      "key": "user_validation_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_validation_first_name",
+      "value": "José Luis",
+      "type": "string"
+    },
+    {
+      "key": "user_validation_last_name",
+      "value": "O'Connor",
+      "type": "string"
+    },
+    {
+      "key": "user_validation_email",
+      "value": "aat16.validation@example.test",
+      "type": "string"
+    },
+    {
+      "key": "user_validation_username",
+      "value": "aat16.validation",
+      "type": "string"
+    },
+    {
+      "key": "user_validation_password",
+      "value": "Caja123*",
+      "type": "string"
+    },
+    {
+      "key": "user_validation_mobile",
+      "value": "+51 999 888 777",
+      "type": "string"
+    },
+    {
+      "key": "invalid_user_first_name",
+      "value": "Jose123",
+      "type": "string"
+    },
+    {
+      "key": "invalid_user_email",
+      "value": "correo-malo",
+      "type": "string"
+    },
+    {
+      "key": "invalid_user_mobile",
+      "value": "+51 123 456 789",
+      "type": "string"
+    },
+    {
+      "key": "reserved_username",
+      "value": "admin",
+      "type": "string"
+    },
+    {
+      "key": "weak_user_password",
+      "value": "Caja123",
+      "type": "string"
+    },
+    {
+      "key": "malformed_user_id",
+      "value": "not-a-valid-uuid",
       "type": "string"
     }
   ]

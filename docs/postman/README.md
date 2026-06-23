@@ -74,6 +74,17 @@ Umari OS API
 │  ├─ Edit Status User
 │  └─ Create User No Permission
 │
+├─ User Maintenance - Validation
+│  ├─ Create User - Valid Identity Format
+│  ├─ Create User - Reject Name With Number
+│  ├─ Create User - Reject Invalid Email
+│  ├─ Create User - Reject Invalid Peru Phone
+│  ├─ Create User - Reject Reserved Username
+│  ├─ Create User - Reject Weak Password
+│  ├─ Create User - Reject Unexpected Field
+│  ├─ Edit User - Reject Malformed User ID
+│  └─ Edit Status User - Reject String Boolean
+│
 ├─ Establishment
 │  ├─ Visual Establishment
 │  └─ Edit Establishment
@@ -202,6 +213,39 @@ invalid_product_id = 00000000-0000-0000-0000-000000000000
 invalid_order_id = 00000000-0000-0000-0000-000000000000
 invalid_item_id = 00000000-0000-0000-0000-000000000000
 invalid_service_call_id = 00000000-0000-0000-0000-000000000000
+
+user_create_first_name =
+user_create_last_name =
+user_create_email =
+user_create_identifier =
+user_create_password =
+user_create_mobile =
+user_status = true
+user_status_edit = false
+user_id_edit =
+
+edit_user_first_name =
+edit_user_last_name =
+edit_user_email =
+edit_user_username =
+edit_user_mobile =
+edit_user_role_id =
+edit_user_status = true
+
+user_validation_id =
+user_validation_first_name =
+user_validation_last_name =
+user_validation_email =
+user_validation_username =
+user_validation_password =
+user_validation_mobile =
+
+invalid_user_first_name =
+invalid_user_email =
+invalid_user_mobile =
+reserved_username =
+weak_user_password =
+malformed_user_id =
 ```
 
 Las carpetas funcionales usan variables adicionales para usuarios, roles, establecimiento, carta, salón, POS y KDS. Esas variables deben completarse con datos de prueba locales antes de ejecutar cada flujo.
@@ -242,7 +286,22 @@ Body de edición de usuario:
   "username": "{{edit_user_username}}",
   "celular": "{{edit_user_mobile}}",
   "id_rol": "{{edit_user_role_id}}",
-  "estado": "{{edit_user_status}}"
+  "estado": {{edit_user_status}}
+}
+```
+
+Body de validación de usuario:
+
+```json
+{
+  "nombres": "{{user_validation_first_name}}",
+  "apellidos": "{{user_validation_last_name}}",
+  "email": "{{user_validation_email}}",
+  "username": "{{user_validation_username}}",
+  "password": "{{user_validation_password}}",
+  "celular": "{{user_validation_mobile}}",
+  "id_rol": "{{role_id}}",
+  "estado": true
 }
 ```
 
@@ -290,6 +349,7 @@ El login guarda tokens y datos de sesión en variables reutilizables por la cole
 Authorization / Profiles
 Roles
 User Maintenance
+User Maintenance - Validation
 Establishment
 ```
 
@@ -343,6 +403,10 @@ Lista roles disponibles para el establecimiento autenticado.
 ### User Maintenance
 
 Agrupa requests de consulta, creación, edición y cambio de estado de usuarios.
+
+### User Maintenance - Validation
+
+Agrupa casos manuales de validación de usuarios para nombres, apellidos, correo, username, contraseña, celular peruano, parámetros UUID, campos inesperados y booleanos estrictos.
 
 ### Establishment
 
@@ -420,6 +484,9 @@ kds_identifier
 kds_password
 user_identifier
 user_password
+user_create_password
+user_validation_password
+weak_user_password
 
 admin_token
 admin_refresh_token
