@@ -74,7 +74,11 @@ export function isValidUsername(value) {
   return !RESERVED_USERNAMES.has(normalizedValue)
 }
 
-export function normalizePeruPhone(value) {
+export function normalizeRoleId(value) {
+  return String(value ?? "").trim()
+}
+
+export function normalizePeruPhoneDigits(value) {
   const rawValue = normalizeText(value)
 
   if (!rawValue) {
@@ -82,27 +86,34 @@ export function normalizePeruPhone(value) {
   }
 
   const digits = rawValue.replace(/\D/g, "")
-  const nationalNumber =
-    digits.length === 11 && digits.startsWith("51")
-      ? digits.slice(2)
-      : digits
+  const nationalNumber = digits.startsWith("51") && digits.length > 9
+    ? digits.slice(2)
+    : digits
 
-  if (nationalNumber.length === 0) {
+  return nationalNumber.slice(0, 9)
+}
+
+export function formatPeruPhoneDigits(value) {
+  const digits = normalizePeruPhoneDigits(value)
+  const firstBlock = digits.slice(0, 3)
+  const secondBlock = digits.slice(3, 6)
+  const thirdBlock = digits.slice(6, 9)
+
+  return [firstBlock, secondBlock, thirdBlock].filter(Boolean).join(" ")
+}
+
+export function normalizePeruPhone(value) {
+  const digits = normalizePeruPhoneDigits(value)
+
+  if (!digits) {
     return ""
   }
 
-  const safeNationalNumber = nationalNumber.slice(0, 9)
-  const firstBlock = safeNationalNumber.slice(0, 3)
-  const secondBlock = safeNationalNumber.slice(3, 6)
-  const thirdBlock = safeNationalNumber.slice(6, 9)
-
-  return ["+51", firstBlock, secondBlock, thirdBlock]
-    .filter(Boolean)
-    .join(" ")
+  return `+51 ${formatPeruPhoneDigits(digits)}`
 }
 
 export function isValidPeruPhone(value) {
-  return /^\+51 9\d{2} \d{3} \d{3}$/.test(normalizePeruPhone(value))
+  return /^9\d{8}$/.test(normalizePeruPhoneDigits(value))
 }
 
 export function isStrongPassword(value) {
@@ -146,7 +157,7 @@ export function validateUserForm(formData, { isEditMode = false } = {}) {
     errors.celular = "El celular debe tener el formato +51 999 888 777."
   }
 
-  if (!formData.id_rol) {
+  if (!normalizeRoleId(formData.id_rol)) {
     errors.id_rol = "Debe seleccionar un rol."
   }
 
