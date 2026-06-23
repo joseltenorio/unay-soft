@@ -26,18 +26,28 @@ export function mapKitchenOrderToBoard(order) {
   const elapsedMinutes = getElapsedMinutes(
     order.enviada_cocina_at || order.abierta_at || order.created_at,
   )
+  const createdBy = mapUser(order.created_by || order.usuario)
+  const responsibleWaiter = mapUser(order.table_service?.responsible_user)
+  const tableService = mapTableService(order.table_service)
 
   return {
     id: formatOrderNumber(order.numero_orden),
     rawId: order.id_orden,
     rawOrderNumber: order.numero_orden,
     table: formatTable(order.mesa),
-    waiter: formatWaiter(order.usuario),
+    waiter: formatUserDisplayName(order.usuario),
+    createdBy,
+    createdByName: formatUserDisplayName(createdBy),
+    responsibleWaiter,
+    responsibleWaiterName: formatUserDisplayName(responsibleWaiter),
+    isSupportOrder: isDifferentUser(createdBy, responsibleWaiter),
+    tableService,
     elapsedMinutes,
     elapsedLabel: formatElapsedTime(elapsedMinutes),
     status: mapOrderStatusToUi(order.estado),
     rawStatus: order.estado,
-    notes: order.observaciones || "",
+    notes: normalizeOrderNotes(order.observaciones),
+    orderNotes: normalizeNotes(order.observaciones),
     openedAt: order.abierta_at,
     sentToKitchenAt: order.enviada_cocina_at,
     preparationStartedAt: order.preparacion_inicio_at,
@@ -175,17 +185,64 @@ function formatTable(mesa) {
   return "SM"
 }
 
-function formatWaiter(usuario) {
-  if (!usuario) {
+function mapUser(user) {
+  if (!user) {
+    return null
+  }
+
+  return {
+    id_usuario: user.id_usuario || user.id || null,
+    nombres: user.nombres || "",
+    apellidos: user.apellidos || "",
+    username: user.username || "",
+  }
+}
+
+function mapTableService(tableService) {
+  if (!tableService) {
+    return {
+      responsibleUser: null,
+      responsibleOrder: null,
+      activeOrderCount: 0,
+      activeTotal: 0,
+      firstOrderAt: null,
+      lastOrderAt: null,
+    }
+  }
+
+  return {
+    responsibleUser: mapUser(tableService.responsible_user),
+    responsibleOrder: tableService.responsible_order || null,
+    activeOrderCount: Number(tableService.active_order_count || 0),
+    activeTotal: Number(tableService.active_total || 0),
+    firstOrderAt: tableService.first_order_at || null,
+    lastOrderAt: tableService.last_order_at || null,
+  }
+}
+
+function isDifferentUser(firstUser, secondUser) {
+  if (!firstUser?.id_usuario || !secondUser?.id_usuario) {
+    return false
+  }
+
+  return firstUser.id_usuario !== secondUser.id_usuario
+}
+
+function formatUserDisplayName(user) {
+  if (!user) {
     return "Sin asignar"
   }
 
-  const fullName = [usuario.nombres, usuario.apellidos]
+  const fullName = [user.nombres, user.apellidos]
     .filter(Boolean)
     .join(" ")
     .trim()
 
-  return fullName || usuario.username || "Sin asignar"
+  return fullName || user.username || "Sin asignar"
+}
+
+function normalizeOrderNotes(notes) {
+  return String(notes || "").trim()
 }
 
 function normalizeNotes(notes) {
