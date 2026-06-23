@@ -257,6 +257,34 @@
   cursor: pointer;
 }
 
+
+.pos-support-warning {
+  padding: 12px 14px;
+
+  border: 1px solid rgba(217, 119, 6, 0.22);
+  border-radius: 16px;
+
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.pos-support-warning strong {
+  display: block;
+  margin-bottom: 4px;
+
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.pos-support-warning p {
+  margin: 0;
+
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+
 .pos-order-empty {
   padding: 20px;
   border-radius: 16px;

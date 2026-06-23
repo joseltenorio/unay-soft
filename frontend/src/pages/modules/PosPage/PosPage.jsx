@@ -11,7 +11,10 @@ import {
   Utensils,
 } from "lucide-react"
 
-import { getCurrentPermissions } from "../../../services/authService"
+import {
+  getCurrentPermissions,
+  getCurrentUser,
+} from "../../../services/authService"
 
 import {
   createPosOrder,
@@ -84,6 +87,31 @@ function getOrderTitle(notification) {
     tableName || (tableNumber ? `Mesa ${tableNumber}` : "Sin mesa")
 
   return orderNumber ? `Orden ${orderNumber} · ${tableLabel}` : tableLabel
+}
+
+
+function getTableResponsibleUser(table) {
+  return table?.table_service?.responsible_user || null
+}
+
+function isTableSupportOrder(table, currentUser) {
+  const responsibleUser = getTableResponsibleUser(table)
+
+  if (!responsibleUser || !currentUser) {
+    return false
+  }
+
+  return responsibleUser.id_usuario !== currentUser.id_usuario
+}
+
+function getUserDisplayName(user) {
+  if (!user) {
+    return ""
+  }
+
+  return [user.nombres, user.apellidos].filter(Boolean).join(" ").trim() ||
+    user.username ||
+    "Usuario"
 }
 
 function KitchenNoticeCard({
@@ -178,6 +206,7 @@ export default function PosPage() {
   const isSendingToKitchenRef = useRef(false)
 
   const permissions = useMemo(() => getCurrentPermissions(), [])
+  const currentUser = useMemo(() => getCurrentUser(), [])
 
   const canViewKitchenNotices = hasPermission(
     permissions,
@@ -225,6 +254,16 @@ export default function PosPage() {
   const orderItems = selectedTable
     ? tableOrders[selectedTable.id] || []
     : []
+
+  const isSelectedSupportOrder = isTableSupportOrder(selectedTable, currentUser)
+
+  const selectedResponsibleName = getUserDisplayName(
+    getTableResponsibleUser(selectedTable),
+  )
+
+  const supportOrderMessage = isSelectedSupportOrder
+    ? `Esta mesa está siendo atendida por ${selectedResponsibleName}. Puedes agregar una comanda de apoyo y quedará registrada con tu usuario.`
+    : ""
 
   const pendingReadyOrders = notifications.filter(
     (notification) => notification.tipo === SERVICE_NOTIFICATION_TYPES.READY_ORDER,
@@ -445,6 +484,16 @@ export default function PosPage() {
       })
 
       return
+    }
+
+    if (isTableSupportOrder(table, currentUser)) {
+      const responsibleName = getUserDisplayName(getTableResponsibleUser(table))
+
+      showToast({
+        type: "info",
+        title: "Comanda de apoyo",
+        message: `La mesa ${table.number} está siendo atendida por ${responsibleName}.`,
+      })
     }
 
     setSelectedTable(table)
@@ -897,6 +946,8 @@ export default function PosPage() {
                 activeOrders={selectedTable.active_orders || []}
                 activeOrderCount={selectedTable.active_order_count || 0}
                 activeTotal={selectedTable.active_total || 0}
+                isSupportOrder={isSelectedSupportOrder}
+                supportOrderMessage={supportOrderMessage}
               />
             )}
           </section>
