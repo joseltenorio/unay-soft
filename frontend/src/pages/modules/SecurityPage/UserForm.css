@@ -6,8 +6,8 @@
 .user-form {
   margin-top: 0;
   padding:
-  clamp(22px, 3vw, 28px)
-  clamp(30px, 4vw, 40px);
+    clamp(22px, 3vw, 28px)
+    clamp(30px, 4vw, 40px);
 
   border: 1px solid rgba(157, 190, 187, 0.38);
   border-radius: 28px;
@@ -91,6 +91,11 @@
   border-color: rgba(61, 107, 87, 0.3);
 }
 
+.user-form__close:focus-visible {
+  outline: 3px solid var(--color-app-accent-soft);
+  outline-offset: 3px;
+}
+
 .user-form__error {
   margin-bottom: 20px;
   padding: 16px 18px;
@@ -170,7 +175,38 @@
   box-shadow: 0 0 0 4px var(--color-app-accent-soft);
 }
 
+.user-form__field input[aria-invalid="true"],
+.user-form__field select[aria-invalid="true"] {
+  border-color: var(--color-error);
+  background: var(--color-app-danger-soft);
+}
+
+.user-form__field input[aria-invalid="true"]:focus,
+.user-form__field select[aria-invalid="true"]:focus {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12);
+}
+
+.user-form__hint,
+.user-form__field-error {
+  margin-top: -3px;
+
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.user-form__hint {
+  color: var(--color-app-text-soft);
+}
+
+.user-form__field-error {
+  color: var(--color-error);
+}
+
 .user-form__switch {
+  position: relative;
+
   display: inline-flex;
   align-items: center;
   gap: 12px;
@@ -197,11 +233,14 @@
 
   background: rgba(3, 25, 38, 0.14);
 
-  transition: background-color var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .user-form__switch span::after {
   content: "";
+
   position: absolute;
   top: 3px;
   left: 3px;
@@ -223,6 +262,10 @@
 
 .user-form__switch input:checked + span::after {
   transform: translateX(22px);
+}
+
+.user-form__switch input:focus-visible + span {
+  box-shadow: 0 0 0 4px var(--color-app-accent-soft);
 }
 
 .user-form__actions {
@@ -261,6 +304,11 @@
 
 .user-form__button:not(:disabled):hover {
   transform: translateY(-1px);
+}
+
+.user-form__button:focus-visible {
+  outline: 3px solid var(--color-app-accent-soft);
+  outline-offset: 3px;
 }
 
 .user-form__button--secondary {
