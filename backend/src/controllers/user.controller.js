@@ -26,40 +26,10 @@ async function listUsers(req, res) {
 
 async function registerUser(req, res) {
   try {
-    const {
-      nombres,
-      apellidos,
-      email,
-      username,
-      password,
-      celular,
-      id_rol,
-      estado,
-    } = req.body
-
-    if (!nombres || !apellidos || !email || !username || !password || !id_rol) {
-      return res.status(400).json({
-        message:
-          "Debe ingresar nombres, apellidos, correo, usuario, contraseña y rol.",
-      })
-    }
-
-    if (password.length < 6) {
-      return res.status(400).json({
-        message: "La contraseña debe tener al menos 6 caracteres.",
-      })
-    }
-
-    const createdUser = await createUser(req.user.id_establecimiento, {
-      nombres,
-      apellidos,
-      email,
-      username,
-      password,
-      celular,
-      id_rol,
-      estado,
-    })
+    const createdUser = await createUser(
+      req.user.id_establecimiento,
+      req.body,
+    )
 
     return res.status(201).json({
       message: "Usuario creado correctamente.",
@@ -76,31 +46,11 @@ async function editUser(req, res) {
   try {
     const { id } = req.params
 
-    const {
-      nombres,
-      apellidos,
-      email,
-      username,
-      celular,
-      id_rol,
-      estado,
-    } = req.body
-
-    if (!nombres || !apellidos || !email || !username || !id_rol) {
-      return res.status(400).json({
-        message: "Debe ingresar nombres, apellidos, correo, usuario y rol.",
-      })
-    }
-
-    const updatedUser = await updateUser(req.user.id_establecimiento, id, {
-      nombres,
-      apellidos,
-      email,
-      username,
-      celular,
-      id_rol,
-      estado,
-    })
+    const updatedUser = await updateUser(
+      req.user.id_establecimiento,
+      id,
+      req.body,
+    )
 
     return res.status(200).json({
       message: "Usuario actualizado correctamente.",
@@ -117,12 +67,6 @@ async function changeUserStatus(req, res) {
   try {
     const { id } = req.params
     const { estado } = req.body
-
-    if (typeof estado !== "boolean") {
-      return res.status(400).json({
-        message: "Debe enviar el estado del usuario como true o false.",
-      })
-    }
 
     const updatedUser = await updateUserStatus(
       req.user.id_establecimiento,
