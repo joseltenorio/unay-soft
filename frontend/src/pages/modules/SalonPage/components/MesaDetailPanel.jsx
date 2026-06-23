@@ -29,10 +29,42 @@ const DISP = {
 
 const DISP_OPTIONS = Object.keys(DISP)
 
-export default function MesaDetailPanel({ mesa, zona, onEdit, onChangeDispo, onToggleStatus, onDelete, onClose }) {
+function formatCurrency(value) {
+  return `S/ ${Number(value || 0).toFixed(2)}`
+}
+
+function formatDateTime(value) {
+  if (!value) {
+    return "Sin registro"
+  }
+
+  return new Intl.DateTimeFormat("es-PE", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value))
+}
+
+function getUserDisplayName(user) {
+  if (!user) {
+    return "Sin responsable"
+  }
+
+  return [user.nombres, user.apellidos].filter(Boolean).join(" ").trim() ||
+    user.username ||
+    "Sin responsable"
+}
+
+export default function MesaDetailPanel({ mesa, zona, onEdit, onChangeDispo, onDelete, onClose }) {
   const [dispOpen, setDispOpen] = useState(false)
   const disp = DISP[mesa.disponibilidad] || DISP.LIBRE
-  const hasActiveOrders = (mesa.active_order_count || 0) > 0
+  const activeOrderCount = Number(mesa.active_order_count || 0)
+  const hasActiveOrders = activeOrderCount > 0
+  const tableService = mesa.table_service || {}
+  const responsibleName = getUserDisplayName(tableService.responsible_user)
+  const activeTotal = Number(mesa.active_total || tableService.active_total || 0)
+  const lastOrderAt = mesa.last_order_at || tableService.last_order_at
 
   return (
     <div className="salon-detail">
@@ -62,25 +94,52 @@ export default function MesaDetailPanel({ mesa, zona, onEdit, onChangeDispo, onT
             </span>
           </strong>
         </div>
+
         {hasActiveOrders && (
-          <div className="salon-detail__row">
-            <span>Órdenes activas</span>
-            <strong>{mesa.active_order_count}</strong>
-          </div>
+          <>
+            <div className="salon-detail__row">
+              <span>Responsable</span>
+              <strong>{responsibleName}</strong>
+            </div>
+            <div className="salon-detail__row">
+              <span>Comandas activas</span>
+              <strong>{activeOrderCount}</strong>
+            </div>
+            <div className="salon-detail__row">
+              <span>Total activo</span>
+              <strong>{formatCurrency(activeTotal)}</strong>
+            </div>
+            <div className="salon-detail__row">
+              <span>Última atención</span>
+              <strong>{formatDateTime(lastOrderAt)}</strong>
+            </div>
+          </>
         )}
       </div>
+
+      {hasActiveOrders && (
+        <section className="salon-detail__account">
+          <div>
+            <span>Cuenta abierta</span>
+            <strong>{formatCurrency(activeTotal)}</strong>
+          </div>
+
+          <p>
+            Esta mesa tiene {activeOrderCount} comanda(s) activa(s). La mesa se
+            libera desde caja cuando se cierre la cuenta.
+          </p>
+        </section>
+      )}
 
       <button className="salon-detail__btn-edit" onClick={onEdit}>
         <IconEdit /> Editar mesa
       </button>
 
       {hasActiveOrders ? (
-        <div style={{ marginTop: 16, padding: "12px 14px", background: "#fef2f2", borderRadius: 8, border: "1px solid #fecaca" }}>
-          <p style={{ fontSize: 13, color: "#dc2626", margin: 0, fontWeight: 500 }}>
-            Esta mesa tiene {mesa.active_order_count} orden(es) activa(s).
-          </p>
-          <p style={{ fontSize: 12, color: "#ef4444", margin: "4px 0 0" }}>
-            Ciérralas desde caja para cambiar el estado o eliminar la mesa.
+        <div className="salon-detail__locked">
+          <p>
+            No se puede cambiar disponibilidad, desactivar ni eliminar una mesa
+            con cuenta activa.
           </p>
         </div>
       ) : (
@@ -118,6 +177,6 @@ export default function MesaDetailPanel({ mesa, zona, onEdit, onChangeDispo, onT
           </div>
         </>
       )}
-     </div>
+    </div>
   )
 }
