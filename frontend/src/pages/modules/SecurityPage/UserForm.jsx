@@ -1,12 +1,15 @@
 // src/pages/modules/SecurityPage/UserForm.jsx
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 
 import {
+  formatPeruPhoneDigits,
   hasValidationErrors,
   normalizeEmail,
   normalizePersonName,
   normalizePeruPhone,
+  normalizePeruPhoneDigits,
+  normalizeRoleId,
   normalizeUsername,
   validateUserForm,
 } from "../../../utils/userValidation"
@@ -24,6 +27,17 @@ const emptyFormState = {
   estado: true,
 }
 
+const fieldHelp = {
+  nombres: "Solo letras, espacios, apóstrofe o guion.",
+  apellidos: "Solo letras, espacios, apóstrofe o guion.",
+  email: "Debe tener formato usuario@dominio.com.",
+  username:
+    "Usa 4 a 30 caracteres: letras minúsculas, números, punto, guion o guion bajo.",
+  celular: "Ingrese 9 dígitos si desea registrar celular.",
+  id_rol: "Seleccione un rol operativo activo.",
+  password: "Debe incluir mayúscula, minúscula, número y símbolo.",
+}
+
 function getInitialFormState(mode, initialUser) {
   if (mode === "edit" && initialUser) {
     return {
@@ -31,7 +45,7 @@ function getInitialFormState(mode, initialUser) {
       apellidos: initialUser.apellidos || "",
       email: initialUser.email || "",
       username: initialUser.username || "",
-      celular: initialUser.celular || "",
+      celular: normalizePeruPhoneDigits(initialUser.celular),
       id_rol: initialUser.id_rol || "",
       password: "",
       estado: Boolean(initialUser.estado),
@@ -45,8 +59,21 @@ function getFieldErrorId(fieldName) {
   return `user-form-${fieldName}-error`
 }
 
-function getFieldHintId(fieldName) {
-  return `user-form-${fieldName}-hint`
+function getFieldHelpId(fieldName) {
+  return `user-form-${fieldName}-help`
+}
+
+function FieldHelp({ fieldName, errors }) {
+  const error = errors[fieldName]
+
+  return (
+    <small
+      className={error ? "user-form__field-error" : "user-form__hint"}
+      id={error ? getFieldErrorId(fieldName) : getFieldHelpId(fieldName)}
+    >
+      {error || fieldHelp[fieldName]}
+    </small>
+  )
 }
 
 export default function UserForm({
@@ -64,17 +91,10 @@ export default function UserForm({
     getInitialFormState(mode, initialUser),
   )
   const [fieldErrors, setFieldErrors] = useState({})
-  const [touchedFields, setTouchedFields] = useState({})
+  const [wasSubmitted, setWasSubmitted] = useState(false)
 
-  const visibleFieldErrors = useMemo(() => {
-    return Object.entries(fieldErrors).reduce((errors, [fieldName, message]) => {
-      if (touchedFields[fieldName] || touchedFields.__submitted) {
-        errors[fieldName] = message
-      }
-
-      return errors
-    }, {})
-  }, [fieldErrors, touchedFields])
+  const visibleFieldErrors = wasSubmitted ? fieldErrors : {}
+  const hasVisibleErrors = hasValidationErrors(visibleFieldErrors)
 
   useEffect(() => {
     let isMounted = true
@@ -86,7 +106,7 @@ export default function UserForm({
 
       setFormData(getInitialFormState(mode, initialUser))
       setFieldErrors({})
-      setTouchedFields({})
+      setWasSubmitted(false)
     }, 0)
 
     return () => {
@@ -95,14 +115,11 @@ export default function UserForm({
     }
   }, [mode, initialUser])
 
-  function markFieldAsTouched(fieldName) {
-    setTouchedFields((currentFields) => ({
-      ...currentFields,
-      [fieldName]: true,
-    }))
-  }
+  function validateOnlyAfterSubmit(nextFormData) {
+    if (!wasSubmitted) {
+      return
+    }
 
-  function updateValidation(nextFormData) {
     setFieldErrors(validateUserForm(nextFormData, { isEditMode }))
   }
 
@@ -113,11 +130,15 @@ export default function UserForm({
       let nextValue = type === "checkbox" ? checked : value
 
       if (name === "celular") {
-        nextValue = normalizePeruPhone(value)
+        nextValue = normalizePeruPhoneDigits(value)
       }
 
       if (name === "username") {
         nextValue = normalizeUsername(value)
+      }
+
+      if (name === "id_rol") {
+        nextValue = normalizeRoleId(value)
       }
 
       const nextData = {
@@ -125,7 +146,7 @@ export default function UserForm({
         [name]: nextValue,
       }
 
-      updateValidation(nextData)
+      validateOnlyAfterSubmit(nextData)
 
       return nextData
     })
@@ -133,8 +154,6 @@ export default function UserForm({
 
   function handleBlur(event) {
     const { name } = event.target
-
-    markFieldAsTouched(name)
 
     setFormData((currentData) => {
       const nextData = {
@@ -158,10 +177,14 @@ export default function UserForm({
       }
 
       if (name === "celular") {
-        nextData.celular = normalizePeruPhone(currentData.celular)
+        nextData.celular = normalizePeruPhoneDigits(currentData.celular)
       }
 
-      updateValidation(nextData)
+      if (name === "id_rol") {
+        nextData.id_rol = normalizeRoleId(currentData.id_rol)
+      }
+
+      validateOnlyAfterSubmit(nextData)
 
       return nextData
     })
@@ -176,7 +199,7 @@ export default function UserForm({
       email: normalizeEmail(formData.email),
       username: normalizeUsername(formData.username),
       celular: normalizePeruPhone(formData.celular),
-      id_rol: formData.id_rol,
+      id_rol: normalizeRoleId(formData.id_rol),
       estado: formData.estado,
     }
 
@@ -186,11 +209,17 @@ export default function UserForm({
 
     const errors = validateUserForm(normalizedPayload, { isEditMode })
 
-    setFieldErrors(errors)
-    setTouchedFields((currentFields) => ({
-      ...currentFields,
-      __submitted: true,
+    setFormData((currentData) => ({
+      ...currentData,
+      nombres: normalizedPayload.nombres,
+      apellidos: normalizedPayload.apellidos,
+      email: normalizedPayload.email,
+      username: normalizedPayload.username,
+      celular: normalizePeruPhoneDigits(normalizedPayload.celular),
+      id_rol: normalizedPayload.id_rol,
     }))
+    setFieldErrors(errors)
+    setWasSubmitted(true)
 
     if (hasValidationErrors(errors)) {
       return
@@ -202,31 +231,16 @@ export default function UserForm({
     })
   }
 
-  function getFieldProps(fieldName, hintId = null) {
+  function getFieldProps(fieldName) {
     const error = visibleFieldErrors[fieldName]
-    const describedBy = [hintId, error ? getFieldErrorId(fieldName) : null]
-      .filter(Boolean)
-      .join(" ")
 
     return {
       "aria-invalid": error ? "true" : "false",
-      "aria-describedby": describedBy || undefined,
+      "aria-describedby": error
+        ? getFieldErrorId(fieldName)
+        : getFieldHelpId(fieldName),
       onBlur: handleBlur,
     }
-  }
-
-  function renderFieldError(fieldName) {
-    const error = visibleFieldErrors[fieldName]
-
-    if (!error) {
-      return null
-    }
-
-    return (
-      <small className="user-form__field-error" id={getFieldErrorId(fieldName)}>
-        {error}
-      </small>
-    )
   }
 
   return (
@@ -260,22 +274,27 @@ export default function UserForm({
         </button>
       </div>
 
-      {errorMessage && (
-        <div className="user-form__error" role="alert">
-          {errorMessage}
-        </div>
-      )}
-
-      {hasValidationErrors(visibleFieldErrors) && (
-        <div className="user-form__error" role="alert">
-          Revisa los campos marcados antes de guardar el usuario.
-        </div>
-      )}
+      <div
+        className={
+          errorMessage || hasVisibleErrors
+            ? "user-form__error"
+            : "user-form__error user-form__error--empty"
+        }
+        role="alert"
+        aria-hidden={!errorMessage && !hasVisibleErrors}
+      >
+        {errorMessage ||
+          (hasVisibleErrors
+            ? "Revisa los campos marcados antes de guardar el usuario."
+            : "Sin errores")}
+      </div>
 
       <form className="user-form__body" onSubmit={handleSubmit} noValidate>
         <div className="user-form__grid">
           <label className="user-form__field">
-            <span>Nombres</span>
+            <span>
+              Nombres <strong>*</strong>
+            </span>
             <input
               type="text"
               name="nombres"
@@ -286,11 +305,13 @@ export default function UserForm({
               required
               {...getFieldProps("nombres")}
             />
-            {renderFieldError("nombres")}
+            <FieldHelp fieldName="nombres" errors={visibleFieldErrors} />
           </label>
 
           <label className="user-form__field">
-            <span>Apellidos</span>
+            <span>
+              Apellidos <strong>*</strong>
+            </span>
             <input
               type="text"
               name="apellidos"
@@ -301,11 +322,13 @@ export default function UserForm({
               required
               {...getFieldProps("apellidos")}
             />
-            {renderFieldError("apellidos")}
+            <FieldHelp fieldName="apellidos" errors={visibleFieldErrors} />
           </label>
 
           <label className="user-form__field">
-            <span>Correo</span>
+            <span>
+              Correo <strong>*</strong>
+            </span>
             <input
               type="email"
               name="email"
@@ -316,11 +339,13 @@ export default function UserForm({
               required
               {...getFieldProps("email")}
             />
-            {renderFieldError("email")}
+            <FieldHelp fieldName="email" errors={visibleFieldErrors} />
           </label>
 
           <label className="user-form__field">
-            <span>Usuario</span>
+            <span>
+              Usuario <strong>*</strong>
+            </span>
             <input
               type="text"
               name="username"
@@ -329,40 +354,44 @@ export default function UserForm({
               placeholder="usuario.umari"
               autoComplete="username"
               required
-              {...getFieldProps("username", getFieldHintId("username"))}
+              {...getFieldProps("username")}
             />
-            <small className="user-form__hint" id={getFieldHintId("username")}>
-              Usa 4 a 30 caracteres: letras minúsculas, números, punto, guion o
-              guion bajo.
-            </small>
-            {renderFieldError("username")}
+            <FieldHelp fieldName="username" errors={visibleFieldErrors} />
           </label>
 
           <label className="user-form__field">
             <span>Celular</span>
-            <input
-              type="tel"
-              name="celular"
-              value={formData.celular}
-              onChange={handleChange}
-              placeholder="+51 999 888 777"
-              autoComplete="tel"
-              inputMode="numeric"
-              {...getFieldProps("celular", getFieldHintId("celular"))}
-            />
-            <small className="user-form__hint" id={getFieldHintId("celular")}>
-              Opcional. Debe iniciar con 9 y guardarse como +51 999 888 777.
-            </small>
-            {renderFieldError("celular")}
+            <div
+              className={
+                visibleFieldErrors.celular
+                  ? "user-form__phone user-form__phone--invalid"
+                  : "user-form__phone"
+              }
+            >
+              <span className="user-form__phone-prefix">+51</span>
+              <input
+                type="tel"
+                name="celular"
+                value={formatPeruPhoneDigits(formData.celular)}
+                onChange={handleChange}
+                placeholder="999 888 777"
+                autoComplete="tel-national"
+                inputMode="numeric"
+                maxLength={11}
+                {...getFieldProps("celular")}
+              />
+            </div>
+            <FieldHelp fieldName="celular" errors={visibleFieldErrors} />
           </label>
 
           <label className="user-form__field">
-            <span>Rol</span>
+            <span>
+              Rol <strong>*</strong>
+            </span>
             <select
               name="id_rol"
               value={formData.id_rol}
               onChange={handleChange}
-              onBlur={handleBlur}
               required
               {...getFieldProps("id_rol")}
             >
@@ -374,12 +403,14 @@ export default function UserForm({
                 </option>
               ))}
             </select>
-            {renderFieldError("id_rol")}
+            <FieldHelp fieldName="id_rol" errors={visibleFieldErrors} />
           </label>
 
           {!isEditMode && (
             <label className="user-form__field user-form__field--full">
-              <span>Contraseña temporal</span>
+              <span>
+                Contraseña temporal <strong>*</strong>
+              </span>
               <input
                 type="password"
                 name="password"
@@ -388,12 +419,9 @@ export default function UserForm({
                 placeholder="Ej. Caja123*"
                 autoComplete="new-password"
                 required
-                {...getFieldProps("password", getFieldHintId("password"))}
+                {...getFieldProps("password")}
               />
-              <small className="user-form__hint" id={getFieldHintId("password")}>
-                Debe incluir mayúscula, minúscula, número y símbolo.
-              </small>
-              {renderFieldError("password")}
+              <FieldHelp fieldName="password" errors={visibleFieldErrors} />
             </label>
           )}
 
