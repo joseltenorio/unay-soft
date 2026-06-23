@@ -46,6 +46,7 @@ const H = {
   itemBase: 47,
   itemNote: 20,
   orderNote: 24,
+  ownership: 32,
   footer: 66,
   spacer: 14,
 
@@ -125,6 +126,8 @@ function orderMatchesSearch(order, searchTerm) {
     order.id,
     order.table,
     order.waiter,
+    order.createdByName,
+    order.responsibleWaiterName,
     order.notes,
     ...order.orderNotes,
     getStatusLabel(order.status),
@@ -157,7 +160,8 @@ const estItemH = (item) => H.itemBase + item.notes.length * H.itemNote
 const estHeaderH = (order) =>
   H.headerBase +
   (order.status === "process" ? H.headerProg : 0) +
-  order.orderNotes.length * H.orderNote
+  order.orderNotes.length * H.orderNote +
+  H.ownership
 
 const estCardH = (order) =>
   estHeaderH(order) +
@@ -355,8 +359,38 @@ function HeaderBand({ order }) {
         </div>
       )}
 
+      <OwnershipPanel order={order} />
       <OrderNotesPanel order={order} />
     </>
+  )
+}
+
+function OwnershipPanel({ order }) {
+  const createdBy = order.createdByName || order.waiter
+  const responsibleWaiter = order.responsibleWaiterName || createdBy
+  const showSupportBadge = order.isSupportOrder
+
+  return (
+    <section className="kds-card-ownership" aria-label="Responsables de comanda">
+      <span className="kds-card-owner-badge">
+        Enviado por: <strong>{createdBy}</strong>
+      </span>
+
+      {showSupportBadge ? (
+        <>
+          <span className="kds-card-owner-badge kds-card-owner-badge--responsible">
+            Responsable: <strong>{responsibleWaiter}</strong>
+          </span>
+          <span className="kds-card-owner-badge kds-card-owner-badge--support">
+            Apoyo
+          </span>
+        </>
+      ) : (
+        <span className="kds-card-owner-badge kds-card-owner-badge--responsible">
+          Responsable de mesa
+        </span>
+      )}
+    </section>
   )
 }
 
