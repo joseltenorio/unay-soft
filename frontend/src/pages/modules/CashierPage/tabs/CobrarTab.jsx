@@ -1,6 +1,6 @@
 // src/pages/modules/CashierPage/tabs/CobrarTab.jsx
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import "./CobrarTab.css"
 
 // ORDERS LOCALES
@@ -12,7 +12,7 @@ const ORDERS_MOCK = [
     id_mesa: "mesa-01",
     mesa_nombre: "Mesa 1",
 
-    estado: "ENTREGADA",
+    estado: "ENVIADA_A_CAJA",
     tipo_servicio: "SALON",
 
     subtotal: 41.10,
@@ -45,7 +45,7 @@ const ORDERS_MOCK = [
     id_mesa: "mesa-05",
     mesa_nombre: "Mesa 5",
 
-    estado: "ENTREGADA",
+    estado: "ENVIADA_A_CAJA",
     tipo_servicio: "SALON",
 
     subtotal: 81.36,
@@ -73,7 +73,7 @@ const ORDERS_MOCK = [
     id_mesa: "mesa-08",
     mesa_nombre: "Mesa 8",
 
-    estado: "ENTREGADA",
+    estado: "ENVIADA_A_CAJA",
     tipo_servicio: "SALON",
 
     subtotal: 27.12,
@@ -96,7 +96,7 @@ const ORDERS_MOCK = [
     id_mesa: "mesa-12",
     mesa_nombre: "Mesa 12",
 
-    estado: "LISTA",
+    estado: "ENVIADA_A_CAJA",
     tipo_servicio: "SALON",
 
     subtotal: 96.61,
@@ -177,11 +177,14 @@ const PAYMENTS_MOCK = [
 
 export default function CobrarTab() {
   const [selectedOrder, setSelectedOrder] = useState(null)
+  const pendingOrders = ORDERS_MOCK.filter(
+    (order) => order.estado === "ENVIADA_A_CAJA"
+  )
 
   return (
     <div className="cobrar-tab">
       <OrderList
-        orders={ORDERS_MOCK}
+        orders={pendingOrders}
         selectedOrder={selectedOrder}
         onSelect={setSelectedOrder}
       />
@@ -254,6 +257,11 @@ function PayPanel({ order }) {
   const [method, setMethod] = useState("EFECTIVO")
   const [received, setReceived] = useState("")
 
+   useEffect(() => {
+    setReceived("")
+    setMethod("EFECTIVO")
+  }, [order])
+
   const change = received
     ? Math.max(0, parseFloat(received) - (order?.total ?? 0))
     : null
@@ -267,21 +275,15 @@ function PayPanel({ order }) {
   }
 
   const handleSubmit = () => {
+    
     const paymentData = {
       id_pago: crypto.randomUUID(),
-
       id_orden: order.id_orden,
-
       id_usuario: "usuario-mock",
-
       metodo_pago: method,
-
       monto: order.total,
-
       referencia: null,
-
       estado: "CONFIRMADO",
-
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }

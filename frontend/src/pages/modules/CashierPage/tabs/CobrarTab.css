@@ -267,8 +267,8 @@
     box-shadow var(--transition-fast);
 
   background-image:
-    linear-gradient(45deg, transparent 50%, white 50%),
-    linear-gradient(135deg, white 50%, transparent 50%);
+    linear-gradient(45deg, transparent 50%, var(--color-brand-primary-light) 50%),
+    linear-gradient(135deg, var(--color-brand-primary-light) 50%, transparent 50%);
 
   background-position:
     calc(100% - 18px) calc(50% - 3px),
