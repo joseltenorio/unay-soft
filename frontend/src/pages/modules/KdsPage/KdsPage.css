@@ -891,6 +891,25 @@
   white-space: nowrap;
 }
 
+.kds-card-item--blocked .kds-card-item__main {
+  opacity: 0.45;
+}
+
+.kds-card-item--blocked .kds-card-item__info strong,
+.kds-card-item--blocked .kds-card-item__notes li,
+.kds-card-item--blocked .kds-card-item__qty {
+  color: rgba(3, 25, 38, 0.42);
+}
+
+.kds-card-item--blocked .kds-card-item__notes li::before {
+  color: rgba(168, 121, 88, 0.38);
+}
+
+.kds-card-item--blocked .kds-check-button {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .kds-check-button {
   width: 22px;
   height: 22px;
