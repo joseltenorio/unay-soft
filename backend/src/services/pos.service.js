@@ -130,27 +130,74 @@ async function getOrderById(client, idOrden) {
 async function getPosTables(idEstablecimiento) {
   const { rows } = await pool.query(
     `
-      with active_orders as (
+      with active_order_rows as (
         select
           o.id_mesa,
+          o.id_orden,
+          o.numero_orden,
+          o.estado,
+          o.subtotal,
+          o.igv,
+          o.total,
+          o.observaciones,
+          o.abierta_at,
+          o.enviada_cocina_at,
+          o.created_at,
+          o.updated_at,
+          u.id_usuario,
+          u.nombres,
+          u.apellidos,
+          u.username
+        from orden o
+        inner join usuario u
+          on u.id_usuario = o.id_usuario
+        where o.estado = any($2::varchar[])
+          and u.id_establecimiento = $1
+      ),
+      active_orders as (
+        select
+          id_mesa,
           count(*)::int as active_order_count,
-          coalesce(sum(o.total), 0)::numeric as active_total,
-          max(o.created_at) as last_order_at,
+          coalesce(sum(total), 0)::numeric as active_total,
+          min(coalesce(abierta_at, created_at)) as first_order_at,
+          max(coalesce(enviada_cocina_at, updated_at, created_at)) as last_order_at,
           json_agg(
             json_build_object(
-              'id_orden', o.id_orden,
-              'numero_orden', o.numero_orden,
-              'estado', o.estado,
-              'subtotal', o.subtotal,
-              'igv', o.igv,
-              'total', o.total,
-              'created_at', o.created_at
+              'id_orden', id_orden,
+              'numero_orden', numero_orden,
+              'estado', estado,
+              'subtotal', subtotal,
+              'igv', igv,
+              'total', total,
+              'observaciones', observaciones,
+              'created_at', created_at,
+              'created_by', json_build_object(
+                'id_usuario', id_usuario,
+                'nombres', nombres,
+                'apellidos', apellidos,
+                'username', username
+              )
             )
-            order by o.created_at desc
+            order by created_at desc
           ) as orders
-        from orden o
-        where o.estado = any($2::varchar[])
-        group by o.id_mesa
+        from active_order_rows
+        group by id_mesa
+      ),
+      table_responsible as (
+        select distinct on (id_mesa)
+          id_mesa,
+          id_orden as responsible_order_id,
+          numero_orden as responsible_order_number,
+          id_usuario,
+          nombres,
+          apellidos,
+          username,
+          coalesce(abierta_at, created_at) as assigned_at
+        from active_order_rows
+        order by
+          id_mesa,
+          coalesce(abierta_at, created_at) asc,
+          id_orden asc
       )
       select
         m.id_mesa,
@@ -164,13 +211,23 @@ async function getPosTables(idEstablecimiento) {
         m.estado,
         coalesce(ao.active_order_count, 0) as active_order_count,
         coalesce(ao.active_total, 0) as active_total,
+        ao.first_order_at,
         ao.last_order_at,
-        coalesce(ao.orders, '[]'::json) as active_orders
+        coalesce(ao.orders, '[]'::json) as active_orders,
+        tr.responsible_order_id,
+        tr.responsible_order_number,
+        tr.assigned_at as responsible_assigned_at,
+        tr.id_usuario as responsible_user_id,
+        tr.nombres as responsible_user_nombres,
+        tr.apellidos as responsible_user_apellidos,
+        tr.username as responsible_user_username
       from mesa m
       left join zona z
         on z.id_zona = m.id_zona
       left join active_orders ao
         on ao.id_mesa = m.id_mesa
+      left join table_responsible tr
+        on tr.id_mesa = m.id_mesa
       where m.id_establecimiento = $1
         and m.estado = true
       order by
@@ -180,27 +237,53 @@ async function getPosTables(idEstablecimiento) {
     [idEstablecimiento, ACTIVE_ORDER_STATES],
   )
 
-  return rows.map((table) => ({
-    id_mesa: table.id_mesa,
-    id: table.id_mesa,
-    id_establecimiento: table.id_establecimiento,
-    id_zona: table.id_zona,
-    zona_nombre: table.zona_nombre || "Sin zona",
-    floor: table.zona_nombre || "Sin zona",
-    numero: table.numero,
-    number: table.numero,
-    nombre: table.nombre,
-    capacidad: table.capacidad,
-    disponibilidad: table.disponibilidad,
-    estado: table.estado,
-    occupied:
-      table.disponibilidad === "OCUPADA" ||
-      Number(table.active_order_count) > 0,
-    active_order_count: Number(table.active_order_count || 0),
-    active_total: Number(table.active_total || 0),
-    last_order_at: table.last_order_at,
-    active_orders: table.active_orders || [],
-  }))
+  return rows.map((table) => {
+    const responsibleUser = table.responsible_user_id
+      ? {
+          id_usuario: table.responsible_user_id,
+          nombres: table.responsible_user_nombres,
+          apellidos: table.responsible_user_apellidos,
+          username: table.responsible_user_username,
+        }
+      : null
+
+    return {
+      id_mesa: table.id_mesa,
+      id: table.id_mesa,
+      id_establecimiento: table.id_establecimiento,
+      id_zona: table.id_zona,
+      zona_nombre: table.zona_nombre || "Sin zona",
+      floor: table.zona_nombre || "Sin zona",
+      numero: table.numero,
+      number: table.numero,
+      nombre: table.nombre,
+      capacidad: table.capacidad,
+      disponibilidad: table.disponibilidad,
+      estado: table.estado,
+      occupied:
+        table.disponibilidad === "OCUPADA" ||
+        Number(table.active_order_count) > 0,
+      active_order_count: Number(table.active_order_count || 0),
+      active_total: Number(table.active_total || 0),
+      first_order_at: table.first_order_at,
+      last_order_at: table.last_order_at,
+      active_orders: table.active_orders || [],
+      table_service: {
+        responsible_user: responsibleUser,
+        responsible_order: table.responsible_order_id
+          ? {
+              id_orden: table.responsible_order_id,
+              numero_orden: table.responsible_order_number,
+              assigned_at: table.responsible_assigned_at,
+            }
+          : null,
+        active_order_count: Number(table.active_order_count || 0),
+        active_total: Number(table.active_total || 0),
+        first_order_at: table.first_order_at,
+        last_order_at: table.last_order_at,
+      },
+    }
+  })
 }
 
 async function getPosMenu(idEstablecimiento) {

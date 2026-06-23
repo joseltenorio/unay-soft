@@ -31,40 +31,53 @@ export default function PosPageTables({
       </header>
 
       <div className="pos-tables-grid">
-        {tables.map((table) => (
-          <button
-            key={table.id}
-            type="button"
-            className={
-              table.occupied
-                ? "pos-table pos-table--occupied"
-                : "pos-table"
-            }
-            onClick={() => onTableClick(table)}
-          >
-            <div className="pos-table-circle">
-              {table.number}
-            </div>
+        {tables.map((table) => {
+          const tableService = table.table_service || {}
+          const responsibleName =
+            tableService.responsible_user_name || table.waiter
+          const activeTotal = Number(table.active_total || 0).toFixed(2)
 
-            <div className="pos-table-info">
-              {table.occupied ? (
-                <>
-                  <span className="pos-table-waiter">
-                    {table.waiter}
-                  </span>
+          return (
+            <button
+              key={table.id}
+              type="button"
+              className={
+                table.occupied
+                  ? "pos-table pos-table--occupied"
+                  : "pos-table"
+              }
+              onClick={() => onTableClick(table)}
+            >
+              <div className="pos-table-circle">
+                {table.number}
+              </div>
 
-                  <small className="pos-table-time">
-                    {table.time}
+              <div className="pos-table-info">
+                {table.occupied ? (
+                  <>
+                    <span className="pos-table-waiter">
+                      {responsibleName
+                        ? `Atiende: ${responsibleName}`
+                        : "Cuenta abierta"}
+                    </span>
+
+                    <small className="pos-table-time">
+                      {table.time}
+                    </small>
+
+                    <small className="pos-table-total">
+                      S/ {activeTotal}
+                    </small>
+                  </>
+                ) : (
+                  <small className="pos-table-free">
+                    Disponible
                   </small>
-                </>
-              ) : (
-                <small className="pos-table-free">
-                  Disponible
-                </small>
-              )}
-            </div>
-          </button>
-        ))}
+                )}
+              </div>
+            </button>
+          )
+        })}
       </div>
     </section>
   )
