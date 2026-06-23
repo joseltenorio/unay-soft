@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react"
 import "./CobrarTab.css"
+import useToast from "../../../../components/common/Toast/useToast"
+
 
 // ORDERS LOCALES
 const ORDERS_MOCK = [
@@ -176,6 +178,8 @@ const PAYMENTS_MOCK = [
 ]
 
 export default function CobrarTab() {
+  const { showToast } = useToast()
+
   const [selectedOrder, setSelectedOrder] = useState(null)
   const pendingOrders = ORDERS_MOCK.filter(
     (order) => order.estado === "ENVIADA_A_CAJA"
@@ -189,7 +193,10 @@ export default function CobrarTab() {
         onSelect={setSelectedOrder}
       />
 
-      <PayPanel order={selectedOrder} />
+      <PayPanel
+        order={selectedOrder}
+        clearOrder={() => setSelectedOrder(null)}
+      />
     </div>
   )
 }
@@ -253,7 +260,7 @@ const PAYMENT_METHODS = [
   "TRANSFERENCIA",
 ]
 
-function PayPanel({ order }) {
+function PayPanel({ order, clearOrder }) {
   const [method, setMethod] = useState("EFECTIVO")
   const [received, setReceived] = useState("")
 
@@ -275,6 +282,8 @@ function PayPanel({ order }) {
   }
 
   const handleSubmit = () => {
+    console.log("=== HANDLE SUBMIT ===")
+    console.log(order)
     
     const paymentData = {
       id_pago: crypto.randomUUID(),
@@ -288,13 +297,16 @@ function PayPanel({ order }) {
       updated_at: new Date().toISOString(),
     }
 
+    console.log("Pago registrado:")
+    console.log(paymentData)
+
     PAYMENTS_MOCK.push(paymentData)
+
+    console.log("Payments:")
+    console.table(PAYMENTS_MOCK)
 
     //Cambio de estado a pagado
     order.estado = "PAGADA"
-
-    console.log("Pago registrado")
-    console.log(paymentData)
 
     setSelectedOrder(null)
   }
