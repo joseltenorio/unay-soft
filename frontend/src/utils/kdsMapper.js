@@ -276,3 +276,41 @@ function getElapsedMinutes(dateValue) {
 
   return Math.max(diffInMinutes, 0)
 }
+
+
+export function mapKitchenServiceNotificationsToBoard(notifications = []) {
+  return notifications.map(mapKitchenServiceNotificationToBoard)
+}
+
+export function mapKitchenServiceNotificationToBoard(notification) {
+  const orderCreatedBy = mapUser(notification.order_created_by)
+  const notificationCreatedBy = mapUser(notification.creado_por_usuario)
+  const attendedBy = mapUser(notification.atendido_por_usuario)
+  const responsibleWaiter = mapUser(notification.table_service?.responsible_user)
+
+  return {
+    id: notification.id_notificacion,
+    rawId: notification.id_notificacion,
+    orderId: notification.id_orden,
+    type: notification.tipo,
+    status: notification.estado,
+    reason: notification.motivo || "",
+    message: notification.mensaje || "",
+    table: formatTable(notification.mesa),
+    orderNumber: formatOrderNumber(notification.orden?.numero_orden),
+    orderStatus: notification.orden?.estado || "",
+    orderNotes: normalizeOrderNotes(notification.orden?.observaciones),
+    orderCreatedBy,
+    orderCreatedByName: formatUserDisplayName(orderCreatedBy),
+    notificationCreatedBy,
+    notificationCreatedByName: formatUserDisplayName(notificationCreatedBy),
+    attendedBy,
+    attendedByName: attendedBy ? formatUserDisplayName(attendedBy) : "Sin atender",
+    responsibleWaiter,
+    responsibleWaiterName: formatUserDisplayName(responsibleWaiter),
+    isSupportNotification: isDifferentUser(notificationCreatedBy, responsibleWaiter),
+    createdAt: notification.created_at,
+    attendedAt: notification.atendida_at,
+    items: mapKitchenItemsToBoard(notification.items),
+  }
+}

@@ -850,6 +850,23 @@ async function getServiceNotifications({
       creador.apellidos as creado_por_apellidos,
       creador.username as creado_por_username,
 
+      order_creator.id_usuario as order_creator_id_usuario,
+      order_creator.nombres as order_creator_nombres,
+      order_creator.apellidos as order_creator_apellidos,
+      order_creator.username as order_creator_username,
+
+      responsible_user.id_usuario as responsable_id_usuario,
+      responsible_user.nombres as responsable_nombres,
+      responsible_user.apellidos as responsable_apellidos,
+      responsible_user.username as responsable_username,
+      responsible_order.id_orden as responsable_id_orden,
+      responsible_order.numero_orden as responsable_numero_orden,
+
+      table_service.active_order_count,
+      table_service.active_total,
+      table_service.first_order_at,
+      table_service.last_order_at,
+
       atendido.nombres as atendido_por_nombres,
       atendido.apellidos as atendido_por_apellidos,
       atendido.username as atendido_por_username,
@@ -877,6 +894,60 @@ async function getServiceNotifications({
       on o.id_orden = ns.id_orden
     join usuario creador
       on creador.id_usuario = ns.creado_por
+    join usuario order_creator
+      on order_creator.id_usuario = o.id_usuario
+
+    left join lateral (
+      select
+        count(*)::int as active_order_count,
+        coalesce(sum(active_order.total), 0)::numeric as active_total,
+        min(coalesce(active_order.abierta_at, active_order.created_at)) as first_order_at,
+        max(coalesce(active_order.updated_at, active_order.created_at)) as last_order_at
+      from orden active_order
+      inner join usuario active_user
+        on active_user.id_usuario = active_order.id_usuario
+      where active_order.id_mesa = o.id_mesa
+        and active_user.id_establecimiento = $1
+        and active_order.cerrada_at is null
+        and active_order.estado in (
+          'ABIERTA',
+          'EN_PREPARACION',
+          'LISTA',
+          'ENTREGADA'
+        )
+    ) table_service
+      on true
+
+    left join lateral (
+      select
+        first_order.id_orden,
+        first_order.numero_orden,
+        first_user.id_usuario,
+        first_user.nombres,
+        first_user.apellidos,
+        first_user.username
+      from orden first_order
+      inner join usuario first_user
+        on first_user.id_usuario = first_order.id_usuario
+      where first_order.id_mesa = o.id_mesa
+        and first_user.id_establecimiento = $1
+        and first_order.cerrada_at is null
+        and first_order.estado in (
+          'ABIERTA',
+          'EN_PREPARACION',
+          'LISTA',
+          'ENTREGADA'
+        )
+      order by
+        coalesce(first_order.abierta_at, first_order.created_at) asc,
+        first_order.id_orden asc
+      limit 1
+    ) responsible_order
+      on true
+
+    left join usuario responsible_user
+      on responsible_user.id_usuario = responsible_order.id_usuario
+
     left join usuario atendido
       on atendido.id_usuario = ns.atendido_por
     left join mesa m
@@ -914,6 +985,20 @@ async function getServiceNotifications({
       creador.nombres,
       creador.apellidos,
       creador.username,
+      order_creator.id_usuario,
+      order_creator.nombres,
+      order_creator.apellidos,
+      order_creator.username,
+      responsible_user.id_usuario,
+      responsible_user.nombres,
+      responsible_user.apellidos,
+      responsible_user.username,
+      responsible_order.id_orden,
+      responsible_order.numero_orden,
+      table_service.active_order_count,
+      table_service.active_total,
+      table_service.first_order_at,
+      table_service.last_order_at,
       atendido.nombres,
       atendido.apellidos,
       atendido.username
@@ -956,6 +1041,32 @@ async function getServiceNotifications({
           nombre: notification.mesa_nombre,
         }
       : null,
+    order_created_by: {
+      id_usuario: notification.order_creator_id_usuario,
+      nombres: notification.order_creator_nombres,
+      apellidos: notification.order_creator_apellidos,
+      username: notification.order_creator_username,
+    },
+    table_service: {
+      responsible_user: notification.responsable_id_usuario
+        ? {
+            id_usuario: notification.responsable_id_usuario,
+            nombres: notification.responsable_nombres,
+            apellidos: notification.responsable_apellidos,
+            username: notification.responsable_username,
+          }
+        : null,
+      responsible_order: notification.responsable_id_orden
+        ? {
+            id_orden: notification.responsable_id_orden,
+            numero_orden: notification.responsable_numero_orden,
+          }
+        : null,
+      active_order_count: Number(notification.active_order_count || 0),
+      active_total: Number(notification.active_total || 0),
+      first_order_at: notification.first_order_at,
+      last_order_at: notification.last_order_at,
+    },
     creado_por_usuario: {
       nombres: notification.creado_por_nombres,
       apellidos: notification.creado_por_apellidos,
