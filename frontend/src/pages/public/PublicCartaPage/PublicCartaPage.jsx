@@ -96,14 +96,6 @@ export default function PublicCartaPage() {
   return (
     <main className="public-carta">
       <section className="public-carta__hero">
-        {establecimiento?.logo_url && (
-          <img
-            className="public-carta__logo"
-            src={establecimiento.logo_url}
-            alt={establecimiento.nombre_comercial || "Logo del restaurante"}
-          />
-        )}
-
         <p className="public-carta__eyebrow">Carta digital</p>
 
         <h1>{establecimiento?.nombre_comercial || "Restaurante"}</h1>
