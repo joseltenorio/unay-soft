@@ -1,6 +1,15 @@
 // src/pages/modules/SecurityPage/UserForm.jsx
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+
+import {
+  hasValidationErrors,
+  normalizeEmail,
+  normalizePersonName,
+  normalizePeruPhone,
+  normalizeUsername,
+  validateUserForm,
+} from "../../../utils/userValidation"
 
 import "./UserForm.css"
 
@@ -32,6 +41,14 @@ function getInitialFormState(mode, initialUser) {
   return emptyFormState
 }
 
+function getFieldErrorId(fieldName) {
+  return `user-form-${fieldName}-error`
+}
+
+function getFieldHintId(fieldName) {
+  return `user-form-${fieldName}-hint`
+}
+
 export default function UserForm({
   mode = "create",
   roles = [],
@@ -46,6 +63,18 @@ export default function UserForm({
   const [formData, setFormData] = useState(() =>
     getInitialFormState(mode, initialUser),
   )
+  const [fieldErrors, setFieldErrors] = useState({})
+  const [touchedFields, setTouchedFields] = useState({})
+
+  const visibleFieldErrors = useMemo(() => {
+    return Object.entries(fieldErrors).reduce((errors, [fieldName, message]) => {
+      if (touchedFields[fieldName] || touchedFields.__submitted) {
+        errors[fieldName] = message
+      }
+
+      return errors
+    }, {})
+  }, [fieldErrors, touchedFields])
 
   useEffect(() => {
     let isMounted = true
@@ -56,6 +85,8 @@ export default function UserForm({
       }
 
       setFormData(getInitialFormState(mode, initialUser))
+      setFieldErrors({})
+      setTouchedFields({})
     }, 0)
 
     return () => {
@@ -64,33 +95,138 @@ export default function UserForm({
     }
   }, [mode, initialUser])
 
+  function markFieldAsTouched(fieldName) {
+    setTouchedFields((currentFields) => ({
+      ...currentFields,
+      [fieldName]: true,
+    }))
+  }
+
+  function updateValidation(nextFormData) {
+    setFieldErrors(validateUserForm(nextFormData, { isEditMode }))
+  }
+
   function handleChange(event) {
     const { name, value, type, checked } = event.target
 
-    setFormData((currentData) => ({
-      ...currentData,
-      [name]: type === "checkbox" ? checked : value,
-    }))
+    setFormData((currentData) => {
+      let nextValue = type === "checkbox" ? checked : value
+
+      if (name === "celular") {
+        nextValue = normalizePeruPhone(value)
+      }
+
+      if (name === "username") {
+        nextValue = normalizeUsername(value)
+      }
+
+      const nextData = {
+        ...currentData,
+        [name]: nextValue,
+      }
+
+      updateValidation(nextData)
+
+      return nextData
+    })
+  }
+
+  function handleBlur(event) {
+    const { name } = event.target
+
+    markFieldAsTouched(name)
+
+    setFormData((currentData) => {
+      const nextData = {
+        ...currentData,
+      }
+
+      if (name === "nombres") {
+        nextData.nombres = normalizePersonName(currentData.nombres)
+      }
+
+      if (name === "apellidos") {
+        nextData.apellidos = normalizePersonName(currentData.apellidos)
+      }
+
+      if (name === "email") {
+        nextData.email = normalizeEmail(currentData.email)
+      }
+
+      if (name === "username") {
+        nextData.username = normalizeUsername(currentData.username)
+      }
+
+      if (name === "celular") {
+        nextData.celular = normalizePeruPhone(currentData.celular)
+      }
+
+      updateValidation(nextData)
+
+      return nextData
+    })
   }
 
   function handleSubmit(event) {
     event.preventDefault()
 
-    const payload = {
-      nombres: formData.nombres.trim(),
-      apellidos: formData.apellidos.trim(),
-      email: formData.email.trim().toLowerCase(),
-      username: formData.username.trim().toLowerCase(),
-      celular: formData.celular.trim(),
+    const normalizedPayload = {
+      nombres: normalizePersonName(formData.nombres),
+      apellidos: normalizePersonName(formData.apellidos),
+      email: normalizeEmail(formData.email),
+      username: normalizeUsername(formData.username),
+      celular: normalizePeruPhone(formData.celular),
       id_rol: formData.id_rol,
       estado: formData.estado,
     }
 
     if (!isEditMode) {
-      payload.password = formData.password
+      normalizedPayload.password = formData.password
     }
 
-    onSubmit(payload)
+    const errors = validateUserForm(normalizedPayload, { isEditMode })
+
+    setFieldErrors(errors)
+    setTouchedFields((currentFields) => ({
+      ...currentFields,
+      __submitted: true,
+    }))
+
+    if (hasValidationErrors(errors)) {
+      return
+    }
+
+    onSubmit({
+      ...normalizedPayload,
+      celular: normalizedPayload.celular || null,
+    })
+  }
+
+  function getFieldProps(fieldName, hintId = null) {
+    const error = visibleFieldErrors[fieldName]
+    const describedBy = [hintId, error ? getFieldErrorId(fieldName) : null]
+      .filter(Boolean)
+      .join(" ")
+
+    return {
+      "aria-invalid": error ? "true" : "false",
+      "aria-describedby": describedBy || undefined,
+      onBlur: handleBlur,
+    }
+  }
+
+  function renderFieldError(fieldName) {
+    const error = visibleFieldErrors[fieldName]
+
+    if (!error) {
+      return null
+    }
+
+    return (
+      <small className="user-form__field-error" id={getFieldErrorId(fieldName)}>
+        {error}
+      </small>
+    )
   }
 
   return (
@@ -130,7 +266,13 @@ export default function UserForm({
         </div>
       )}
 
-      <form className="user-form__body" onSubmit={handleSubmit}>
+      {hasValidationErrors(visibleFieldErrors) && (
+        <div className="user-form__error" role="alert">
+          Revisa los campos marcados antes de guardar el usuario.
+        </div>
+      )}
+
+      <form className="user-form__body" onSubmit={handleSubmit} noValidate>
         <div className="user-form__grid">
           <label className="user-form__field">
             <span>Nombres</span>
@@ -139,9 +281,12 @@ export default function UserForm({
               name="nombres"
               value={formData.nombres}
               onChange={handleChange}
-              placeholder="Ej. Carlos"
+              placeholder="Ej. José Luis"
+              autoComplete="given-name"
               required
+              {...getFieldProps("nombres")}
             />
+            {renderFieldError("nombres")}
           </label>
 
           <label className="user-form__field">
@@ -151,9 +296,12 @@ export default function UserForm({
               name="apellidos"
               value={formData.apellidos}
               onChange={handleChange}
-              placeholder="Ej. Paredes Rojas"
+              placeholder="Ej. O'Connor Rojas"
+              autoComplete="family-name"
               required
+              {...getFieldProps("apellidos")}
             />
+            {renderFieldError("apellidos")}
           </label>
 
           <label className="user-form__field">
@@ -164,8 +312,11 @@ export default function UserForm({
               value={formData.email}
               onChange={handleChange}
               placeholder="usuario@umari.pe"
+              autoComplete="email"
               required
+              {...getFieldProps("email")}
             />
+            {renderFieldError("email")}
           </label>
 
           <label className="user-form__field">
@@ -176,19 +327,33 @@ export default function UserForm({
               value={formData.username}
               onChange={handleChange}
               placeholder="usuario.umari"
+              autoComplete="username"
               required
+              {...getFieldProps("username", getFieldHintId("username"))}
             />
+            <small className="user-form__hint" id={getFieldHintId("username")}>
+              Usa 4 a 30 caracteres: letras minúsculas, números, punto, guion o
+              guion bajo.
+            </small>
+            {renderFieldError("username")}
           </label>
 
           <label className="user-form__field">
             <span>Celular</span>
             <input
-              type="text"
+              type="tel"
               name="celular"
               value={formData.celular}
               onChange={handleChange}
               placeholder="+51 999 888 777"
+              autoComplete="tel"
+              inputMode="numeric"
+              {...getFieldProps("celular", getFieldHintId("celular"))}
             />
+            <small className="user-form__hint" id={getFieldHintId("celular")}>
+              Opcional. Debe iniciar con 9 y guardarse como +51 999 888 777.
+            </small>
+            {renderFieldError("celular")}
           </label>
 
           <label className="user-form__field">
@@ -197,7 +362,9 @@ export default function UserForm({
               name="id_rol"
               value={formData.id_rol}
               onChange={handleChange}
+              onBlur={handleBlur}
               required
+              {...getFieldProps("id_rol")}
             >
               <option value="">Seleccione un rol</option>
 
@@ -207,6 +374,7 @@ export default function UserForm({
                 </option>
               ))}
             </select>
+            {renderFieldError("id_rol")}
           </label>
 
           {!isEditMode && (
@@ -217,10 +385,15 @@ export default function UserForm({
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Mínimo 6 caracteres"
-                minLength={6}
+                placeholder="Ej. Caja123*"
+                autoComplete="new-password"
                 required
+                {...getFieldProps("password", getFieldHintId("password"))}
               />
+              <small className="user-form__hint" id={getFieldHintId("password")}>
+                Debe incluir mayúscula, minúscula, número y símbolo.
+              </small>
+              {renderFieldError("password")}
             </label>
           )}
 
