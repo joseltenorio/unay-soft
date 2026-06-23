@@ -497,6 +497,7 @@ export default function PosPage() {
             quantity: quantityToAdd,
             sentQuantity: 0,
             kitchenReady: false,
+            kitchenNotes: "",
           },
         ],
       }
@@ -625,7 +626,7 @@ export default function PosPage() {
         return {
           id_producto: item.id_producto || item.id,
           cantidad: quantityToSend,
-          notas_cocina: notes,
+          notas_cocina: item.kitchenNotes?.trim() || null,
         }
       })
       .filter(Boolean)
@@ -646,7 +647,7 @@ export default function PosPage() {
 
       const createdOrder = await createPosOrder({
         id_mesa: tableToSend.id_mesa || tableToSend.id,
-        observaciones: notes,
+        observaciones: notes.trim() || null,
         items: newItems,
       })
 
@@ -757,6 +758,44 @@ export default function PosPage() {
     }))
   }
 
+  function handleUpdateItemNotes(productId, notes) {
+    if (!selectedTable) {
+      return
+    }
+
+    setTableOrders((prev) => {
+      const currentOrder = prev[selectedTable.id] || []
+
+      return {
+        ...prev,
+        [selectedTable.id]: currentOrder.map((item) =>
+          item.id === productId
+            ? {
+                ...item,
+                kitchenNotes: notes,
+              }
+            : item,
+        ),
+      }
+    })
+
+    setSavedOrders((prev) => {
+      const currentOrder = prev[selectedTable.id] || []
+
+      return {
+        ...prev,
+        [selectedTable.id]: currentOrder.map((item) =>
+          item.id === productId
+            ? {
+                ...item,
+                kitchenNotes: notes,
+              }
+            : item,
+        ),
+      }
+    })
+  }
+
   return (
     <main className="pos-page">
       <section className="pos-page__shell">
@@ -853,6 +892,7 @@ export default function PosPage() {
                 handleSendToCashier={handleSendToCashier}
                 orderNotes={orderNotes[selectedTable.id] || ""}
                 handleUpdateOrderNotes={handleUpdateOrderNotes}
+                handleUpdateItemNotes={handleUpdateItemNotes}
                 isSendingToKitchen={isSendingToKitchen}
                 activeOrders={selectedTable.active_orders || []}
                 activeOrderCount={selectedTable.active_order_count || 0}

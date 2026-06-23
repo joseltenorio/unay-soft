@@ -54,6 +54,7 @@ export default function PosPageMenu({
   setSearchTerm,
   orderNotes,
   handleUpdateOrderNotes,
+  handleUpdateItemNotes,
   isSendingToKitchen = false,
   activeOrders = [],
   activeOrderCount = 0,
@@ -267,6 +268,18 @@ export default function PosPageMenu({
                           </small>
                         )}
                       </div>
+
+                      <label className="pos-order-item-note">
+                        <span>Nota para cocina</span>
+                        <textarea
+                          value={item.kitchenNotes || ""}
+                          onChange={(event) =>
+                            handleUpdateItemNotes(item.id, event.target.value)
+                          }
+                          placeholder="Ej: sin cebolla, poco picante..."
+                          disabled={pendingQuantity <= 0}
+                        />
+                      </label>
                     </div>
 
                     <strong>
@@ -301,7 +314,7 @@ export default function PosPageMenu({
 
             <div className="pos-order-notes">
               <label>
-                Notas del pedido
+                Observación general
               </label>
 
               <textarea
