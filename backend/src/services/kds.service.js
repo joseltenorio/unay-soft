@@ -66,6 +66,18 @@ async function getKitchenOrders(idEstablecimiento) {
       u.apellidos as usuario_apellidos,
       u.username as usuario_username,
 
+      responsible_user.id_usuario as responsable_id_usuario,
+      responsible_user.nombres as responsable_nombres,
+      responsible_user.apellidos as responsable_apellidos,
+      responsible_user.username as responsable_username,
+      responsible_order.id_orden as responsable_id_orden,
+      responsible_order.numero_orden as responsable_numero_orden,
+
+      table_service.active_order_count,
+      table_service.active_total,
+      table_service.first_order_at,
+      table_service.last_order_at,
+
       coalesce(
         json_agg(
           json_build_object(
@@ -95,6 +107,58 @@ async function getKitchenOrders(idEstablecimiento) {
       on m.id_mesa = o.id_mesa
     inner join usuario u
       on u.id_usuario = o.id_usuario
+
+    left join lateral (
+      select
+        count(*)::int as active_order_count,
+        coalesce(sum(active_order.total), 0)::numeric as active_total,
+        min(coalesce(active_order.abierta_at, active_order.created_at)) as first_order_at,
+        max(coalesce(active_order.updated_at, active_order.created_at)) as last_order_at
+      from orden active_order
+      inner join usuario active_user
+        on active_user.id_usuario = active_order.id_usuario
+      where active_order.id_mesa = o.id_mesa
+        and active_user.id_establecimiento = $1
+        and active_order.cerrada_at is null
+        and active_order.estado in (
+          'ABIERTA',
+          'EN_PREPARACION',
+          'LISTA',
+          'ENTREGADA'
+        )
+    ) table_service
+      on true
+
+    left join lateral (
+      select
+        first_order.id_orden,
+        first_order.numero_orden,
+        first_user.id_usuario,
+        first_user.nombres,
+        first_user.apellidos,
+        first_user.username
+      from orden first_order
+      inner join usuario first_user
+        on first_user.id_usuario = first_order.id_usuario
+      where first_order.id_mesa = o.id_mesa
+        and first_user.id_establecimiento = $1
+        and first_order.cerrada_at is null
+        and first_order.estado in (
+          'ABIERTA',
+          'EN_PREPARACION',
+          'LISTA',
+          'ENTREGADA'
+        )
+      order by
+        coalesce(first_order.abierta_at, first_order.created_at) asc,
+        first_order.id_orden asc
+      limit 1
+    ) responsible_order
+      on true
+
+    left join usuario responsible_user
+      on responsible_user.id_usuario = responsible_order.id_usuario
+
     left join item_orden io
       on io.id_orden = o.id_orden
      and io.estado_cocina <> 'ANULADO'
@@ -137,7 +201,17 @@ async function getKitchenOrders(idEstablecimiento) {
       u.id_usuario,
       u.nombres,
       u.apellidos,
-      u.username
+      u.username,
+      responsible_user.id_usuario,
+      responsible_user.nombres,
+      responsible_user.apellidos,
+      responsible_user.username,
+      responsible_order.id_orden,
+      responsible_order.numero_orden,
+      table_service.active_order_count,
+      table_service.active_total,
+      table_service.first_order_at,
+      table_service.last_order_at
 
     order by
       coalesce(o.enviada_cocina_at, o.abierta_at, o.created_at) asc;
@@ -152,6 +226,15 @@ async function getKitchenOrders(idEstablecimiento) {
       apellidos: order.usuario_apellidos,
       username: order.usuario_username,
     }
+
+    const responsibleUser = order.responsable_id_usuario
+      ? {
+          id_usuario: order.responsable_id_usuario,
+          nombres: order.responsable_nombres,
+          apellidos: order.responsable_apellidos,
+          username: order.responsable_username,
+        }
+      : null
 
     return {
       id_orden: order.id_orden,
@@ -177,6 +260,21 @@ async function getKitchenOrders(idEstablecimiento) {
         : null,
       usuario: orderCreator,
       created_by: orderCreator,
+      table_service: order.id_mesa
+        ? {
+            active_order_count: Number(order.active_order_count || 0),
+            active_total: Number(order.active_total || 0),
+            first_order_at: order.first_order_at,
+            last_order_at: order.last_order_at,
+            responsible_order: order.responsable_id_orden
+              ? {
+                  id_orden: order.responsable_id_orden,
+                  numero_orden: order.responsable_numero_orden,
+                }
+              : null,
+            responsible_user: responsibleUser,
+          }
+        : null,
       items: order.items || [],
     }
   })
