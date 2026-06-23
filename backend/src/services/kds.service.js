@@ -142,39 +142,44 @@ async function getKitchenOrders(idEstablecimiento) {
     order by
       coalesce(o.enviada_cocina_at, o.abierta_at, o.created_at) asc;
   `
-  
+
   const { rows } = await pool.query(query, [idEstablecimiento])
 
-  return rows.map((order) => ({
-    id_orden: order.id_orden,
-    numero_orden: order.numero_orden,
-    estado: order.estado,
-    tipo_servicio: order.tipo_servicio,
-    subtotal: Number(order.subtotal),
-    igv: Number(order.igv),
-    total: Number(order.total),
-    observaciones: order.observaciones,
-    abierta_at: order.abierta_at,
-    enviada_cocina_at: order.enviada_cocina_at,
-    preparacion_inicio_at: order.preparacion_inicio_at,
-    lista_at: order.lista_at,
-    created_at: order.created_at,
-    updated_at: order.updated_at,
-    mesa: order.id_mesa
-      ? {
-          id_mesa: order.id_mesa,
-          numero: order.mesa_numero,
-          nombre: order.mesa_nombre,
-        }
-      : null,
-    usuario: {
+  return rows.map((order) => {
+    const orderCreator = {
       id_usuario: order.id_usuario,
       nombres: order.usuario_nombres,
       apellidos: order.usuario_apellidos,
       username: order.usuario_username,
-    },
-    items: order.items || [],
-  }))
+    }
+
+    return {
+      id_orden: order.id_orden,
+      numero_orden: order.numero_orden,
+      estado: order.estado,
+      tipo_servicio: order.tipo_servicio,
+      subtotal: Number(order.subtotal),
+      igv: Number(order.igv),
+      total: Number(order.total),
+      observaciones: order.observaciones,
+      abierta_at: order.abierta_at,
+      enviada_cocina_at: order.enviada_cocina_at,
+      preparacion_inicio_at: order.preparacion_inicio_at,
+      lista_at: order.lista_at,
+      created_at: order.created_at,
+      updated_at: order.updated_at,
+      mesa: order.id_mesa
+        ? {
+            id_mesa: order.id_mesa,
+            numero: order.mesa_numero,
+            nombre: order.mesa_nombre,
+          }
+        : null,
+      usuario: orderCreator,
+      created_by: orderCreator,
+      items: order.items || [],
+    }
+  })
 }
 
 async function updateKitchenOrderStatus({
