@@ -112,6 +112,13 @@ Umari OS API
 │  ├─ KDS - Change Order Status to Ready
 │  └─ Casos negativos de permisos, estados y recursos inexistentes
 │
+├─ KDS - Kitchen Context
+│  ├─ KDS - Context Includes Order Creator
+│  ├─ KDS - Context Includes Table Service Summary
+│  ├─ KDS - Context Separates Order Notes
+│  ├─ KDS - Context Separates Item Notes
+│  └─ KDS - Context Identifies Support Orders
+│
 ├─ KDS - Service Notifications
 │  ├─ KDS - Create Ready Order Service Call
 │  ├─ KDS - Create Kitchen Incident Service Call
@@ -119,6 +126,9 @@ Umari OS API
 │  ├─ KDS - Attend Kitchen Service Call
 │  ├─ KDS - Confirm Delivered Order
 │  └─ Casos negativos de permisos, tipos y recursos inexistentes
+│
+├─ KDS - Service Notification Context
+│  └─ KDS - Service Calls Include Ownership Context
 │
 ├─ Auth - Session Hardening
 │  ├─ Refresh - Current Session
@@ -367,7 +377,9 @@ Orden sugerido cuando se requiere generar datos entre módulos:
 7. POS - Orders
 8. Auth / Login - KDS
 9. KDS - Kitchen Monitor
-10. KDS - Service Notifications
+10. KDS - Kitchen Context
+11. KDS - Service Notifications
+12. KDS - Service Notification Context
 ```
 
 ### 5. Ejecutar carpetas de autenticación avanzada
@@ -428,9 +440,17 @@ Agrupa requests de mesas, carta disponible para POS y creación de comandas.
 
 Agrupa requests del monitor de cocina y actualización de estados de comandas e ítems.
 
+### KDS - Kitchen Context
+
+Agrupa casos manuales para validar que las comandas de cocina expongan creador de orden, responsable de mesa, resumen de cuenta activa, observaciones generales, notas por ítem y comandas de apoyo.
+
 ### KDS - Service Notifications
 
 Agrupa requests de avisos de servicio entre cocina y salón.
+
+### KDS - Service Notification Context
+
+Agrupa casos manuales para validar contexto de usuario creador, usuario que atiende, orden asociada y resumen de mesa en avisos de cocina y servicio.
 
 ### Auth - Session Hardening
 
@@ -517,6 +537,10 @@ open_order_item_id
 ready_order_id
 service_call_id
 incident_service_call_id
+kds_context_order_id
+kds_context_item_id
+kds_support_order_id
+kds_service_context_id
 ```
 
 ---

@@ -3944,6 +3944,354 @@
       ]
     },
     {
+      "name": "KDS - Kitchen Context",
+      "description": "Casos manuales para validar contexto operativo del monitor de cocina: creador de comanda, responsable de mesa, cuenta activa, observaciones generales, notas por ítem y comandas de apoyo.",
+      "item": [
+        {
+          "name": "KDS - Context Includes Order Creator",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "orders"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{kds_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Valida que las comandas del monitor incluyan el usuario que envió la orden a cocina."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"KDS context request returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response contains orders array\", function () {",
+                  "    pm.expect(response.orders).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Orders include creator context when data exists\", function () {",
+                  "    if (response.orders.length === 0) {",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    const order = response.orders[0];",
+                  "    pm.expect(order.created_by).to.exist;",
+                  "    pm.expect(order.created_by.id_usuario).to.exist;",
+                  "    pm.expect(order.created_by.username).to.exist;",
+                  "});",
+                  "",
+                  "if (response.orders.length > 0) {",
+                  "    const order = response.orders[0];",
+                  "    pm.collectionVariables.set(\"kds_context_order_id\", order.id_orden);",
+                  "    if (order.items && order.items.length > 0) {",
+                  "        pm.collectionVariables.set(\"kds_context_item_id\", order.items[0].id_item_orden);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "KDS - Context Includes Table Service Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "orders"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{kds_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Valida que las comandas asociadas a mesa incluyan resumen de cuenta activa y responsable de atención."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"KDS context request returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response contains orders array\", function () {",
+                  "    pm.expect(response.orders).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "const tableOrders = response.orders.filter((order) => order.mesa);",
+                  "",
+                  "pm.test(\"Table orders include service summary\", function () {",
+                  "    if (tableOrders.length === 0) {",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    const order = tableOrders[0];",
+                  "    pm.expect(order.table_service).to.exist;",
+                  "    pm.expect(order.table_service.active_order_count).to.be.a(\"number\");",
+                  "    pm.expect(order.table_service.active_total).to.be.a(\"number\");",
+                  "    pm.expect(order.table_service.responsible_user).to.exist;",
+                  "    pm.expect(order.table_service.responsible_user.id_usuario).to.exist;",
+                  "});",
+                  "",
+                  "if (tableOrders.length > 0) {",
+                  "    pm.collectionVariables.set(\"kds_context_order_id\", tableOrders[0].id_orden);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "KDS - Context Separates Order Notes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "orders"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{kds_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Valida que las observaciones generales de la orden se expongan separadas de las notas de ítems."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"KDS context request returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response contains orders array\", function () {",
+                  "    pm.expect(response.orders).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Orders expose general notes separately\", function () {",
+                  "    response.orders.forEach((order) => {",
+                  "        pm.expect(order).to.have.property(\"observaciones\");",
+                  "    });",
+                  "});",
+                  "",
+                  "const orderWithNotes = response.orders.find((order) => order.observaciones);",
+                  "if (orderWithNotes) {",
+                  "    pm.collectionVariables.set(\"kds_context_order_id\", orderWithNotes.id_orden);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "KDS - Context Separates Item Notes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "orders"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{kds_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Valida que cada ítem de cocina exponga su propia nota mediante `notas_cocina`."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"KDS context request returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response contains orders array\", function () {",
+                  "    pm.expect(response.orders).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "const items = response.orders.flatMap((order) => order.items || []);",
+                  "",
+                  "pm.test(\"Kitchen items expose item notes separately\", function () {",
+                  "    if (items.length === 0) {",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    items.forEach((item) => {",
+                  "        pm.expect(item).to.have.property(\"notas_cocina\");",
+                  "    });",
+                  "});",
+                  "",
+                  "const itemWithNotes = items.find((item) => item.notas_cocina);",
+                  "if (itemWithNotes) {",
+                  "    pm.collectionVariables.set(\"kds_context_item_id\", itemWithNotes.id_item_orden);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "KDS - Context Identifies Support Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "orders"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{kds_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Valida que una comanda de apoyo pueda identificarse cuando el creador de la orden es distinto al responsable de mesa."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"KDS context request returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response contains orders array\", function () {",
+                  "    pm.expect(response.orders).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "const supportOrder = response.orders.find((order) => {",
+                  "    const creatorId = order.created_by && order.created_by.id_usuario;",
+                  "    const responsibleId =",
+                  "        order.table_service &&",
+                  "        order.table_service.responsible_user &&",
+                  "        order.table_service.responsible_user.id_usuario;",
+                  "",
+                  "    return creatorId && responsibleId && creatorId !== responsibleId;",
+                  "});",
+                  "",
+                  "pm.test(\"Support orders can be identified when they exist\", function () {",
+                  "    if (!supportOrder) {",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    pm.expect(supportOrder.created_by).to.exist;",
+                  "    pm.expect(supportOrder.table_service.responsible_user).to.exist;",
+                  "    pm.expect(supportOrder.created_by.id_usuario).to.not.eql(",
+                  "        supportOrder.table_service.responsible_user.id_usuario,",
+                  "    );",
+                  "});",
+                  "",
+                  "if (supportOrder) {",
+                  "    pm.collectionVariables.set(\"kds_support_order_id\", supportOrder.id_orden);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "KDS - Service Notifications",
       "description": "AAT-29 tests for kitchen service notifications and delivery confirmation. This folder validates ready-order service calls, kitchen incidents, waiter attention, delivery confirmation, business rules, and permission checks.",
       "item": [
@@ -4712,6 +5060,84 @@
                   "pm.test(\"Invalid type message is returned\", function () {",
                   "    pm.expect(response.message).to.include(\"Tipo de aviso\");",
                   "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "KDS - Service Notification Context",
+      "description": "Casos manuales para validar contexto de propiedad en avisos de cocina y servicio.",
+      "item": [
+        {
+          "name": "KDS - Service Calls Include Ownership Context",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kds/service-calls",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kds",
+                "service-calls"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{waiter_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Valida que los avisos de servicio incluyan usuario creador, orden asociada y resumen de atención cuando exista información disponible."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "pm.test(\"Service notification context request returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response contains notifications array\", function () {",
+                  "    pm.expect(response.notifications).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Notifications include ownership context when data exists\", function () {",
+                  "    if (response.notifications.length === 0) {",
+                  "        return;",
+                  "    }",
+                  "",
+                  "    const notification = response.notifications[0];",
+                  "    pm.expect(notification.creado_por_usuario).to.exist;",
+                  "    pm.expect(notification.orden).to.exist;",
+                  "",
+                  "    if (notification.orden.created_by) {",
+                  "        pm.expect(notification.orden.created_by.id_usuario).to.exist;",
+                  "    }",
+                  "",
+                  "    if (notification.table_service) {",
+                  "        pm.expect(notification.table_service.active_order_count).to.be.a(\"number\");",
+                  "    }",
+                  "});",
+                  "",
+                  "if (response.notifications.length > 0) {",
+                  "    pm.collectionVariables.set(\"kds_service_context_id\", response.notifications[0].id_notificacion);",
+                  "}"
                 ]
               }
             }
@@ -7017,6 +7443,26 @@
     {
       "key": "malformed_user_id",
       "value": "not-a-valid-uuid",
+      "type": "string"
+    },
+    {
+      "key": "kds_context_order_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "kds_context_item_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "kds_support_order_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "kds_service_context_id",
+      "value": "",
       "type": "string"
     }
   ]
