@@ -24,20 +24,24 @@ function getIssueField(issue) {
   return ""
 }
 
+function buildValidationResponse(result, res) {
+  const errors = result.error.issues.map((issue) => ({
+    field: getIssueField(issue),
+    message: getIssueMessage(issue),
+  }))
+
+  return res.status(400).json({
+    message: errors[0]?.message || "La solicitud contiene datos inválidos.",
+    errors,
+  })
+}
+
 function validateBody(schema) {
   return function (req, res, next) {
     const result = schema.safeParse(req.body)
 
     if (!result.success) {
-      const errors = result.error.issues.map((issue) => ({
-        field: getIssueField(issue),
-        message: getIssueMessage(issue),
-      }))
-
-      return res.status(400).json({
-        message: errors[0]?.message || "La solicitud contiene datos inválidos.",
-        errors,
-      })
+      return buildValidationResponse(result, res)
     }
 
     req.body = result.data
@@ -46,6 +50,21 @@ function validateBody(schema) {
   }
 }
 
+function validateParams(schema) {
+  return function (req, res, next) {
+    const result = schema.safeParse(req.params)
+
+    if (!result.success) {
+      return buildValidationResponse(result, res)
+    }
+
+    req.params = result.data
+
+    next()
+  }
+}
+
 module.exports = {
   validateBody,
+  validateParams,
 }
