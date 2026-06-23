@@ -3,44 +3,175 @@
 import { useState } from "react"
 import "./CobrarTab.css"
 
-// TODO: reemplazar con datos reales desde API / contexto / props
+// ORDERS LOCALES
 const ORDERS_MOCK = [
   {
-    id: 1,
-    mesa: "Mesa 1",
-    total: 48.5,
-    items: [
-      { nombre: "Lomo Saltado",   qty: 1, precio: 28.5 },
-      { nombre: "Chicha Morada",  qty: 2, precio: 5    },
-      { nombre: "Pie de Limón",   qty: 1, precio: 10   },
+    id_orden: "ord-001",
+    numero_orden: "ORD-0001",
+
+    id_mesa: "mesa-01",
+    mesa_nombre: "Mesa 1",
+
+    estado: "ENTREGADA",
+    tipo_servicio: "SALON",
+
+    subtotal: 41.10,
+    igv: 7.40,
+    total: 48.50,
+
+    detalle: [
+      {
+        nombre: "Lomo Saltado",
+        cantidad: 1,
+        precio_unitario: 28.50,
+      },
+      {
+        nombre: "Chicha Morada",
+        cantidad: 2,
+        precio_unitario: 5.00,
+      },
+      {
+        nombre: "Pie de Limón",
+        cantidad: 1,
+        precio_unitario: 10.00,
+      },
     ],
   },
+
   {
-    id: 2,
-    mesa: "Mesa 5",
-    total: 96,
-    items: [
-      { nombre: "Parrilla Familiar", qty: 1, precio: 78 },
-      { nombre: "Inca Kola",         qty: 2, precio: 9  },
+    id_orden: "ord-002",
+    numero_orden: "ORD-0002",
+
+    id_mesa: "mesa-05",
+    mesa_nombre: "Mesa 5",
+
+    estado: "ENTREGADA",
+    tipo_servicio: "SALON",
+
+    subtotal: 81.36,
+    igv: 14.64,
+    total: 96.00,
+
+    detalle: [
+      {
+        nombre: "Parrilla Familiar",
+        cantidad: 1,
+        precio_unitario: 78.00,
+      },
+      {
+        nombre: "Inca Kola",
+        cantidad: 2,
+        precio_unitario: 9.00,
+      },
     ],
   },
+
   {
-    id: 3,
-    mesa: "Mesa 8",
-    total: 32,
-    items: [
-      { nombre: "Hamburguesa Clásica", qty: 2, precio: 16 },
+    id_orden: "ord-003",
+    numero_orden: "ORD-0003",
+
+    id_mesa: "mesa-08",
+    mesa_nombre: "Mesa 8",
+
+    estado: "ENTREGADA",
+    tipo_servicio: "SALON",
+
+    subtotal: 27.12,
+    igv: 4.88,
+    total: 32.00,
+
+    detalle: [
+      {
+        nombre: "Hamburguesa Clásica",
+        cantidad: 2,
+        precio_unitario: 16.00,
+      },
     ],
   },
+
   {
-    id: 4,
-    mesa: "Mesa 12",
-    total: 114,
-    items: [
-      { nombre: "Ceviche Mixto", qty: 2, precio: 42 },
-      { nombre: "Limonada",      qty: 2, precio: 8  },
-      { nombre: "Tres Leches",   qty: 1, precio: 14 },
+    id_orden: "ord-004",
+    numero_orden: "ORD-0004",
+
+    id_mesa: "mesa-12",
+    mesa_nombre: "Mesa 12",
+
+    estado: "LISTA",
+    tipo_servicio: "SALON",
+
+    subtotal: 96.61,
+    igv: 17.39,
+    total: 114.00,
+
+    detalle: [
+      {
+        nombre: "Ceviche Mixto",
+        cantidad: 2,
+        precio_unitario: 42.00,
+      },
+      {
+        nombre: "Limonada",
+        cantidad: 2,
+        precio_unitario: 8.00,
+      },
+      {
+        nombre: "Tres Leches",
+        cantidad: 1,
+        precio_unitario: 14.00,
+      },
     ],
+  },
+
+  {
+    id_orden: "ord-005",
+    numero_orden: "ORD-0005",
+
+    id_mesa: "mesa-03",
+    mesa_nombre: "Mesa 3",
+
+    estado: "PAGADA",
+    tipo_servicio: "SALON",
+
+    subtotal: 58.47,
+    igv: 10.53,
+    total: 69.00,
+
+    detalle: [
+      {
+        nombre: "Arroz Chaufa Especial",
+        cantidad: 2,
+        precio_unitario: 22.00,
+      },
+      {
+        nombre: "Maracuyá Frozen",
+        cantidad: 1,
+        precio_unitario: 10.00,
+      },
+      {
+        nombre: "Brownie",
+        cantidad: 1,
+        precio_unitario: 15.00,
+      },
+    ],
+  },
+]
+
+// PAGOS LOCALES
+const PAYMENTS_MOCK = [
+  {
+    id_pago: "pag-001",
+    id_orden: "ord-000",
+    id_usuario: "user-001",
+
+    metodo_pago: "YAPE",
+    monto: 48.5,
+
+    referencia: "YAPE-123456",
+
+    estado: "CONFIRMADO",
+
+    created_at: "2026-06-22T18:00:00Z",
+    updated_at: "2026-06-22T18:00:00Z",
   },
 ]
 
@@ -78,9 +209,9 @@ function OrderList({ orders, selectedOrder, onSelect }) {
         <ul className="cobrar-orders__list">
           {orders.map((order) => (
             <li
-              key={order.id}
+              key={order.id_orden}
               className={
-                selectedOrder?.id === order.id
+                selectedOrder?.id_orden === order.id_orden
                   ? "cobrar-order-card cobrar-order-card--selected"
                   : "cobrar-order-card"
               }
@@ -88,10 +219,13 @@ function OrderList({ orders, selectedOrder, onSelect }) {
             >
               <div className="cobrar-order-card__info">
                 <strong>
-                  {order.mesa} · {order.items.length} items
+                  {order.mesa_nombre} · {order.detalle.length} items
                 </strong>
+
                 <span>
-                  {order.items.map((item) => item.nombre).join(", ")}
+                  {order.detalle
+                    .map((item) => item.nombre)
+                    .join(", ")}
                 </span>
               </div>
 
@@ -108,10 +242,16 @@ function OrderList({ orders, selectedOrder, onSelect }) {
 
 /* ── Pay Panel ───────────────────────────────────────────────────── */
 
-const PAYMENT_METHODS = ["efectivo", "tarjeta", "qr"]
+const PAYMENT_METHODS = [
+  "EFECTIVO",
+  "TARJETA",
+  "YAPE",
+  "PLIN",
+  "TRANSFERENCIA",
+]
 
 function PayPanel({ order }) {
-  const [method, setMethod] = useState("efectivo")
+  const [method, setMethod] = useState("EFECTIVO")
   const [received, setReceived] = useState("")
 
   const change = received
@@ -127,25 +267,59 @@ function PayPanel({ order }) {
   }
 
   const handleSubmit = () => {
-    // TODO: lógica de registro de cobro
-    console.log("Registrar cobro", { order, method, received })
+    const paymentData = {
+      id_pago: crypto.randomUUID(),
+
+      id_orden: order.id_orden,
+
+      id_usuario: "usuario-mock",
+
+      metodo_pago: method,
+
+      monto: order.total,
+
+      referencia: null,
+
+      estado: "CONFIRMADO",
+
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+
+    PAYMENTS_MOCK.push(paymentData)
+
+    console.log("Pago registrado")
+    console.log(paymentData)
   }
 
   const canSubmit =
-    method !== "efectivo" ||
+    method !== "EFECTIVO" ||
     (received !== "" && parseFloat(received) >= order.total)
 
   return (
     <div className="cobrar-pay-panel">
 
       {/* Detalle */}
+
       <div className="cobrar-pay-panel__detail">
         <h3>Detalle de consumo</h3>
 
-        {order.items.map((item, index) => (
-          <div key={index} className="cobrar-pay-panel__line">
-            <span>{item.qty}× {item.nombre}</span>
-            <span>S/ {(item.precio * item.qty).toFixed(2)}</span>
+        {order.detalle.map((item, index) => (
+          <div
+            key={index}
+            className="cobrar-pay-panel__line"
+          >
+            <span>
+              {item.cantidad}× {item.nombre}
+            </span>
+
+            <span>
+              S/{" "}
+              {(
+                item.precio_unitario *
+                item.cantidad
+              ).toFixed(2)}
+            </span>
           </div>
         ))}
 
@@ -156,36 +330,33 @@ function PayPanel({ order }) {
       </div>
 
       {/* Método de pago */}
+
       <div className="cobrar-pay-panel__payment-section">
         <h3>Método de pago</h3>
 
-        <div className="cobrar-pay-panel__methods">
+        <select
+          className="cobrar-pay-panel__select"
+          value={method}
+          onChange={(e) => {
+            setMethod(e.target.value)
+            setReceived("")
+          }}
+        >
           {PAYMENT_METHODS.map((pm) => (
-            <button
-              key={pm}
-              type="button"
-              className={
-                method === pm
-                  ? "cobrar-method-btn cobrar-method-btn--active"
-                  : "cobrar-method-btn"
-              }
-              onClick={() => {
-                setMethod(pm)
-                setReceived("")
-              }}
-            >
-              {pm === "qr"
-                ? "QR"
-                : pm.charAt(0).toUpperCase() + pm.slice(1)}
-            </button>
+            <option key={pm} value={pm}>
+              {pm}
+            </option>
           ))}
-        </div>
+        </select>
       </div>
 
-      {/* Efectivo: monto recibido y vuelto */}
-      {method === "efectivo" ? (
+      {/* Efectivo */}
+
+      {method === "EFECTIVO" ? (
         <div className="cobrar-pay-panel__received">
-          <label htmlFor="cashier-received">Monto recibido</label>
+          <label htmlFor="cashier-received">
+            Monto recibido
+          </label>
 
           <input
             id="cashier-received"
@@ -194,13 +365,17 @@ function PayPanel({ order }) {
             step="0.10"
             value={received}
             placeholder="S/ 0.00"
-            onChange={(e) => setReceived(e.target.value)}
+            onChange={(e) =>
+              setReceived(e.target.value)
+            }
           />
 
           {change !== null && (
             <div className="cobrar-pay-panel__change">
               <span>Vuelto</span>
-              <strong>S/ {change.toFixed(2)}</strong>
+              <strong>
+                S/ {change.toFixed(2)}
+              </strong>
             </div>
           )}
         </div>
@@ -208,7 +383,7 @@ function PayPanel({ order }) {
         <div className="cobrar-pay-panel__info">
           <p>
             El pago se registrará mediante{" "}
-            <strong>{method === "qr" ? "QR" : "Tarjeta"}</strong>.
+            <strong>{method}</strong>.
           </p>
         </div>
       )}
