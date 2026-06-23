@@ -1,7 +1,35 @@
 // backend/src/services/salon.service.js
 
 const { pool } = require("../config/database")
-const ACTIVE_ORDER_STATES = ["ABIERTA", "EN_PREPARACION", "LISTA"]
+const ACTIVE_ORDER_STATES = ["ABIERTA", "EN_PREPARACION", "LISTA", "ENTREGADA"]
+
+async function getActiveOrderCount(idEstablecimiento, idMesa) {
+  const { rows } = await pool.query(
+    `
+      select count(*)::int as active_order_count
+      from orden o
+      join usuario u
+        on u.id_usuario = o.id_usuario
+      where o.id_mesa = $1
+        and u.id_establecimiento = $2
+        and o.estado = any($3::varchar[]);
+    `,
+    [idMesa, idEstablecimiento, ACTIVE_ORDER_STATES]
+  )
+
+  return Number(rows[0]?.active_order_count || 0)
+}
+
+async function ensureMesaHasNoActiveAccount(idEstablecimiento, idMesa, message) {
+  const activeOrderCount = await getActiveOrderCount(idEstablecimiento, idMesa)
+
+  if (activeOrderCount > 0) {
+    const error = new Error(message)
+    error.statusCode = 409
+    throw error
+  }
+}
+
 
 async function getMesas(idEstablecimiento) {
   const query = `
@@ -117,6 +145,14 @@ async function updateMesaDisponibilidad(idEstablecimiento, idMesa, disponibilida
     throw error
   }
 
+  if (disponibilidad !== "OCUPADA") {
+    await ensureMesaHasNoActiveAccount(
+      idEstablecimiento,
+      idMesa,
+      "No se puede cambiar la disponibilidad de una mesa con cuenta activa.",
+    )
+  }
+
   const { rows } = await pool.query(
     `UPDATE mesa SET disponibilidad = $1
      WHERE id_mesa = $2 AND id_establecimiento = $3
@@ -132,6 +168,14 @@ async function updateMesaDisponibilidad(idEstablecimiento, idMesa, disponibilida
 }
 
 async function updateMesaStatus(idEstablecimiento, idMesa, estado) {
+  if (estado === false) {
+    await ensureMesaHasNoActiveAccount(
+      idEstablecimiento,
+      idMesa,
+      "No se puede desactivar una mesa con cuenta activa.",
+    )
+  }
+
   const { rows } = await pool.query(
     `UPDATE mesa SET estado = $1
      WHERE id_mesa = $2 AND id_establecimiento = $3
@@ -147,6 +191,12 @@ async function updateMesaStatus(idEstablecimiento, idMesa, estado) {
 }
 
 async function deleteMesa(idEstablecimiento, idMesa) {
+  await ensureMesaHasNoActiveAccount(
+    idEstablecimiento,
+    idMesa,
+    "No se puede eliminar una mesa con cuenta activa.",
+  )
+
   const { rows } = await pool.query(
     `DELETE FROM mesa WHERE id_mesa = $1 AND id_establecimiento = $2 RETURNING id_mesa, numero, nombre;`,
     [idMesa, idEstablecimiento]
