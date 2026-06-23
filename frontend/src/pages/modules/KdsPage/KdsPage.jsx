@@ -45,6 +45,7 @@ const H = {
   headerProg: 3,
   itemBase: 47,
   itemNote: 20,
+  orderNote: 24,
   footer: 66,
   spacer: 14,
 
@@ -124,6 +125,8 @@ function orderMatchesSearch(order, searchTerm) {
     order.id,
     order.table,
     order.waiter,
+    order.notes,
+    ...order.orderNotes,
     getStatusLabel(order.status),
     ...order.items.map((item) => item.name),
     ...order.items.flatMap((item) => item.notes),
@@ -135,7 +138,10 @@ function orderMatchesSearch(order, searchTerm) {
 }
 
 function orderHasNotes(order) {
-  return order.items.some((item) => item.notes.length > 0)
+  return (
+    order.orderNotes.length > 0 ||
+    order.items.some((item) => item.notes.length > 0)
+  )
 }
 
 function orderHasPendingItems(order) {
@@ -149,7 +155,9 @@ function orderIsCritical(order) {
 const estItemH = (item) => H.itemBase + item.notes.length * H.itemNote
 
 const estHeaderH = (order) =>
-  H.headerBase + (order.status === "process" ? H.headerProg : 0)
+  H.headerBase +
+  (order.status === "process" ? H.headerProg : 0) +
+  order.orderNotes.length * H.orderNote
 
 const estCardH = (order) =>
   estHeaderH(order) +
@@ -346,7 +354,27 @@ function HeaderBand({ order }) {
           />
         </div>
       )}
+
+      <OrderNotesPanel order={order} />
     </>
+  )
+}
+
+function OrderNotesPanel({ order }) {
+  if (!order.orderNotes.length) {
+    return null
+  }
+
+  return (
+    <section className="kds-card-order-notes" aria-label="Observaciones de comanda">
+      <span>Observación</span>
+
+      <ul>
+        {order.orderNotes.map((note) => (
+          <li key={note}>{note}</li>
+        ))}
+      </ul>
+    </section>
   )
 }
 
