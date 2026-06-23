@@ -59,6 +59,8 @@ export default function PosPageMenu({
   activeOrders = [],
   activeOrderCount = 0,
   activeTotal = 0,
+  isSupportOrder = false,
+  supportOrderMessage = "",
 }) {
   const [productQuantities, setProductQuantities] = useState({})
 
@@ -230,6 +232,13 @@ export default function PosPageMenu({
             </button>
           </div>
         </div>
+
+        {isSupportOrder && supportOrderMessage && (
+          <div className="pos-support-warning" role="status">
+            <strong>Comanda de apoyo</strong>
+            <p>{supportOrderMessage}</p>
+          </div>
+        )}
 
         {orderItems.length === 0 ? (
           <div className="pos-order-empty">
