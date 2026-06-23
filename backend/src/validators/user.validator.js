@@ -105,12 +105,18 @@ const phoneSchema = z.preprocess((value) => {
   z.null(),
 ]))
 
-const uuidSchema = z
-  .string({
-    required_error: "El identificador es obligatorio.",
-    invalid_type_error: "El identificador debe ser texto.",
-  })
-  .uuid("El identificador enviado no es válido.")
+const POSTGRES_UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+const uuidSchema = z.preprocess(
+  (value) => (typeof value === "string" ? value.trim() : value),
+  z
+    .string({
+      required_error: "El identificador es obligatorio.",
+      invalid_type_error: "El identificador debe ser texto.",
+    })
+    .regex(POSTGRES_UUID_PATTERN, "El identificador enviado no es válido."),
+)
 
 const createUserSchema = z
   .object({
