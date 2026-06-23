@@ -334,25 +334,20 @@ function PayPanel({ order }) {
       <div className="cobrar-pay-panel__payment-section">
         <h3>Método de pago</h3>
 
-        <div className="cobrar-pay-panel__methods">
+        <select
+          className="cobrar-pay-panel__select"
+          value={method}
+          onChange={(e) => {
+            setMethod(e.target.value)
+            setReceived("")
+          }}
+        >
           {PAYMENT_METHODS.map((pm) => (
-            <button
-              key={pm}
-              type="button"
-              className={
-                method === pm
-                  ? "cobrar-method-btn cobrar-method-btn--active"
-                  : "cobrar-method-btn"
-              }
-              onClick={() => {
-                setMethod(pm)
-                setReceived("")
-              }}
-            >
+            <option key={pm} value={pm}>
               {pm}
-            </button>
+            </option>
           ))}
-        </div>
+        </select>
       </div>
 
       {/* Efectivo */}
