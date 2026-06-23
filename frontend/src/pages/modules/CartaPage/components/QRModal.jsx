@@ -1,6 +1,7 @@
 // src/pages/modules/CartaPage/components/QRModal.jsx
 
 import { useEffect, useState } from "react"
+
 import { getQR } from "../../../../services/qrService"
 
 export default function QRModal({ onClose }) {
@@ -10,22 +11,44 @@ export default function QRModal({ onClose }) {
   const [copiado, setCopiado] = useState(false)
 
   useEffect(() => {
-    getQR()
-      .then(setQr)
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false))
+    let isMounted = true
+
+    async function loadQR() {
+      try {
+        const generatedQr = await getQR()
+
+        if (isMounted) {
+          setQr(generatedQr)
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err.message || "No se pudo generar el QR.")
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadQR()
+
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   async function handleDescargar() {
-     try {
+    if (!qr?.imagen_qr) return
+
+    try {
       const response = await fetch(qr.imagen_qr)
       const blob = await response.blob()
       const urlBlob = window.URL.createObjectURL(blob)
-      
       const link = document.createElement("a")
 
       link.href = urlBlob
-      link.download = "qr-carta-umari.png"
+      link.download = `qr-carta-${qr.tenant_slug || "umari"}.png`
 
       document.body.appendChild(link)
       link.click()
@@ -36,14 +59,16 @@ export default function QRModal({ onClose }) {
 
       link.href = qr.imagen_qr
       link.target = "_blank"
-      link.download = "qr-carta-umari.png"
+      link.download = `qr-carta-${qr.tenant_slug || "umari"}.png`
       link.click()
     }
   }
 
   function handleCopiarLink() {
     if (!qr?.url_destino) return
-    navigator.clipboard.writeText(qr.url_destino)
+
+    navigator.clipboard
+      .writeText(qr.url_destino)
       .then(() => {
         setCopiado(true)
         setTimeout(() => setCopiado(false), 2000)
@@ -52,15 +77,16 @@ export default function QRModal({ onClose }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div
+      className="modal-overlay"
+      onClick={(event) => event.target === event.currentTarget && onClose()}
+    >
       <div className="modal" style={{ textAlign: "center", maxWidth: 380 }}>
         <h2>QR de tu carta digital</h2>
 
         {loading && <p style={{ color: "#6b7280" }}>Generando código QR...</p>}
 
-        {error && (
-          <p style={{ color: "#dc2626", fontSize: 14 }}>{error}</p>
-        )}
+        {error && <p style={{ color: "#dc2626", fontSize: 14 }}>{error}</p>}
 
         {qr && !loading && (
           <>
@@ -77,7 +103,14 @@ export default function QRModal({ onClose }) {
               }}
             />
 
-            <p style={{ fontSize: 13, color: "#6b7280", wordBreak: "break-all", marginBottom: 16 }}>
+            <p
+              style={{
+                fontSize: 13,
+                color: "#6b7280",
+                wordBreak: "break-all",
+                marginBottom: 16,
+              }}
+            >
               {qr.url_destino}
             </p>
 
@@ -86,7 +119,9 @@ export default function QRModal({ onClose }) {
                 className="carta__btn carta__btn--secondary"
                 type="button"
                 onClick={handleCopiarLink}
-                style={copiado ? { backgroundColor: "#e2e8f0", color: "#0f172a" } : {}}
+                style={
+                  copiado ? { backgroundColor: "#e2e8f0", color: "#0f172a" } : {}
+                }
               >
                 {copiado ? "¡Copiado! ✓" : "Copiar link"}
               </button>

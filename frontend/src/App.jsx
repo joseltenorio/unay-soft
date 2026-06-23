@@ -36,7 +36,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/restore-password" element={<RestorePassword />} />
           <Route
-            path="/carta/:id_establecimiento"
+            path="/carta/:public_identifier"
             element={<PublicCartaPage />}
           />
 

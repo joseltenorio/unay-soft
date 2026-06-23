@@ -14,7 +14,8 @@ function formatPrice(value, currencySymbol = "S/.") {
 }
 
 export default function PublicCartaPage() {
-  const { id_establecimiento } = useParams()
+  const { public_identifier, tenant_slug, id_establecimiento } = useParams()
+  const cartaIdentifier = public_identifier || tenant_slug || id_establecimiento
 
   const [data, setData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -32,14 +33,14 @@ export default function PublicCartaPage() {
       setErrorMessage("")
       setData(null)
 
-      if (!id_establecimiento) {
+      if (!cartaIdentifier) {
         setErrorMessage("El establecimiento es requerido.")
         setIsLoading(false)
         return
       }
 
       try {
-        const cartaData = await getPublicCarta(id_establecimiento)
+        const cartaData = await getPublicCarta(cartaIdentifier)
 
         if (isMounted) {
           setData(cartaData)
@@ -60,7 +61,7 @@ export default function PublicCartaPage() {
     return () => {
       isMounted = false
     }
-  }, [id_establecimiento])
+  }, [cartaIdentifier])
 
   const establecimiento = data?.establecimiento
   const categorias = useMemo(() => data?.categorias || [], [data])

@@ -2,13 +2,13 @@
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api"
 
-export async function getPublicCarta(idEstablecimiento) {
-  if (!idEstablecimiento) {
+export async function getPublicCarta(publicIdentifier) {
+  if (!publicIdentifier) {
     throw new Error("El establecimiento es requerido.")
   }
 
   const response = await fetch(
-    `${API_URL}/public/carta/${encodeURIComponent(idEstablecimiento)}`,
+    `${API_URL}/public/carta/${encodeURIComponent(publicIdentifier)}`,
   )
 
   const responseData = await response.json().catch(() => null)
@@ -21,4 +21,3 @@ export async function getPublicCarta(idEstablecimiento) {
 
   return responseData
 }
-
