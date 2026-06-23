@@ -196,6 +196,7 @@ export default function CobrarTab() {
       <PayPanel
         order={selectedOrder}
         clearOrder={() => setSelectedOrder(null)}
+        showToast={showToast}
       />
     </div>
   )
@@ -260,7 +261,7 @@ const PAYMENT_METHODS = [
   "TRANSFERENCIA",
 ]
 
-function PayPanel({ order, clearOrder }) {
+function PayPanel({ order, clearOrder, showToast }) {
   const [method, setMethod] = useState("EFECTIVO")
   const [received, setReceived] = useState("")
 
@@ -282,6 +283,18 @@ function PayPanel({ order, clearOrder }) {
   }
 
   const handleSubmit = () => {
+    if (
+      method === "EFECTIVO" &&
+      (received === "" || parseFloat(received) < order.total)
+    ) {
+      showToast({
+        type: "warning",
+        title: "Monto insuficiente",
+        message: "El monto recibido es menor al total de la cuenta.",
+      })
+      return
+    }
+
     console.log("=== HANDLE SUBMIT ===")
     console.log(order)
     
@@ -302,15 +315,18 @@ function PayPanel({ order, clearOrder }) {
 
     PAYMENTS_MOCK.push(paymentData)
 
-    console.log("Payments:")
-    console.table(PAYMENTS_MOCK)
-
     //Cambio de estado a pagado
     order.estado = "PAGADA"
 
-    setSelectedOrder(null)
-  }
+    showToast({
+      type: "success",
+      title: "Cobro registrado",
+      message: `La orden ${order.numero_orden} fue cobrada correctamente.`,
+    })
 
+    clearOrder()
+  }
+ 
   const canSubmit =
     method !== "EFECTIVO" ||
     (received !== "" && parseFloat(received) >= order.total)
