@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react"
 import "./CobrarTab.css"
+import useToast from "../../../../components/common/Toast/useToast"
+
 
 // ORDERS LOCALES
 const ORDERS_MOCK = [
@@ -176,6 +178,8 @@ const PAYMENTS_MOCK = [
 ]
 
 export default function CobrarTab() {
+  const { showToast } = useToast()
+
   const [selectedOrder, setSelectedOrder] = useState(null)
   const pendingOrders = ORDERS_MOCK.filter(
     (order) => order.estado === "ENVIADA_A_CAJA"
@@ -189,7 +193,11 @@ export default function CobrarTab() {
         onSelect={setSelectedOrder}
       />
 
-      <PayPanel order={selectedOrder} />
+      <PayPanel
+        order={selectedOrder}
+        clearOrder={() => setSelectedOrder(null)}
+        showToast={showToast}
+      />
     </div>
   )
 }
@@ -253,7 +261,7 @@ const PAYMENT_METHODS = [
   "TRANSFERENCIA",
 ]
 
-function PayPanel({ order }) {
+function PayPanel({ order, clearOrder, showToast }) {
   const [method, setMethod] = useState("EFECTIVO")
   const [received, setReceived] = useState("")
 
@@ -275,6 +283,20 @@ function PayPanel({ order }) {
   }
 
   const handleSubmit = () => {
+    if (
+      method === "EFECTIVO" &&
+      (received === "" || parseFloat(received) < order.total)
+    ) {
+      showToast({
+        type: "warning",
+        title: "Monto insuficiente",
+        message: "El monto recibido es menor al total de la cuenta.",
+      })
+      return
+    }
+
+    console.log("=== HANDLE SUBMIT ===")
+    console.log(order)
     
     const paymentData = {
       id_pago: crypto.randomUUID(),
@@ -288,17 +310,23 @@ function PayPanel({ order }) {
       updated_at: new Date().toISOString(),
     }
 
+    console.log("Pago registrado:")
+    console.log(paymentData)
+
     PAYMENTS_MOCK.push(paymentData)
 
     //Cambio de estado a pagado
     order.estado = "PAGADA"
 
-    console.log("Pago registrado")
-    console.log(paymentData)
+    showToast({
+      type: "success",
+      title: "Cobro registrado",
+      message: `La orden ${order.numero_orden} fue cobrada correctamente.`,
+    })
 
-    setSelectedOrder(null)
+    clearOrder()
   }
-
+ 
   const canSubmit =
     method !== "EFECTIVO" ||
     (received !== "" && parseFloat(received) >= order.total)
