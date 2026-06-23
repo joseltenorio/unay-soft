@@ -2,8 +2,19 @@
 
 import { apiPrivateRequest } from "./api"
 
+function buildUserFullName(user) {
+  if (!user) {
+    return ""
+  }
+
+  return [user.nombres, user.apellidos].filter(Boolean).join(" ").trim()
+}
+
 function normalizeTable(table) {
   const activeOrderCount = Number(table.active_order_count || 0)
+  const tableService = table.table_service || {}
+  const responsibleUser = tableService.responsible_user || null
+  const responsibleName = buildUserFullName(responsibleUser)
 
   return {
     ...table,
@@ -13,12 +24,25 @@ function normalizeTable(table) {
     floor: table.zona_nombre || table.floor || "Sin zona",
 
     occupied: Boolean(table.occupied),
-    waiter: activeOrderCount > 0 ? "Cuenta abierta" : null,
+    waiter: activeOrderCount > 0
+      ? responsibleName || "Cuenta abierta"
+      : null,
     time: activeOrderCount > 0 ? `${activeOrderCount} orden(es)` : null,
 
     active_order_count: activeOrderCount,
     active_total: Number(table.active_total || 0),
     active_orders: table.active_orders || [],
+    first_order_at: table.first_order_at || tableService.first_order_at || null,
+    last_order_at: table.last_order_at || tableService.last_order_at || null,
+    table_service: {
+      ...tableService,
+      responsible_user: responsibleUser,
+      responsible_user_name: responsibleName,
+      active_order_count: Number(
+        tableService.active_order_count || activeOrderCount,
+      ),
+      active_total: Number(tableService.active_total || table.active_total || 0),
+    },
   }
 }
 

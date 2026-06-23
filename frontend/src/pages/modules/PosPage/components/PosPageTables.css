@@ -132,9 +132,15 @@
   font-weight: 700;
 }
 
-.pos-table-time {
+.pos-table-time,
+.pos-table-total {
   color: var(--pos-text-secondary);
   font-size: 13px;
+}
+
+.pos-table-total {
+  color: var(--pos-primary);
+  font-weight: 800;
 }
 
 .pos-table-free {
