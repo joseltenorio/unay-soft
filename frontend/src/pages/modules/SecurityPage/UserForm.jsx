@@ -91,9 +91,8 @@ export default function UserForm({
     getInitialFormState(mode, initialUser),
   )
   const [fieldErrors, setFieldErrors] = useState({})
-  const [wasSubmitted, setWasSubmitted] = useState(false)
 
-  const visibleFieldErrors = wasSubmitted ? fieldErrors : {}
+  const visibleFieldErrors = fieldErrors
   const hasVisibleErrors = hasValidationErrors(visibleFieldErrors)
 
   useEffect(() => {
@@ -106,7 +105,6 @@ export default function UserForm({
 
       setFormData(getInitialFormState(mode, initialUser))
       setFieldErrors({})
-      setWasSubmitted(false)
     }, 0)
 
     return () => {
@@ -121,7 +119,7 @@ export default function UserForm({
 
     setFormData((currentData) => {
       let nextValue = type === "checkbox" ? checked : value
-
+      
       if (name === "celular") {
         nextValue = normalizePeruPhoneDigits(value)
       }
@@ -169,7 +167,7 @@ export default function UserForm({
         nextData.id_rol = normalizeRoleId(currentData.id_rol)
       }
 
-      validateOnlyAfterSubmit(nextData)
+      setFieldErrors(validateUserForm(nextData, { isEditMode }))
 
       return nextData
     })
@@ -204,7 +202,6 @@ export default function UserForm({
       id_rol: normalizedPayload.id_rol,
     }))
     setFieldErrors(errors)
-    setWasSubmitted(true)
 
     if (hasValidationErrors(errors)) {
       return
