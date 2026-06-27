@@ -115,13 +115,6 @@ export default function UserForm({
     }
   }, [mode, initialUser])
 
-  function validateOnlyAfterSubmit(nextFormData) {
-    if (!wasSubmitted) {
-      return
-    }
-
-    setFieldErrors(validateUserForm(nextFormData, { isEditMode }))
-  }
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target
@@ -137,18 +130,10 @@ export default function UserForm({
         nextValue = normalizeUsername(value)
       }
 
-      if (name === "id_rol") {
-        nextValue = normalizeRoleId(value)
-      }
-
-      const nextData = {
+      return {
         ...currentData,
         [name]: nextValue,
       }
-
-      validateOnlyAfterSubmit(nextData)
-
-      return nextData
     })
   }
 
