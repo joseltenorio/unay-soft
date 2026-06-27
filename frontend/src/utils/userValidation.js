@@ -86,9 +86,8 @@ export function normalizePeruPhoneDigits(value) {
   }
 
   const digits = rawValue.replace(/\D/g, "")
-  const nationalNumber = digits.startsWith("51") && digits.length > 9
-    ? digits.slice(2)
-    : digits
+  const nationalNumber =
+    digits.startsWith("51") && digits.length > 9 ? digits.slice(2) : digits
 
   return nationalNumber.slice(0, 9)
 }
@@ -131,27 +130,85 @@ export function isStrongPassword(value) {
   )
 }
 
+function validatePersonName(value, fieldLabel) {
+  const normalized = normalizePersonName(value)
+
+  if (!normalized) {
+    return `El ${fieldLabel} es obligatorio.`
+  }
+
+  if (normalized.length < 2 || normalized.length > 60) {
+    return `El ${fieldLabel} debe tener entre 2 y 60 caracteres.`
+  }
+
+  if (/^['-]/.test(normalized)) {
+    return `El ${fieldLabel} no puede empezar con guion o apóstrofe.`
+  }
+
+  if (/['-]$/.test(normalized)) {
+    return `El ${fieldLabel} no puede terminar con guion o apóstrofe.`
+  }
+
+  if (/['-]{2,}/.test(normalized)) {
+    return `El ${fieldLabel} no puede tener guiones o apóstrofes consecutivos.`
+  }
+
+  if (!PERSON_NAME_PATTERN.test(normalized)) {
+    return `El ${fieldLabel} solo puede contener letras, espacios, apóstrofe o guion.`
+  }
+
+  return null
+}
+
+function validateUsername(value) {
+  const normalized = normalizeUsername(value)
+
+  if (!normalized) {
+    return "El usuario es obligatorio."
+  }
+
+  if (normalized.length < 4 || normalized.length > 30) {
+    return "El usuario debe tener entre 4 y 30 caracteres."
+  }
+
+  if (/^[._-]/.test(normalized)) {
+    return "El usuario no puede empezar con punto, guion o guion bajo."
+  }
+
+  if (/[._-]$/.test(normalized)) {
+    return "El usuario no puede terminar con punto, guion o guion bajo."
+  }
+
+  if (/[._-]{2,}/.test(normalized)) {
+    return "El usuario no puede tener puntos, guiones o guiones bajos consecutivos."
+  }
+
+  if (RESERVED_USERNAMES.has(normalized)) {
+    return "Este nombre de usuario no está disponible."
+  }
+
+  if (!USERNAME_PATTERN.test(normalized)) {
+    return "El usuario solo puede contener letras, números, punto, guion o guion bajo."
+  }
+
+  return null
+}
+
 export function validateUserForm(formData, { isEditMode = false } = {}) {
   const errors = {}
 
-  if (!isValidPersonName(formData.nombres)) {
-    errors.nombres =
-      "El nombre solo puede contener letras, espacios, apóstrofe o guion."
-  }
+  const nombresError = validatePersonName(formData.nombres, "nombre")
+  if (nombresError) errors.nombres = nombresError
 
-  if (!isValidPersonName(formData.apellidos)) {
-    errors.apellidos =
-      "El apellido solo puede contener letras, espacios, apóstrofe o guion."
-  }
+  const apellidosError = validatePersonName(formData.apellidos, "apellido")
+  if (apellidosError) errors.apellidos = apellidosError
 
   if (!isValidEmail(formData.email)) {
     errors.email = "Debe ingresar un correo válido."
   }
 
-  if (!isValidUsername(formData.username)) {
-    errors.username =
-      "El usuario debe tener 4 a 30 caracteres: letras minúsculas, números, punto, guion o guion bajo."
-  }
+  const usernameError = validateUsername(formData.username)
+  if (usernameError) errors.username = usernameError
 
   if (formData.celular && !isValidPeruPhone(formData.celular)) {
     errors.celular = "El celular debe tener el formato +51 999 888 777."
@@ -170,5 +227,5 @@ export function validateUserForm(formData, { isEditMode = false } = {}) {
 }
 
 export function hasValidationErrors(errors) {
-  return Object.keys(errors).length > 0
+  return Object.values(errors).some((error) => error !== undefined)
 }
