@@ -1,7 +1,7 @@
 // frontend/src/utils/userValidation.js
 
 const PERSON_NAME_PATTERN =
-  /^(?!.*\s{2,})(?!.*['-]{2,})[\p{L}]+(?:[ '-][\p{L}]+)*$/u
+  /^(?!.*['-]{2,})[\p{L}]+(?:[ '-][\p{L}]+)*$/u
 
 const USERNAME_PATTERN =
   /^(?![._-])(?!.*[._-]{2})(?!.*[._-]$)[a-z0-9._-]{4,30}$/
@@ -33,7 +33,7 @@ export function normalizeText(value) {
 }
 
 export function normalizePersonName(value) {
-  return normalizeText(value)
+  return normalizeText(value).toUpperCase()
 }
 
 export function isValidPersonName(value) {
