@@ -87,7 +87,7 @@ export function normalizePeruPhoneDigits(value) {
 
   const digits = rawValue.replace(/\D/g, "")
   const nationalNumber =
-    digits.startsWith("51") && digits.length > 9 ? digits.slice(2) : digits
+    digits.startsWith("51") ? digits.slice(2) : digits
 
   return nationalNumber.slice(0, 9)
 }
