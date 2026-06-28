@@ -177,6 +177,9 @@ const PAYMENTS_MOCK = [
   },
 ]
 
+// Mock IGV
+const IGV_RATE = 0.18
+
 export default function CobrarTab() {
   const { showToast } = useToast()
 
@@ -265,6 +268,10 @@ function PayPanel({ order, clearOrder, showToast }) {
   const [method, setMethod] = useState("EFECTIVO")
   const [received, setReceived] = useState("")
 
+  const subtotal = order ? order.subtotal : 0
+  const igv = order ? parseFloat((subtotal * IGV_RATE).toFixed(2)) : 0
+  const total = order ? parseFloat((subtotal + igv).toFixed(2)) : 0
+
    useEffect(() => {
     setReceived("")
     setMethod("EFECTIVO")
@@ -340,27 +347,28 @@ function PayPanel({ order, clearOrder, showToast }) {
         <h3>Detalle de consumo</h3>
 
         {order.detalle.map((item, index) => (
-          <div
-            key={index}
-            className="cobrar-pay-panel__line"
-          >
-            <span>
-              {item.cantidad}× {item.nombre}
-            </span>
-
-            <span>
-              S/{" "}
-              {(
-                item.precio_unitario *
-                item.cantidad
-              ).toFixed(2)}
-            </span>
+          <div key={index} className="cobrar-pay-panel__line">
+            <span>{item.cantidad}× {item.nombre}</span>
+            <span>S/ {(item.precio_unitario * item.cantidad).toFixed(2)}</span>
           </div>
         ))}
 
+        {/* Subtotal + IGV + Total */}
+        <div className="cobrar-pay-panel__subtotals">
+          <div className="cobrar-pay-panel__line cobrar-pay-panel__line--muted">
+            <span>Subtotal</span>
+            <span>S/ {subtotal.toFixed(2)}</span>
+          </div>
+
+          <div className="cobrar-pay-panel__line cobrar-pay-panel__line--muted">
+            <span>IGV ({IGV_RATE * 100}%)</span>
+            <span>S/ {igv.toFixed(2)}</span>
+          </div>
+        </div>
+
         <div className="cobrar-pay-panel__total">
           <strong>Total</strong>
-          <strong>S/ {order.total.toFixed(2)}</strong>
+          <strong>S/ {total.toFixed(2)}</strong>
         </div>
       </div>
 
