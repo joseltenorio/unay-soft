@@ -372,43 +372,9 @@ function PayPanel({ order, clearOrder, showToast }) {
   return (
     <div className="cobrar-pay-panel">
 
-      {/* Detalle de consumo */}
-      <div className="cobrar-pay-panel__detail">
-        <h3>Detalle de consumo</h3>
-
-        {/* Una línea por cada ítem del pedido */}
-        {order.detalle.map((item, index) => (
-          <div key={index} className="cobrar-pay-panel__line">
-            <span>{item.cantidad}× {item.nombre}</span>
-            <span>S/ {(item.precio_unitario * item.cantidad).toFixed(2)}</span>
-          </div>
-        ))}
-
-        {/* Subtotal e IGV antes del total */}
-        <div className="cobrar-pay-panel__subtotals">
-          <div className="cobrar-pay-panel__line cobrar-pay-panel__line--muted">
-            <span>Subtotal</span>
-            <span>S/ {subtotal.toFixed(2)}</span>
-          </div>
-          <div className="cobrar-pay-panel__line cobrar-pay-panel__line--muted">
-            {/* El porcentaje se calcula dinámicamente desde IGV_RATE */}
-            <span>IGV ({IGV_RATE * 100}%)</span>
-            <span>S/ {igv.toFixed(2)}</span>
-          </div>
-        </div>
-
-        {/* Total final destacado */}
-        <div className="cobrar-pay-panel__total">
-          <strong>Total</strong>
-          <strong>S/ {total.toFixed(2)}</strong>
-        </div>
-      </div>
-
       {/* Tipo de comprobante */}
       <div className="cobrar-pay-panel__payment-section">
-        <h3>Tipo de comprobante</h3>
-
-        {/* Toggle entre Boleta y Factura */}
+        {/* Boleta / Factura */}
         <div className="cobrar-pay-panel__doc-toggle">
           <button
             type="button"
@@ -477,6 +443,38 @@ function PayPanel({ order, clearOrder, showToast }) {
             )}
           </div>
         )}
+      </div>
+
+      {/* Detalle de consumo */}
+      <div className="cobrar-pay-panel__detail">
+        <h3>Detalle de consumo</h3>
+
+        {/* Una línea por cada ítem del pedido */}
+        {order.detalle.map((item, index) => (
+          <div key={index} className="cobrar-pay-panel__line">
+            <span>{item.cantidad}× {item.nombre}</span>
+            <span>S/ {(item.precio_unitario * item.cantidad).toFixed(2)}</span>
+          </div>
+        ))}
+
+        {/* Subtotal e IGV antes del total */}
+        <div className="cobrar-pay-panel__subtotals">
+          <div className="cobrar-pay-panel__line cobrar-pay-panel__line--muted">
+            <span>Subtotal</span>
+            <span>S/ {subtotal.toFixed(2)}</span>
+          </div>
+          <div className="cobrar-pay-panel__line cobrar-pay-panel__line--muted">
+            {/* El porcentaje se calcula dinámicamente desde IGV_RATE */}
+            <span>IGV ({IGV_RATE * 100}%)</span>
+            <span>S/ {igv.toFixed(2)}</span>
+          </div>
+        </div>
+
+        {/* Total final destacado */}
+        <div className="cobrar-pay-panel__total">
+          <strong>Total</strong>
+          <strong>S/ {total.toFixed(2)}</strong>
+        </div>
       </div>
 
       {/* Método de pago */}
