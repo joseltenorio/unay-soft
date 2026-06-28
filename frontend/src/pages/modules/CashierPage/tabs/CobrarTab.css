@@ -85,7 +85,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  border: 1px solid var(--color-border-base);
+  border: 1px solid rgba(157, 190, 187, 0.34);
   border-left: 4px solid var(--color-brand-main-50);
   border-radius: 18px;
   background: var(--color-surface);
@@ -450,7 +450,6 @@
 }
 
 /* Change */
-/* Change */
 .cobrar-pay-panel__change {
   display: flex;
   align-items: center;
@@ -497,7 +496,7 @@
     background-color var(--transition-fast),
     transform var(--transition-fast),
     box-shadow var(--transition-fast);
-  box-shadow: 0 10px 26px rgba(3, 25, 38, 0.18);
+  box-shadow: var(--shadow-button);
 }
 
 .cobrar-pay-panel__submit:hover:not(:disabled) {
@@ -511,6 +510,12 @@
   opacity: 0.56;
   transform: none;
   box-shadow: none;
+}
+
+/* ── Animaciones ─────────────────────────────────────────────────── */
+@keyframes cobrar-pulse {
+  0%, 100% { opacity: 1;   }
+  50%       { opacity: 0.4; }
 }
 
 /* ── Responsive ──────────────────────────────────────────────────── */
