@@ -91,22 +91,19 @@ export default function UserForm({
     getInitialFormState(mode, initialUser),
   )
   const [fieldErrors, setFieldErrors] = useState({})
-  const [wasSubmitted, setWasSubmitted] = useState(false)
 
-  const visibleFieldErrors = wasSubmitted ? fieldErrors : {}
-  const hasVisibleErrors = hasValidationErrors(visibleFieldErrors)
+  const hasVisibleErrors = Object.values(fieldErrors).some(
+    (error) => error !== undefined,
+  )
 
   useEffect(() => {
     let isMounted = true
 
     const resetFormId = window.setTimeout(() => {
-      if (!isMounted) {
-        return
-      }
+      if (!isMounted) return
 
       setFormData(getInitialFormState(mode, initialUser))
       setFieldErrors({})
-      setWasSubmitted(false)
     }, 0)
 
     return () => {
@@ -114,14 +111,6 @@ export default function UserForm({
       window.clearTimeout(resetFormId)
     }
   }, [mode, initialUser])
-
-  function validateOnlyAfterSubmit(nextFormData) {
-    if (!wasSubmitted) {
-      return
-    }
-
-    setFieldErrors(validateUserForm(nextFormData, { isEditMode }))
-  }
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target
@@ -137,70 +126,46 @@ export default function UserForm({
         nextValue = normalizeUsername(value)
       }
 
-      if (name === "id_rol") {
-        nextValue = normalizeRoleId(value)
-      }
-
-      const nextData = {
+      return {
         ...currentData,
         [name]: nextValue,
       }
-
-      validateOnlyAfterSubmit(nextData)
-
-      return nextData
     })
   }
 
   function handleBlur(event) {
     const { name } = event.target
 
-    setFormData((currentData) => {
-      const nextData = {
-        ...currentData,
-      }
+    const nextData = { ...formData }
 
-      if (name === "nombres") {
-        nextData.nombres = normalizePersonName(currentData.nombres)
-      }
+    if (name === "nombres")   nextData.nombres   = normalizePersonName(formData.nombres)
+    if (name === "apellidos") nextData.apellidos = normalizePersonName(formData.apellidos)
+    if (name === "email")     nextData.email     = normalizeEmail(formData.email)
+    if (name === "username")  nextData.username  = normalizeUsername(formData.username)
+    if (name === "celular")   nextData.celular   = normalizePeruPhoneDigits(formData.celular)
+    if (name === "id_rol")    nextData.id_rol    = normalizeRoleId(formData.id_rol)
 
-      if (name === "apellidos") {
-        nextData.apellidos = normalizePersonName(currentData.apellidos)
-      }
+    const errors = validateUserForm(nextData, { isEditMode })
 
-      if (name === "email") {
-        nextData.email = normalizeEmail(currentData.email)
-      }
+    setFormData(nextData)
 
-      if (name === "username") {
-        nextData.username = normalizeUsername(currentData.username)
-      }
-
-      if (name === "celular") {
-        nextData.celular = normalizePeruPhoneDigits(currentData.celular)
-      }
-
-      if (name === "id_rol") {
-        nextData.id_rol = normalizeRoleId(currentData.id_rol)
-      }
-
-      validateOnlyAfterSubmit(nextData)
-
-      return nextData
-    })
+    setFieldErrors((currentErrors) => ({
+      ...currentErrors,
+      [name]: errors[name],
+    }))
   }
 
   function handleSubmit(event) {
     event.preventDefault()
 
     const normalizedPayload = {
-      nombres: normalizePersonName(formData.nombres),
+      nombres:   normalizePersonName(formData.nombres),
       apellidos: normalizePersonName(formData.apellidos),
-      email: normalizeEmail(formData.email),
-      username: normalizeUsername(formData.username),
-      celular: normalizePeruPhone(formData.celular),
-      id_rol: normalizeRoleId(formData.id_rol),
-      estado: formData.estado,
+      email:     normalizeEmail(formData.email),
+      username:  normalizeUsername(formData.username),
+      celular:   normalizePeruPhone(formData.celular),
+      id_rol:    normalizeRoleId(formData.id_rol),
+      estado:    formData.estado,
     }
 
     if (!isEditMode) {
@@ -211,15 +176,15 @@ export default function UserForm({
 
     setFormData((currentData) => ({
       ...currentData,
-      nombres: normalizedPayload.nombres,
+      nombres:   normalizedPayload.nombres,
       apellidos: normalizedPayload.apellidos,
-      email: normalizedPayload.email,
-      username: normalizedPayload.username,
-      celular: normalizePeruPhoneDigits(normalizedPayload.celular),
-      id_rol: normalizedPayload.id_rol,
+      email:     normalizedPayload.email,
+      username:  normalizedPayload.username,
+      celular:   normalizePeruPhoneDigits(normalizedPayload.celular),
+      id_rol:    normalizedPayload.id_rol,
     }))
+
     setFieldErrors(errors)
-    setWasSubmitted(true)
 
     if (hasValidationErrors(errors)) {
       return
@@ -232,7 +197,7 @@ export default function UserForm({
   }
 
   function getFieldProps(fieldName) {
-    const error = visibleFieldErrors[fieldName]
+    const error = fieldErrors[fieldName]
 
     return {
       "aria-invalid": error ? "true" : "false",
@@ -305,7 +270,7 @@ export default function UserForm({
               required
               {...getFieldProps("nombres")}
             />
-            <FieldHelp fieldName="nombres" errors={visibleFieldErrors} />
+            <FieldHelp fieldName="nombres" errors={fieldErrors} />
           </label>
 
           <label className="user-form__field">
@@ -322,7 +287,7 @@ export default function UserForm({
               required
               {...getFieldProps("apellidos")}
             />
-            <FieldHelp fieldName="apellidos" errors={visibleFieldErrors} />
+            <FieldHelp fieldName="apellidos" errors={fieldErrors} />
           </label>
 
           <label className="user-form__field">
@@ -339,7 +304,7 @@ export default function UserForm({
               required
               {...getFieldProps("email")}
             />
-            <FieldHelp fieldName="email" errors={visibleFieldErrors} />
+            <FieldHelp fieldName="email" errors={fieldErrors} />
           </label>
 
           <label className="user-form__field">
@@ -356,14 +321,14 @@ export default function UserForm({
               required
               {...getFieldProps("username")}
             />
-            <FieldHelp fieldName="username" errors={visibleFieldErrors} />
+            <FieldHelp fieldName="username" errors={fieldErrors} />
           </label>
 
           <label className="user-form__field">
             <span>Celular</span>
             <div
               className={
-                visibleFieldErrors.celular
+                fieldErrors.celular
                   ? "user-form__phone user-form__phone--invalid"
                   : "user-form__phone"
               }
@@ -381,7 +346,7 @@ export default function UserForm({
                 {...getFieldProps("celular")}
               />
             </div>
-            <FieldHelp fieldName="celular" errors={visibleFieldErrors} />
+            <FieldHelp fieldName="celular" errors={fieldErrors} />
           </label>
 
           <label className="user-form__field">
@@ -403,7 +368,7 @@ export default function UserForm({
                 </option>
               ))}
             </select>
-            <FieldHelp fieldName="id_rol" errors={visibleFieldErrors} />
+            <FieldHelp fieldName="id_rol" errors={fieldErrors} />
           </label>
 
           {!isEditMode && (
@@ -421,7 +386,7 @@ export default function UserForm({
                 required
                 {...getFieldProps("password")}
               />
-              <FieldHelp fieldName="password" errors={visibleFieldErrors} />
+              <FieldHelp fieldName="password" errors={fieldErrors} />
             </label>
           )}
 

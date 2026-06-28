@@ -513,12 +513,8 @@ function FooterActions({
           className="kds-abort-ready-button"
           type="button"
           onClick={() => onAbortReady(order.id)}
-          disabled={isUpdating || isServiceCallSubmitting || wasReadyNotified}
-          title={
-            wasReadyNotified
-              ? "No se puede reabrir una comanda ya notificada al mesero"
-              : "Volver la comanda a preparación"
-          }
+          disabled={isUpdating || isServiceCallSubmitting}
+          title="Volver la comanda a preparacion"
         >
           {isUpdating ? (
             <span className="kds-action-button__spinner" aria-hidden="true" />
