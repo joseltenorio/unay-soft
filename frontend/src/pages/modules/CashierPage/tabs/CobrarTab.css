@@ -231,7 +231,7 @@
   gap: 12px;
   padding-top: 12px;
   margin-top: 4px;
-  border-top: 1.5px solid rgba(70, 129, 137, 0.2);
+  border-top: 1.5px solid var(--color-brand-main-20);
 }
 
 .cobrar-pay-panel__total strong:first-child {
@@ -268,7 +268,7 @@
   min-height: 42px;
   border: 1.5px solid rgba(157, 190, 187, 0.4);
   border-radius: 14px;
-  background: rgba(252, 249, 242, 0.6);
+  background: var(--color-surface-warm);
   color: var(--color-brand-primary);
   font-size: 0.84rem;
   font-weight: 800;
@@ -282,10 +282,15 @@
 }
 
 .cobrar-pay-panel__doc-btn:hover:not(.cobrar-pay-panel__doc-btn--active) {
-  border-color: rgba(70, 129, 137, 0.4);
-  color: var(--color-brand-primary);
+  border-color: var(--color-brand-main-40);
 }
 
+.cobrar-pay-panel__doc-btn--active {
+  border-color: var(--color-brand-primary);
+  background: var(--color-brand-primary);
+  color: var(--color-text-on-dark);
+  box-shadow: 0 4px 14px var(--color-brand-primary-12);
+}
 
 .cobrar-pay-panel__select {
   width: 100%;
