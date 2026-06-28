@@ -68,7 +68,7 @@ export default function MesaModal({ data, zonas, defaultZonaId, mesasExistentes 
             <div className="salon-modal__field">
               <label>Número <span className="salon-modal__req">*</span></label>
               <input
-                type="number" min="1"
+                type="number"
                 value={form.numero}
                 onChange={e => {
                   const newForm = { ...form, numero: e.target.value }
@@ -91,7 +91,7 @@ export default function MesaModal({ data, zonas, defaultZonaId, mesasExistentes 
             <div className="salon-modal__field">
               <label>Capacidad <span className="salon-modal__req">*</span></label>
               <input
-                type="number" min="1"
+                type="number"
                 value={form.capacidad}
                 onChange={e => {
                   const newForm = { ...form, capacidad: e.target.value }
