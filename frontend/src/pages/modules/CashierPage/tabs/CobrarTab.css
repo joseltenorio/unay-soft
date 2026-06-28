@@ -424,9 +424,9 @@
   width: 100%;
   min-height: 52px;
   padding: 0 16px;
-  border: 1.5px solid rgba(70, 129, 137, 0.3);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.9);
+  border: 1.5px solid var(--color-brand-main-30);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-white);
   color: var(--color-brand-primary);
   font-size: 1.35rem;
   font-weight: 900;
@@ -438,13 +438,14 @@
     box-shadow var(--transition-fast);
 }
 
+
 .cobrar-pay-panel__received input:focus {
   border-color: var(--color-brand-main);
-  box-shadow: 0 0 0 4px rgba(70, 129, 137, 0.12);
+  box-shadow: 0 0 0 4px var(--color-brand-main-12);
 }
 
 .cobrar-pay-panel__received input::placeholder {
-  color: rgba(3, 25, 38, 0.28);
+  color: var(--color-brand-primary-28);
   font-weight: 700;
 }
 
