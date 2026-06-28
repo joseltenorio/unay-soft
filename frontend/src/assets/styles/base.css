@@ -26,6 +26,20 @@ html {
   --color-brand-accent: #77aca2;
   --color-brand-feature: #f4e9cd;
 
+  /* Brand main con opacidades */
+  --color-brand-main-10: rgba(70, 129, 137, 0.10);
+  --color-brand-main-12: rgba(70, 129, 137, 0.12);
+  --color-brand-main-20: rgba(70, 129, 137, 0.20);
+  --color-brand-main-28: rgba(70, 129, 137, 0.28);
+  --color-brand-main-30: rgba(70, 129, 137, 0.30);
+  --color-brand-main-40: rgba(70, 129, 137, 0.40);
+  --color-brand-main-50: rgba(70, 129, 137, 0.50);
+
+  /* Brand primary con opacidades */
+  --color-brand-primary-12: rgba(3, 25, 38, 0.12);
+  --color-brand-primary-28: rgba(3, 25, 38, 0.28);
+  --color-brand-primary-60: rgba(3, 25, 38, 0.60);
+
   /* UI / Surfaces */
   --color-bg: #f4e9cd;
   --color-bg-soft: #fcf9f2;
@@ -34,6 +48,11 @@ html {
   --color-surface: #ffffff;
   --color-surface-muted: #efefef;
   --color-border: #9dbebb;
+
+  --color-surface-warm:      rgba(252, 249, 242, 0.60);
+  --color-surface-warm-mid:  rgba(252, 249, 242, 0.70);
+  --color-surface-warm-full: rgba(252, 249, 242, 0.90);
+  --color-surface-white:     rgba(255, 255, 255, 0.90);
 
   /* Auth */
   --color-auth-bg: #f8efd8;
@@ -101,9 +120,20 @@ html {
   --shadow-navbar: 0 10px 30px rgba(2, 14, 21, 0.18);
   --shadow-button: 0 8px 20px rgba(3, 25, 38, 0.18);
 
+  /* Success */
+  --color-success-soft:   rgba(75, 156, 115, 0.10);
+  --color-success-border: rgba(75, 156, 115, 0.22);
+  --color-success-text:   #2f7552;
+
+  /* Shadows comunes */
+  --shadow-panel-soft:
+    0 18px 50px rgba(3, 25, 38, 0.07),
+    0 3px 10px rgba(3, 25, 38, 0.04);
+    
   /* Transitions */
   --transition-fast: 0.2s ease;
   --transition-base: 0.3s ease;
+  
 }
 
 body {

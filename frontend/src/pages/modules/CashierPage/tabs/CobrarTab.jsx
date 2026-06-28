@@ -122,7 +122,7 @@ async function consultarRucMock(ruc) {
 }
 
 // Métodos de pago disponibles
-const PAYMENT_METHODS = ["EFECTIVO", "TARJETA", "YAPE", "PLIN", "TRANSFERENCIA"]
+const PAYMENT_METHODS = ["Efectivo", "Tarjeta", "Yape", "Plin", "Transferencia"]
 
 // ── CobrarTab ─────────────────────────────────────────────────────
 
