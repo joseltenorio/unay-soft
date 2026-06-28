@@ -292,13 +292,14 @@
   box-shadow: 0 4px 14px var(--color-brand-primary-12);
 }
 
+/* Select */
 .cobrar-pay-panel__select {
   width: 100%;
   min-height: 48px;
   padding: 0 1rem;
   border: 1px solid rgba(157, 190, 187, 0.3);
   border-radius: 18px;
-  background: rgba(252, 249, 242, 0.6);
+  background: var(--color-surface-warm);
   color: var(--color-brand-primary);
   font-size: 0.82rem;
   font-weight: 900;
@@ -327,7 +328,7 @@
 
 .cobrar-pay-panel__select:focus {
   box-shadow:
-    0 0 0 4px rgba(3, 25, 38, 0.12),
+    0 0 0 4px var(--color-brand-primary-12),
     0 8px 20px rgba(3, 25, 38, 0.16);
 }
 
