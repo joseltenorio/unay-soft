@@ -212,6 +212,18 @@
   flex-shrink: 0;
 }
 
+/* Subtotal e IGV en tono más suave */
+.cobrar-pay-panel__line--muted span:first-child,
+.cobrar-pay-panel__line--muted span:last-child {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.cobrar-pay-panel__subtotals {
+  margin-bottom: 2px;
+}
+
 .cobrar-pay-panel__total {
   display: flex;
   align-items: center;
