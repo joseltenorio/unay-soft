@@ -81,7 +81,7 @@ export default function QRModal({ onClose }) {
       className="modal-overlay"
       onClick={(event) => event.target === event.currentTarget && onClose()}
     >
-      <div className="modal" style={{ textAlign: "center", maxWidth: 380 }}>
+      <div className="modal" style={{ textAlign: "center", maxWidth: 380 ,position: "relative"}}>
         <h2>QR de tu carta digital</h2>
 
         {loading && <p style={{ color: "#6b7280" }}>Generando código QR...</p>}
@@ -135,21 +135,30 @@ export default function QRModal({ onClose }) {
             </div>
           </>
         )}
-
         <button
-          type="button"
-          onClick={onClose}
-          style={{
-            marginTop: 20,
-            background: "none",
-            border: "none",
-            color: "#6b7280",
-            fontSize: 13,
-            cursor: "pointer",
+        type="button"
+        onClick={onClose} 
+        aria-label="Cerrar"
+        title="Cerrar"
+        style={{
+          position: "absolute",
+          top: 12,
+          right: 12,
+          width: 32,
+          height: 32,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "transparent",
+          border: "none",
+          fontSize: 24,
+          color: "#6b7280",
+          cursor: "pointer",
+          padding: 0,
           }}
-        >
-          Cerrar
-        </button>
+          >
+            ✕
+            </button>
       </div>
     </div>
   )
