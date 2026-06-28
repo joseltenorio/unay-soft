@@ -91,7 +91,7 @@ export default function ZonaModal({ data, onSave, onClose }) {
           <div className="salon-modal__field">
             <label>Capacidad total <span className="salon-modal__opt">opcional</span></label>
             <input
-              type="number" min="0"
+              type="number"
               value={form.capacidad}
               onChange={e => {
                 const newForm = { ...form, capacidad: e.target.value }
