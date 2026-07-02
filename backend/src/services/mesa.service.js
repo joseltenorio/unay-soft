@@ -168,6 +168,7 @@ async function getMesas(idEstablecimiento) {
     }
   })
 }
+
 async function createMesa(idEstablecimiento, data) {
   const { numero, nombre, capacidad = 4, id_zona, disponibilidad = "LIBRE", estado = true } = data
 
@@ -209,28 +210,30 @@ async function createMesa(idEstablecimiento, data) {
     }
     throw error
   }
+}
+ 
+  async function updateMesa(idEstablecimiento, idMesa, data) {
+    const { numero, nombre, capacidad, id_zona, estado } = data
 
-  const dup = await pool.query(
-    `SELECT id_mesa FROM mesa WHERE id_establecimiento = $1 AND numero = $2 AND id_mesa != $3 LIMIT 1;`,
-    [idEstablecimiento, numero, idMesa]
-  )
-  if (dup.rows.length > 0) {
-    const error = new Error(`Ya existe otra mesa con el número ${numero} en el establecimiento.`)
-    error.statusCode = 400
-    throw error
-  }
+    const exist = await pool.query(
+      `SELECT id_mesa FROM mesa WHERE id_mesa = $1 AND id_establecimiento = $2 LIMIT 1;`,
+      [idMesa, idEstablecimiento]
+    )
+    if (exist.rows.length === 0) {
+      const error = new Error("La mesa no existe o no pertenece al establecimiento.")
+      error.statusCode = 404
+      throw error
+    }
 
-  if (id_zona) {
-    const zonaQ = await pool.query(
-      `SELECT id_zona FROM zona WHERE id_zona = $1 AND id_establecimiento = $2 AND estado = true LIMIT 1;`,
-      [id_zona, idEstablecimiento]
+    const dup = await pool.query(
+      `SELECT id_mesa FROM mesa WHERE id_establecimiento = $1 AND numero = $2 AND id_mesa != $3 LIMIT 1;`,
+      [idEstablecimiento, numero, idMesa]
     )
     if (dup.rows.length > 0) {
       const error = new Error(`Ya existe otra mesa con el número ${numero} en el establecimiento.`)
       error.statusCode = 400
       throw error
     }
-  }
 
     if (id_zona) {
       const zonaQ = await pool.query(
