@@ -1,6 +1,7 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import {
   validateMesaForm,
+  validateMesaNumberUnique,
   normalizeMesaName,
   hasValidationErrors
 } from "../../../../utils/salonValidation"
@@ -11,13 +12,31 @@ const IconX = () => (
   </svg>
 )
 
+function getNextAvailableNumber(mesas, excludeId = null) {
+  const usados = mesas
+    .filter(m => m.id_mesa !== excludeId)
+    .map(m => Number(m.numero))
+    .sort((a, b) => a - b)
+
+  let siguiente = 1
+  for (const n of usados) {
+    if (n === siguiente) siguiente++
+    else if (n > siguiente) break
+  }
+  return siguiente
+}
+
 export default function MesaModal({ data, zonas, defaultZonaId, mesasExistentes = [], onSave, onClose }) {
+  const numerosOcupados = useMemo(
+    () => mesasExistentes
+      .filter(m => m.id_mesa !== data?.id_mesa)
+      .map(m => Number(m.numero))
+      .sort((a, b) => a - b),
+    [mesasExistentes, data]
+  )
+
   const [form, setForm] = useState({
-    numero: data?.numero || (
-      mesasExistentes.length > 0
-        ? Math.max(...mesasExistentes.map(m => Number(m.numero || 0))) + 1
-        : 1
-    ),
+    numero: data?.numero || getNextAvailableNumber(mesasExistentes, data?.id_mesa),
     nombre: data?.nombre || "",
     capacidad: data?.capacidad || 4,
     id_zona: data?.id_zona || defaultZonaId || "",
@@ -27,11 +46,17 @@ export default function MesaModal({ data, zonas, defaultZonaId, mesasExistentes 
   const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
 
-  const handleBlurOrChange = (updatedForm) => {
-    const validationErrors = validateMesaForm(updatedForm)
-    setErrors(validationErrors)
-    return hasValidationErrors(validationErrors)
+const runValidation = (updatedForm) => {
+  const validationErrors = validateMesaForm(updatedForm)
+
+  if (!validationErrors.numero) {
+    const dupError = validateMesaNumberUnique(updatedForm.numero, mesasExistentes, data?.id_mesa)
+    if (dupError) validationErrors.numero = dupError
   }
+
+  setErrors(validationErrors)
+  return hasValidationErrors(validationErrors)
+}
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -41,11 +66,8 @@ export default function MesaModal({ data, zonas, defaultZonaId, mesasExistentes 
       numero: Number(form.numero),
       capacidad: Number(form.capacidad),
     }
-    const formErrors = validateMesaForm(formNormalizado)
-    if (hasValidationErrors(formErrors)) {
-      setErrors(formErrors)
-      return
-    }
+    if (runValidation(formNormalizado)) return
+
     setSaving(true)
     await onSave(
       { ...formNormalizado, id_zona: formNormalizado.id_zona || null },
@@ -73,16 +95,20 @@ export default function MesaModal({ data, zonas, defaultZonaId, mesasExistentes 
                 onChange={e => {
                   const newForm = { ...form, numero: e.target.value }
                   setForm(newForm)
-                  if (errors.numero) handleBlurOrChange(newForm)
+                  if (errors.numero) runValidation(newForm)
                 }}
-                onBlur={() => handleBlurOrChange(form)}
+                onBlur={() => runValidation(form)}
                 placeholder="ej. 1"
                 required
                 style={errors.numero ? { borderColor: "#e63946" } : {}}
               />
-              {errors.numero && (
+              {errors.numero ? (
                 <p style={{ color: "#e63946", fontSize: "12px", marginTop: "4px" }}>
                   {errors.numero}
+                </p>
+              ) : numerosOcupados.length > 0 && (
+                <p style={{ color: "#8a8a8a", fontSize: "11px", marginTop: "4px" }}>
+                  En uso: {numerosOcupados.join(", ")}
                 </p>
               )}
             </div>
@@ -96,9 +122,9 @@ export default function MesaModal({ data, zonas, defaultZonaId, mesasExistentes 
                 onChange={e => {
                   const newForm = { ...form, capacidad: e.target.value }
                   setForm(newForm)
-                  if (errors.capacidad) handleBlurOrChange(newForm)
+                  if (errors.capacidad) runValidation(newForm)
                 }}
-                onBlur={() => handleBlurOrChange(form)}
+                onBlur={() => runValidation(form)}
                 style={errors.capacidad ? { borderColor: "#e63946" } : {}}
               />
               {errors.capacidad && (
@@ -117,9 +143,9 @@ export default function MesaModal({ data, zonas, defaultZonaId, mesasExistentes 
               onChange={e => {
                 const newForm = { ...form, nombre: e.target.value }
                 setForm(newForm)
-                if (errors.nombre) handleBlurOrChange(newForm)
+                if (errors.nombre) runValidation(newForm)
               }}
-              onBlur={() => handleBlurOrChange(form)}
+              onBlur={() => runValidation(form)}
               placeholder="ej. P01, Mesa VIP"
               style={errors.nombre ? { borderColor: "#e63946" } : {}}
             />
@@ -137,7 +163,6 @@ export default function MesaModal({ data, zonas, defaultZonaId, mesasExistentes 
               value={form.id_zona}
               onChange={e => setForm(p => ({ ...p, id_zona: e.target.value }))}
             >
-              <option value="">Sin zona</option>
               {zonas.filter(z => z.estado).map(z => (
                 <option key={z.id_zona} value={z.id_zona}>{z.nombre}</option>
               ))}

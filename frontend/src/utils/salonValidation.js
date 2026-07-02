@@ -66,12 +66,23 @@ export function validateZonaForm(formData) {
   return errors
 }
 
-export function isValidMesaName(value) {
+function validateMesaName(value) {
   const v = normalizeMesaName(value)
-  if (v.length < 1 || v.length > 20) return false
-  if (/[bcdfghjklmnñpqrstvwxyz]{5,}/i.test(v)) return false
-  if (!MESA_NAME_PATTERN.test(v)) return false
-  return !RESERVED_NAMES.has(v.toLowerCase())
+
+  if (v.length < 1) return "El nombre no puede estar vacío."
+  if (v.length > 20) return "El nombre no puede superar los 20 caracteres."
+  if (/[bcdfghjklmnñpqrstvwxyz]{5,}/i.test(v))
+    return "El nombre contiene una secuencia de letras no válida."
+  if (!MESA_NAME_PATTERN.test(v))
+    return "El nombre solo puede contener letras, números, espacios, guion o paréntesis."
+  if (RESERVED_NAMES.has(v.toLowerCase()))
+    return "Este nombre no está disponible."
+
+  return null
+}
+
+export function isValidMesaName(value) {
+  return validateMesaName(value) === null
 }
 
 export function validateMesaForm(formData) {
@@ -83,9 +94,8 @@ export function validateMesaForm(formData) {
   }
 
   if (formData.nombre && formData.nombre.trim() !== "") {
-    if (!isValidMesaName(formData.nombre)) {
-      errors.nombre = "El nombre debe ser válido (ej. 'P01', 'Mesa VIP') y no contener texto aleatorio."
-    }
+    const nombreError = validateMesaName(formData.nombre)
+    if (nombreError) errors.nombre = nombreError
   }
 
   const cap = Number(formData.capacidad)
@@ -94,6 +104,15 @@ export function validateMesaForm(formData) {
   }
 
   return errors
+}
+
+export function validateMesaNumberUnique(numero, mesasExistentes = [], excludeId = null) {
+  const num = Number(numero)
+  const enUso = mesasExistentes
+    .filter((m) => m.id_mesa !== excludeId)
+    .some((m) => Number(m.numero) === num)
+
+  return enUso ? `El número ${num} ya está en uso.` : null
 }
 
 export function hasValidationErrors(errors) {

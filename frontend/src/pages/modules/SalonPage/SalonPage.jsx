@@ -814,6 +814,7 @@ export default function SalonPage() {
           data={mesaModal.data}
           zonas={zonas}
           defaultZonaId={mesaModal.defaultZonaId}
+          mesasExistentes={mesas} 
           onSave={handleSaveMesa}
           onClose={() =>
             setMesaModal({
