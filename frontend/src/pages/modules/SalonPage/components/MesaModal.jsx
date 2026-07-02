@@ -163,7 +163,6 @@ const runValidation = (updatedForm) => {
               value={form.id_zona}
               onChange={e => setForm(p => ({ ...p, id_zona: e.target.value }))}
             >
-              <option value="">Sin zona</option>
               {zonas.filter(z => z.estado).map(z => (
                 <option key={z.id_zona} value={z.id_zona}>{z.nombre}</option>
               ))}
