@@ -193,25 +193,20 @@ async function createMesa(idEstablecimiento, data) {
     }
   }
 
-  const { rows } = await pool.query(
-    `INSERT INTO mesa (id_establecimiento, id_zona, numero, nombre, capacidad, disponibilidad, estado)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
-     RETURNING *;`,
-    [idEstablecimiento, id_zona || null, numero, nombre?.trim() || null, Number(capacidad), disponibilidad, Boolean(estado)]
-  )
-  return rows[0]
-}
-
-async function updateMesa(idEstablecimiento, idMesa, data) {
-  const { numero, nombre, capacidad, id_zona, estado } = data
-
-  const exist = await pool.query(
-    `SELECT id_mesa FROM mesa WHERE id_mesa = $1 AND id_establecimiento = $2 LIMIT 1;`,
-    [idMesa, idEstablecimiento]
-  )
-  if (exist.rows.length === 0) {
-    const error = new Error("La mesa no existe o no pertenece al establecimiento.")
-    error.statusCode = 404
+  try {
+    const { rows } = await pool.query(
+      `INSERT INTO mesa (id_establecimiento, id_zona, numero, nombre, capacidad, disponibilidad, estado)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING *;`,
+      [idEstablecimiento, id_zona || null, numero, nombre?.trim() || null, Number(capacidad), disponibilidad, Boolean(estado)]
+    )
+    return rows[0]
+  } catch (error) {
+    if (error.code === "23505") {
+      const err = new Error(`Ya existe una mesa con el número ${numero} en el establecimiento.`)
+      err.statusCode = 400
+      throw err
+    }
     throw error
   }
 
@@ -230,22 +225,43 @@ async function updateMesa(idEstablecimiento, idMesa, data) {
       `SELECT id_zona FROM zona WHERE id_zona = $1 AND id_establecimiento = $2 AND estado = true LIMIT 1;`,
       [id_zona, idEstablecimiento]
     )
-    if (zonaQ.rows.length === 0) {
-      const error = new Error("La zona seleccionada no existe o no pertenece al establecimiento.")
+    if (dup.rows.length > 0) {
+      const error = new Error(`Ya existe otra mesa con el número ${numero} en el establecimiento.`)
       error.statusCode = 400
       throw error
     }
   }
 
-  const { rows } = await pool.query(
-    `UPDATE mesa
-     SET numero = $1, nombre = $2, capacidad = $3, id_zona = $4, estado = $5
-     WHERE id_mesa = $6 AND id_establecimiento = $7
-     RETURNING *;`,
-    [numero, nombre?.trim() || null, Number(capacidad), id_zona || null, Boolean(estado), idMesa, idEstablecimiento]
-  )
-  return rows[0]
-}
+    if (id_zona) {
+      const zonaQ = await pool.query(
+        `SELECT id_zona FROM zona WHERE id_zona = $1 AND id_establecimiento = $2 AND estado = true LIMIT 1;`,
+        [id_zona, idEstablecimiento]
+      )
+      if (zonaQ.rows.length === 0) {
+        const error = new Error("La zona seleccionada no existe o no pertenece al establecimiento.")
+        error.statusCode = 400
+        throw error
+      }
+    }
+
+    try {
+      const { rows } = await pool.query(
+        `UPDATE mesa
+        SET numero = $1, nombre = $2, capacidad = $3, id_zona = $4, estado = $5
+        WHERE id_mesa = $6 AND id_establecimiento = $7
+        RETURNING *;`,
+        [numero, nombre?.trim() || null, Number(capacidad), id_zona || null, Boolean(estado), idMesa, idEstablecimiento]
+      )
+      return rows[0]
+    } catch (error) {
+      if (error.code === "23505") {
+        const err = new Error(`Ya existe otra mesa con el número ${numero} en el establecimiento.`)
+        err.statusCode = 400
+        throw err
+      }
+      throw error
+    }
+  }
 
 async function updateMesaDisponibilidad(idEstablecimiento, idMesa, disponibilidad) {
   const ESTADOS_VALIDOS = ["LIBRE", "OCUPADA", "RESERVADA", "MANTENIMIENTO"]
