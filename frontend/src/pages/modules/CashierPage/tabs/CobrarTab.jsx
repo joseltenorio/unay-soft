@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import "./CobrarTab.css"
 import useToast from "../../../../components/common/Toast/useToast"
+import { consultarRuc } from "../../../../services/sunatService"
 
 // ── Mocks ─────────────────────────────────────────────────────────
 
@@ -104,22 +105,6 @@ const PAYMENTS_MOCK = [
 
 // Tasa IGV — vendrá del backend en el futuro
 const IGV_RATE = 0.18
-
-// Consulta a SUNAT simulada — vendrá de sunatService.js en el futuro
-async function consultarRucMock(ruc) {
-  // Simula el tiempo de respuesta de la API real
-  await new Promise((resolve) => setTimeout(resolve, 800))
-
-  const empresasMock = {
-    "20100070970": "ALICORP S.A.A.",
-    "20131312955": "GLORIA S.A.",
-    "20100047218": "BACKUS Y JOHNSTON S.A.A.",
-    "20601224745": "UMARI RESTAURANT S.A.C.",
-  }
-
-  // Retorna la razón social o null si no existe
-  return empresasMock[ruc] ?? null
-}
 
 // Métodos de pago disponibles
 const PAYMENT_METHODS = ["Efectivo", "Tarjeta", "Yape", "Plin", "Transferencia"]
@@ -257,26 +242,25 @@ function PayPanel({ order, clearOrder, showToast }) {
       setRazonSocial("")
       setRucError("")
 
-      const resultado = await consultarRucMock(ruc)
+      try{
+        const response = await consultarRuc(ruc)
 
-      // Si el componente ya cambió de RUC, ignora esta respuesta
-      if (cancelled) return
+        if (cancelled) return
+        setRazonSocial(response.data.razonSocial)
+      } catch(error){
+        if(cancelled) return
 
-      if (resultado) {
-        setRazonSocial(resultado)
-      } else {
-        setRucError("RUC no encontrado en SUNAT.")
+        setRucError(error.message)
+      } finally{
+        if(!cancelled) 
+          setRucLoading(false)
       }
-
-      setRucLoading(false)
     }
-
-    buscarRuc()
-
-    // Cleanup: marca como cancelada si el RUC cambia antes de que responda
-    return () => {
-      cancelled = true
-    }
+      buscarRuc()
+      // Cleanup: marca como cancelada si el RUC cambia antes de que responda
+      return () => {
+        cancelled = true
+      }
   }, [ruc, tipoDoc])
 
   // ── Cálculos ───────────────────────────────────────────────────
