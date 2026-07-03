@@ -22,7 +22,7 @@ const loginRateLimiter = rateLimit({
   },
 })
 
-// AGREGAR DESDE AQUÍ:
+
 const publicCartaRateLimiter = rateLimit({
   windowMs: 60 * 1000,
   limit: 100,
