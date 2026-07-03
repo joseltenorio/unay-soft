@@ -199,14 +199,14 @@ async function resolvePublicEstablishment(identifier) {
 
 async function getCartaPublica(publicIdentifier) {
 
-  // verificar si hay datos frescos en caché
+  
   const cacheKey = String(publicIdentifier || "").trim().toLowerCase()
   const cached = cartaCache.get(cacheKey)
 
   if (cached && Date.now() - cached.timestamp < CARTA_CACHE_TTL_MS) {
-    return cached.data // devuelve sin tocar la base de datos
+    return cached.data 
   }
-   // si no hay caché, continúa normal
+  
   const establishment = await resolvePublicEstablishment(publicIdentifier)
 
   const categoriesQuery = `
@@ -263,7 +263,7 @@ async function getCartaPublica(publicIdentifier) {
     categorias: categoriesResult.rows,
   }
 
-  // guardar en caché con el momento actual
+  
   cartaCache.set(cacheKey, { data: result, timestamp: Date.now() })
 
   return result
