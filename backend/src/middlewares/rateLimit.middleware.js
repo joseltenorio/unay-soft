@@ -22,6 +22,18 @@ const loginRateLimiter = rateLimit({
   },
 })
 
+// AGREGAR DESDE AQUÍ:
+const publicCartaRateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    message: "Demasiadas solicitudes. Intenta de nuevo en un momento.",
+  },
+})
+
 module.exports = {
   loginRateLimiter,
+  publicCartaRateLimiter,
 }
