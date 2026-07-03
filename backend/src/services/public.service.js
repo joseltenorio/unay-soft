@@ -2,6 +2,9 @@
 
 const { pool } = require("../config/database")
 
+const cartaCache = new Map()
+const CARTA_CACHE_TTL_MS = 30 * 1000
+
 const QR_TYPE_CARTA_GENERAL = "CARTA_GENERAL"
 
 const RESERVED_PUBLIC_SLUGS = new Set([
@@ -195,6 +198,15 @@ async function resolvePublicEstablishment(identifier) {
 }
 
 async function getCartaPublica(publicIdentifier) {
+
+  // verificar si hay datos frescos en caché
+  const cacheKey = String(publicIdentifier || "").trim().toLowerCase()
+  const cached = cartaCache.get(cacheKey)
+
+  if (cached && Date.now() - cached.timestamp < CARTA_CACHE_TTL_MS) {
+    return cached.data // devuelve sin tocar la base de datos
+  }
+   // si no hay caché, continúa normal
   const establishment = await resolvePublicEstablishment(publicIdentifier)
 
   const categoriesQuery = `
@@ -246,10 +258,15 @@ async function getCartaPublica(publicIdentifier) {
     establishment.id_establecimiento,
   ])
 
-  return {
+  const result = {
     establecimiento: establishment,
     categorias: categoriesResult.rows,
   }
+
+  // guardar en caché con el momento actual
+  cartaCache.set(cacheKey, { data: result, timestamp: Date.now() })
+
+  return result
 }
 
 async function getOrCreateQR(idEstablecimiento, baseUrl) {
