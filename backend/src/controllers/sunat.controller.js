@@ -14,6 +14,13 @@ async function getRuc(req, res) {
       })
     }
 
+    // RUC de persona natural empieza con 10 — no válido para factura
+    if (ruc.startsWith("10")) {
+      return res.status(422).json({
+        message: "El RUC ingresado pertenece a una persona natural. Para emitir factura ingrese el RUC de una empresa.",
+      })
+    }
+
     const data = await consultarRuc(ruc)
 
     return res.status(200).json({
