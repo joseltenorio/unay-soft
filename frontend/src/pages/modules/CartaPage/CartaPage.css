@@ -698,7 +698,19 @@
 .carta__title {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+}
+
+.carta__title-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1.5px solid #e2e2e2;
+  border-radius: 10px;
+  background: #fff;
+  color: #333;
 }
 
 /* ── Producto Modal ────────────────────────── */
