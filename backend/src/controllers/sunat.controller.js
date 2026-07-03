@@ -4,7 +4,7 @@ const { consultarRuc } = require("../services/sunat.service")
 
 async function getRuc(req, res) {
   try {
-    // El RUC viene en la URL: /api/sunat/20601030013
+    // El RUC viene en la URL: /api/sunat/20...3
     const { ruc } = req.params
 
     // Validación básica antes de llamar al servicio

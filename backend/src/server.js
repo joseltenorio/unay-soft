@@ -17,6 +17,7 @@ const posRoutes = require("./routes/pos.routes")
 const zonaRoutes = require("./routes/zona.routes")
 const mesaRoutes = require("./routes/mesa.routes")
 const publicRoutes = require("./routes/public.routes")
+const sunatRoutes = require("./routes/sunat.routes")
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -47,6 +48,7 @@ app.use("/api/pos", posRoutes)
 app.use("/api/salon/zonas", zonaRoutes)
 app.use("/api/salon/mesas", mesaRoutes)
 app.use("/api/public", publicRoutes)
+app.use("/api/sunat", sunatRoutes)
 
 app.use((req, res) =>
   res.status(404).json({ message: "Ruta no encontrada.", path: req.originalUrl })
