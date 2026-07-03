@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 
 import { getPublicCarta } from "../../../services/publicCartaService"
+import AsistenteUmari from "./components/AsistenteUmari/AsistenteUmari"
 
 import "./PublicCartaPage.css"
 
@@ -94,6 +95,7 @@ export default function PublicCartaPage() {
   }
 
   return (
+    <>
     <main className="public-carta">
       <section className="public-carta__hero">
         <p className="public-carta__eyebrow">Carta digital</p>
@@ -177,5 +179,13 @@ export default function PublicCartaPage() {
         )}
       </section>
     </main>
+      {!isLoading && !errorMessage && establecimiento && (
+        <AsistenteUmari
+          cartaIdentifier={cartaIdentifier}
+          monedaSimbolo={monedaSimbolo}
+        />
+      )}
+  </>
   )
 }
+
