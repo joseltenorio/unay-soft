@@ -207,6 +207,20 @@ const IconQR = () => (
   </svg>
 )
 
+const IconMenuBook = () => (
+  <svg
+    width="26"
+    height="26"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    viewBox="0 0 24 24"
+  >
+    <path d="M2 4h7a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z" />
+    <path d="M22 4h-7a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h8z" />
+  </svg>
+)
+
 export default function CartaPage() {
   const { showToast } = useToast()
 
@@ -601,7 +615,9 @@ export default function CartaPage() {
       <div className="carta__header">
         <div>
           <span className="carta__breadcrumb">CARTA</span>
-          <h1 className="carta__title">Gestión de Carta</h1>
+          <h1 className="carta__title">
+            <IconMenuBook />
+            Gestión de Carta</h1>
           <p className="carta__sub">
             Categorías y productos del menú de tu restaurante.
           </p>
