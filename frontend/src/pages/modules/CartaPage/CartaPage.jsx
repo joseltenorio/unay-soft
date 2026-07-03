@@ -616,7 +616,9 @@ export default function CartaPage() {
         <div>
           <span className="carta__breadcrumb">CARTA</span>
           <h1 className="carta__title">
-            <IconMenuBook />
+            <span className="carta__title-icon">
+              <IconMenuBook />
+            </span>
             Gestión de Carta</h1>
           <p className="carta__sub">
             Categorías y productos del menú de tu restaurante.
