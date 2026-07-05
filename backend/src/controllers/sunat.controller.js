@@ -14,14 +14,20 @@ async function getRuc(req, res) {
       })
     }
 
-    // RUC de persona natural empieza con 10 — no válido para factura
-    if (ruc.startsWith("10")) {
+    const data = await consultarRuc(ruc)
+
+    // Para emitir factura el RUC debe estar activo y habido
+    if (data.estado !== "ACTIVO") {
       return res.status(422).json({
-        message: "El RUC ingresado pertenece a una persona natural. Para emitir factura ingrese el RUC de una empresa.",
+        message: `El RUC no está activo en SUNAT (estado: ${data.estado}).`,
       })
     }
 
-    const data = await consultarRuc(ruc)
+    if (data.condicion !== "HABIDO") {
+      return res.status(422).json({
+        message: `El RUC no tiene condición HABIDO en SUNAT (condición: ${data.condicion}).`,
+      })
+    }
 
     return res.status(200).json({
       message: "RUC consultado correctamente.",
