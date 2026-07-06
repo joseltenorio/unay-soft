@@ -107,7 +107,7 @@ const PAYMENTS_MOCK = [
 const IGV_RATE = 0.18
 
 // Métodos de pago disponibles
-const PAYMENT_METHODS = ["Efectivo", "Tarjeta", "Yape", "Plin", "Transferencia"]
+const PAYMENT_METHODS = ["EFECTIVO", "TARJETA", "YAPE", "PLIN", "TRANSFERENCIA"]
 
 // ── CobrarTab ─────────────────────────────────────────────────────
 
@@ -308,7 +308,7 @@ function PayPanel({ order, clearOrder, showToast }) {
     // Validación extra: monto insuficiente en efectivo
     if (
       method === "EFECTIVO" &&
-      (received === "" || parseFloat(received) < total)
+      (received === "" || receivedAmount <= 0 || parseFloat(received) < total)
     ) {
       showToast({
         type: "warning",
@@ -487,11 +487,16 @@ function PayPanel({ order, clearOrder, showToast }) {
           <input
             id="cashier-received"
             type="number"
-            min="0"
+            min="0.01"
             step="0.10"
             value={received}
             placeholder="S/ 0.00"
             onChange={(e) => setReceived(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "-" || e.key === "+" || e.key === "e" || e.key === "E") {
+                e.preventDefault()
+              }
+            }}
           />
 
           {/* Vuelto — aparece solo si ya ingresó un monto */}

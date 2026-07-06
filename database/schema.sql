@@ -587,6 +587,23 @@ create table item_orden_adicional (
 -- 6. Pagos / Caja
 -- =========================================================
 
+create table metodo_pago (
+  id_metodo_pago uuid primary key default uuid_generate_v4(),
+  id_establecimiento uuid not null,
+  nombre varchar(80) not null,
+  estado boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+
+  constraint fk_metodo_pago_establecimiento
+    foreign key (id_establecimiento)
+    references establecimiento(id_establecimiento)
+    on update cascade
+    on delete restrict,
+
+  constraint uq_metodo_pago_nombre unique (id_establecimiento, nombre)
+);
+
 create table pago (
   id_pago uuid primary key default uuid_generate_v4(),
   id_orden uuid not null,
@@ -617,8 +634,11 @@ create table pago (
     on update cascade
     on delete restrict,
 
-  constraint chk_pago_metodo
-    check (metodo_pago in ('EFECTIVO', 'TARJETA', 'YAPE', 'PLIN', 'TRANSFERENCIA', 'MIXTO')),
+  constraint fk_pago_metodo_pago
+    foreign key (id_metodo_pago)
+    references metodo_pago(id_metodo_pago)
+    on update cascade
+    on delete restrict,
 
   constraint chk_pago_estado
     check (estado in ('PENDIENTE', 'CONFIRMADO', 'ANULADO')),
@@ -842,6 +862,9 @@ create index idx_item_orden_orden on item_orden(id_orden);
 create index idx_item_orden_estado_cocina on item_orden(estado_cocina);
 create index idx_pago_orden on pago(id_orden);
 create index idx_pago_apertura on pago(id_apertura);
+create index idx_pago_metodo_pago on pago(id_metodo_pago);
+
+create index idx_metodo_pago_establecimiento on metodo_pago(id_establecimiento);
 
 create index idx_insumo_establecimiento on insumo(id_establecimiento);
 create index idx_movimiento_insumo on movimiento_inventario(id_insumo);
@@ -916,6 +939,10 @@ for each row execute function set_updated_at();
 
 create trigger trg_pago_updated_at
 before update on pago
+for each row execute function set_updated_at();
+
+create trigger trg_metodo_pago_updated_at
+before update on metodo_pago
 for each row execute function set_updated_at();
 
 create trigger trg_caja_updated_at
