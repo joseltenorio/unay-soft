@@ -38,3 +38,9 @@ export async function toggleMetodoPago(idMetodoPago, estado) {
   return data.metodoPago
 }
 
+export async function deleteMetodoPago(idMetodoPago) {
+  await apiPrivateRequest(`/establishment/metodos-pago/${idMetodoPago}`, {
+    method: "DELETE",
+  })
+}
+

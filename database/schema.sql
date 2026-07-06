@@ -609,7 +609,7 @@ create table pago (
   id_orden uuid not null,
   id_usuario uuid not null,
   id_apertura uuid,
-  metodo_pago varchar(30) not null,
+  id_metodo_pago uuid not null,
   monto numeric(10,2) not null,
   referencia varchar(120),
   estado varchar(30) not null default 'CONFIRMADO',

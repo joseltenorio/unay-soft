@@ -222,6 +222,50 @@ async function toggleMetodoPago(
   return rows[0]
 }
 
+async function deleteMetodoPago(
+  idEstablecimiento,
+  idMetodoPago,
+) {
+  const paymentQuery = `
+    select 1
+    from pago
+    where id_metodo_pago = $1
+    limit 1;
+  `
+
+  const paymentResult = await pool.query(paymentQuery, [
+    idMetodoPago,
+  ])
+
+  if (paymentResult.rows.length > 0) {
+    const error = new Error(
+      "No se puede eliminar porque el método de pago ya fue utilizado."
+    )
+    error.statusCode = 409
+    throw error
+  }
+
+    const deleteQuery = `
+    delete
+    from metodo_pago
+    where
+      id_metodo_pago = $1
+      and id_establecimiento = $2
+    returning id_metodo_pago;
+  `
+
+  const { rows } = await pool.query(deleteQuery, [
+    idMetodoPago,
+    idEstablecimiento,
+  ])
+
+  if (rows.length === 0) {
+    const error = new Error("El método de pago no existe.")
+    error.statusCode = 404
+    throw error
+  }
+}
+
 module.exports = {
   getEstablishmentById,
   updateEstablishment,
@@ -229,4 +273,5 @@ module.exports = {
   getMetodosPagoByEstablishment,
   createMetodoPago,
   toggleMetodoPago,
+  deleteMetodoPago
 }

@@ -8,6 +8,7 @@ import {
   getMetodosPago,
   createMetodoPago,
   toggleMetodoPago,
+  deleteMetodoPago,
 } from "../../../services/establishmentService"
 
 import { normalizeMetodoPago } from "../../../utils/textNormalization"
@@ -213,6 +214,32 @@ export default function EstablishmentPage() {
       })
     }
   }
+
+  async function handleDeleteMetodo(metodo) {
+    if (!window.confirm(`¿Eliminar "${metodo.nombre}"?`)) {
+      return
+    }
+
+    try {
+      await deleteMetodoPago(metodo.id_metodo_pago)
+
+      setMetodosPago((current) =>
+        current.filter((m) => m.id_metodo_pago !== metodo.id_metodo_pago)
+      )
+
+      showToast({
+        type: "success",
+        title: "Método eliminado",
+        message: "El método de pago fue eliminado correctamente.",
+      })
+    } catch (error) {
+      showToast({
+        type: "error",
+        title: "No se pudo eliminar",
+        message: error.message,
+      })
+    }
+}
 
   return (
     <section className="establishment-page">
@@ -440,7 +467,17 @@ export default function EstablishmentPage() {
                           onClick={() => handleToggleMetodo(metodo)}
                         >
                           {metodo.estado ? "Activo" : "Inactivo"}
-                        </button>                        
+                        </button> 
+                        {/* SOLO mostrar eliminar si está inactivo */}
+                        {!metodo.estado && (
+                          <button
+                            type="button"
+                            className="establishment-page__metodo-delete"
+                            onClick={() => handleDeleteMetodo(metodo)}
+                          >
+                            Eliminar
+                          </button>
+                        )}                     
                       </div>
                     </li>
                   ))

@@ -10,6 +10,7 @@ const {
   getMetodosPago,
   createMetodoPagoController,
   toggleMetodoPagoController,
+  deleteMetodoPagoController,
 } = require("../controllers/establishment.controller")
 
 const { authenticateToken } = require("../middlewares/auth.middleware")
@@ -72,6 +73,13 @@ router.patch(
   authenticateToken,
   authorizePermission("establishment.editar"),
   toggleMetodoPagoController,
+)
+
+router.delete(
+  "/metodos-pago/:idMetodoPago",
+  authenticateToken,
+  authorizePermission("establishment.editar"),
+  deleteMetodoPagoController,
 )
 
 module.exports = router
