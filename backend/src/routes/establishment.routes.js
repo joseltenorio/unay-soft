@@ -7,7 +7,11 @@ const {
   getEstablishment,
   editEstablishment,
   uploadEstablishmentLogo,
+  getMetodosPago,
+  createMetodoPagoController,
+  toggleMetodoPagoController,
 } = require("../controllers/establishment.controller")
+
 const { authenticateToken } = require("../middlewares/auth.middleware")
 const { authorizePermission } = require("../middlewares/permission.middleware")
 
@@ -47,6 +51,27 @@ router.post(
   authorizePermission("establishment.editar"),
   upload.single("logo"),
   uploadEstablishmentLogo,
+)
+
+router.get(
+  "/metodos-pago",
+  authenticateToken,
+  authorizePermission("establishment.ver"),
+  getMetodosPago,
+)
+
+router.post(
+  "/metodos-pago",
+  authenticateToken,
+  authorizePermission("establishment.editar"),
+  createMetodoPagoController,
+)
+
+router.patch(
+  "/metodos-pago/:idMetodoPago",
+  authenticateToken,
+  authorizePermission("establishment.editar"),
+  toggleMetodoPagoController,
 )
 
 module.exports = router

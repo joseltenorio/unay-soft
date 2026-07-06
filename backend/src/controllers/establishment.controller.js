@@ -4,6 +4,9 @@ const {
   getEstablishmentById,
   updateEstablishment,
   updateEstablishmentLogo,
+  getMetodosPagoByEstablishment,
+  createMetodoPago,
+  toggleMetodoPago,
 } = require("../services/establishment.service")
 
 async function getEstablishment(req, res) {
@@ -138,8 +141,76 @@ async function uploadEstablishmentLogo(req, res) {
   }
 }
 
+async function getMetodosPago(req, res) {
+  try {
+    const metodosPago = await getMetodosPagoByEstablishment(
+      req.user.id_establecimiento,
+    )
+
+    return res.status(200).json({
+      message: "Métodos de pago obtenidos correctamente.",
+      metodosPago,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al obtener los métodos de pago.",
+    })
+  }
+}
+
+async function createMetodoPagoController(req, res) {
+  try {
+    const { nombre } = req.body
+
+    if (!nombre) {
+      return res.status(400).json({
+        message: "Debe ingresar el nombre del método de pago.",
+      })
+    }
+
+    const metodoPago = await createMetodoPago(
+      req.user.id_establecimiento,
+      nombre,
+    )
+
+    return res.status(201).json({
+      message: "Método de pago creado correctamente.",
+      metodoPago,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al crear el método de pago.",
+    })
+  }
+}
+
+async function toggleMetodoPagoController(req, res) {
+  try {
+    const { idMetodoPago } = req.params
+    const { estado } = req.body
+
+    const metodoPago = await toggleMetodoPago(
+      req.user.id_establecimiento,
+      idMetodoPago,
+      estado,
+    )
+
+    return res.status(200).json({
+      message: "Método de pago actualizado correctamente.",
+      metodoPago,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al actualizar el método de pago.",
+    })
+  }
+}
+
 module.exports = {
   getEstablishment,
   editEstablishment,
   uploadEstablishmentLogo,
+  getMetodosPago,
+  createMetodoPagoController,
+  toggleMetodoPagoController,
 }
