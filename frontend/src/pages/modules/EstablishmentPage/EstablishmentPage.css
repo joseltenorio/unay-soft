@@ -80,7 +80,7 @@
 
 .establishment-page__grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.8fr);
+  grid-template-columns: 2fr 1fr;
   gap: 18px;
 }
 
@@ -95,7 +95,7 @@
 }
 
 .establishment-page__panel:first-child {
-  grid-row: span 2;
+  grid-row: auto;
 }
 
 .establishment-page__panel--accent {
@@ -322,8 +322,9 @@
 }
 
 .establishment-page__metodos-list {
-  margin: 0;
-  padding: 0;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 6px;
 
   display: flex;
   flex-direction: column;

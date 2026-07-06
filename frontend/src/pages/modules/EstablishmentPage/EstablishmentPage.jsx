@@ -401,40 +401,9 @@ export default function EstablishmentPage() {
               </div>
             </article>
 
-            <article className="establishment-page__panel establishment-page__panel--accent">
-              <div className="establishment-page__panel-header">
-                <span>03</span>
-                <div>
-                  <h3>Identidad visual</h3>
-                  <p>Logo que podrá usarse en interfaz y tickets.</p>
-                </div>
-              </div>
-
-              <div className="establishment-page__fields">
-                <label className="establishment-page__field--full">
-                  <span>URL del logo</span>
-                  <input
-                    type="url"
-                    name="logo_url"
-                    value={formData.logo_url}
-                    onChange={handleChange}
-                    placeholder="https://..."
-                  />
-                </label>
-
-                <div className="establishment-page__logo-preview">
-                  {formData.logo_url ? (
-                    <img src={formData.logo_url} alt="Logo del establecimiento" />
-                  ) : (
-                    <span>Sin logo</span>
-                  )}
-                </div>
-              </div>
-            </article>
-
             <article className="establishment-page__panel">
               <div className="establishment-page__panel-header">
-                <span>04</span>
+                <span>03</span>
                 <div>
                   <h3>Métodos de pago</h3>
                   <p>Configura los métodos disponibles en caja.</p>
@@ -510,6 +479,36 @@ export default function EstablishmentPage() {
                 >
                   {isAddingMetodo ? "Agregando..." : "+ Agregar"}
                 </button>
+              </div>
+            </article>
+            <article className="establishment-page__panel">
+              <div className="establishment-page__panel-header">
+                <span>04</span>
+                <div>
+                  <h3>Identidad visual</h3>
+                  <p>Logo que podrá usarse en interfaz y tickets.</p>
+                </div>
+              </div>
+
+              <div className="establishment-page__fields">
+                <label className="establishment-page__field--full">
+                  <span>URL del logo</span>
+                  <input
+                    type="url"
+                    name="logo_url"
+                    value={formData.logo_url}
+                    onChange={handleChange}
+                    placeholder="https://..."
+                  />
+                </label>
+
+                <div className="establishment-page__logo-preview">
+                  {formData.logo_url ? (
+                    <img src={formData.logo_url} alt="Logo del establecimiento" />
+                  ) : (
+                    <span>Sin logo</span>
+                  )}
+                </div>
               </div>
             </article>
           </section>
