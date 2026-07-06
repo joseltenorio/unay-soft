@@ -11,6 +11,10 @@ import {
   deleteMetodoPago
 } from "../../../services/establishmentService"
 
+import {
+  normalizeText,
+} from "../../../utils/userValidation"
+
 {/*import logoUmari from "../../../assets/icons/logo-umari.svg"*/}
 
 import useToast from "../../../components/common/Toast/useToast"
@@ -163,6 +167,74 @@ export default function EstablishmentPage() {
     setFormData(originalData)
     setErrorMessage("")
     setSuccessMessage("")
+  }
+
+  async function handleAddMetodo() {
+    const nombre = normalizeText(nuevoMetodo)
+
+    if (!nombre) {
+      setMetodoError("Ingresa un nombre para el método de pago.")
+      return
+    }
+
+    if (metodosPago.some((m) => m.nombre.toLowerCase() === nombre.toLowerCase())) {
+      setMetodoError("Ya existe un método de pago con ese nombre.")
+      return
+    }
+
+    try {
+      setIsAddingMetodo(true)
+      setMetodoError("")
+
+      const creado = await createMetodoPago(nombre)
+      setMetodosPago((current) => [...current, creado])
+      setNuevoMetodo("")
+
+      showToast({
+        type: "success",
+        title: "Método agregado",
+        message: `"${nombre}" fue agregado correctamente.`,
+      })
+    } catch (error) {
+      setMetodoError(error.message || "No se pudo agregar el método.")
+    } finally {
+      setIsAddingMetodo(false)
+    }
+  }
+
+  async function handleToggleMetodo(metodo) {
+    try {
+      const updated = await toggleMetodoPago(metodo.id_metodo_pago, !metodo.estado)
+      setMetodosPago((current) =>
+        current.map((m) => m.id_metodo_pago === updated.id_metodo_pago ? updated : m)
+      )
+    } catch (error) {
+      showToast({
+        type: "error",
+        title: "No se pudo actualizar",
+        message: error.message || "Intenta nuevamente.",
+      })
+    }
+  }
+
+  async function handleDeleteMetodo(metodo) {
+    try {
+      await deleteMetodoPago(metodo.id_metodo_pago)
+      setMetodosPago((current) =>
+        current.filter((m) => m.id_metodo_pago !== metodo.id_metodo_pago)
+      )
+      showToast({
+        type: "success",
+        title: "Método eliminado",
+        message: `"${metodo.nombre}" fue eliminado.`,
+      })
+    } catch (error) {
+      showToast({
+        type: "error",
+        title: "No se pudo eliminar",
+        message: error.message || "Intenta nuevamente.",
+      })
+    }
   }
 
   return (
