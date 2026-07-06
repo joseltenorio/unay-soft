@@ -591,6 +591,7 @@ create table pago (
   id_pago uuid primary key default uuid_generate_v4(),
   id_orden uuid not null,
   id_usuario uuid not null,
+  id_apertura uuid,
   metodo_pago varchar(30) not null,
   monto numeric(10,2) not null,
   referencia varchar(120),
@@ -607,6 +608,12 @@ create table pago (
   constraint fk_pago_usuario
     foreign key (id_usuario)
     references usuario(id_usuario)
+    on update cascade
+    on delete restrict,
+
+  constraint fk_pago_apertura
+    foreign key (id_apertura)
+    references apertura_caja(id_apertura)
     on update cascade
     on delete restrict,
 
@@ -834,6 +841,7 @@ create index idx_orden_lista_at on orden(lista_at);
 create index idx_item_orden_orden on item_orden(id_orden);
 create index idx_item_orden_estado_cocina on item_orden(estado_cocina);
 create index idx_pago_orden on pago(id_orden);
+create index idx_pago_apertura on pago(id_apertura);
 
 create index idx_insumo_establecimiento on insumo(id_establecimiento);
 create index idx_movimiento_insumo on movimiento_inventario(id_insumo);
