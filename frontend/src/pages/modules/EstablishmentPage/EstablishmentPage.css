@@ -321,6 +321,163 @@
   color: var(--color-app-accent-strong);
 }
 
+.establishment-page__metodos-list {
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  list-style: none;
+}
+
+.establishment-page__metodo-item {
+  padding: 14px 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  border: 1px solid rgba(157, 190, 187, 0.35);
+  border-radius: var(--radius-md);
+
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.establishment-page__metodo-nombre {
+  color: var(--color-app-text);
+
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.establishment-page__metodo-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.establishment-page__metodo-toggle {
+  min-width: 92px;
+  min-height: 36px;
+  padding: 0 14px;
+
+  border: 1px solid rgba(157, 190, 187, 0.35);
+  border-radius: var(--radius-pill);
+
+  background: #fff;
+  color: var(--color-app-text-muted);
+
+  font-size: 13px;
+  font-weight: 850;
+
+  cursor: pointer;
+
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.establishment-page__metodo-toggle:hover {
+  transform: translateY(-1px);
+}
+
+.establishment-page__metodo-toggle--active {
+  border-color: var(--color-app-accent-border);
+
+  background: var(--color-app-accent-soft);
+  color: var(--color-app-accent-strong);
+}
+
+.establishment-page__metodos-empty {
+  padding: 18px;
+
+  border: 1px dashed rgba(157, 190, 187, 0.4);
+  border-radius: var(--radius-md);
+
+  text-align: center;
+
+  color: var(--color-app-text-soft);
+
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.establishment-page__metodos-add {
+  margin-top: 20px;
+
+  display: flex;
+  gap: 12px;
+}
+
+.establishment-page__metodos-add input {
+  flex: 1;
+  min-height: 46px;
+  padding: 0 14px;
+
+  border: 1px solid rgba(157, 190, 187, 0.42);
+  border-radius: var(--radius-sm);
+  outline: none;
+
+  background: #fff;
+  color: var(--color-app-text);
+
+  font-size: 14px;
+  font-weight: 750;
+
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.establishment-page__metodos-add input:focus {
+  border-color: var(--color-app-accent);
+  box-shadow: 0 0 0 4px var(--color-app-accent-soft);
+}
+
+.establishment-page__metodos-add-btn {
+  min-width: 120px;
+  min-height: 46px;
+  padding: 0 18px;
+
+  border-radius: var(--radius-pill);
+
+  background: var(--color-brand-primary);
+  color: var(--color-brand-feature);
+
+  font-size: 14px;
+  font-weight: 900;
+
+  transition:
+    transform var(--transition-fast),
+    opacity var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.establishment-page__metodos-add-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: var(--color-primary-hover);
+}
+
+.establishment-page__metodos-add-btn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.establishment-page__metodo-error {
+  display: block;
+  margin-top: 10px;
+
+  color: var(--color-error);
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
 @media (max-width: 1120px) {
   .establishment-page__grid {
     grid-template-columns: 1fr;
