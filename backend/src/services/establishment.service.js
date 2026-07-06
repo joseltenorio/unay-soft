@@ -132,8 +132,101 @@ async function updateEstablishmentLogo(idEstablecimiento, logoUrl) {
   return rows[0]
 }
 
+async function getMetodosPagoByEstablishment(idEstablecimiento) {
+  const query = `
+    select
+      id_metodo_pago,
+      id_establecimiento,
+      nombre,
+      estado,
+      created_at,
+      updated_at
+    from metodo_pago
+    where id_establecimiento = $1
+    order by created_at;
+  `
+
+  const { rows } = await pool.query(query, [idEstablecimiento])
+
+  return rows
+}
+
+async function createMetodoPago(idEstablecimiento, nombre) {
+  const query = `
+    insert into metodo_pago (
+      id_establecimiento,
+      nombre
+    )
+    values ($1, $2)
+    returning
+      id_metodo_pago,
+      id_establecimiento,
+      nombre,
+      estado,
+      created_at,
+      updated_at;
+  `
+
+  try {
+    const { rows } = await pool.query(query, [
+      idEstablecimiento,
+      nombre.trim(),
+    ])
+
+    return rows[0]
+  } catch (error) {
+    if (error.code === "23505") {
+      const e = new Error("Ya existe un método de pago con ese nombre.")
+      e.statusCode = 409
+      throw e
+    }
+
+    throw error
+  }
+}
+
+async function toggleMetodoPago(
+  idEstablecimiento,
+  idMetodoPago,
+  estado,
+) {
+  const query = `
+    update metodo_pago
+    set
+      estado = $1,
+      updated_at = now()
+    where
+      id_metodo_pago = $2
+      and id_establecimiento = $3
+    returning
+      id_metodo_pago,
+      id_establecimiento,
+      nombre,
+      estado,
+      created_at,
+      updated_at;
+  `
+
+  const { rows } = await pool.query(query, [
+    estado,
+    idMetodoPago,
+    idEstablecimiento,
+  ])
+
+  if (rows.length === 0) {
+    const error = new Error("El método de pago no existe.")
+    error.statusCode = 404
+    throw error
+  }
+
+  return rows[0]
+}
+
 module.exports = {
   getEstablishmentById,
   updateEstablishment,
   updateEstablishmentLogo,
+  getMetodosPagoByEstablishment,
+  createMetodoPago,
+  toggleMetodoPago,
 }
