@@ -488,6 +488,34 @@
   }
 }
 
+.establishment-page__metodo-delete {
+  min-width: 92px;
+  min-height: 36px;
+  padding: 0 14px;
+
+  border: 1px solid rgba(220, 53, 69, 0.35);
+  border-radius: var(--radius-pill);
+
+  background: rgba(220, 53, 69, 0.08);
+  color: #dc3545;
+
+  font-size: 13px;
+  font-weight: 850;
+
+  cursor: pointer;
+
+  transition:
+    transform var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.establishment-page__metodo-delete:hover {
+  transform: translateY(-1px);
+  background: rgba(220, 53, 69, 0.15);
+  border-color: rgba(220, 53, 69, 0.5);
+}
+
 @media (max-width: 720px) {
   .establishment-page__header {
     flex-direction: column;
