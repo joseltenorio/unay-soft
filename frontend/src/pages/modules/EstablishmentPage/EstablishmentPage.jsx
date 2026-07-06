@@ -8,12 +8,9 @@ import {
   getMetodosPago,
   createMetodoPago,
   toggleMetodoPago,
-  deleteMetodoPago
 } from "../../../services/establishmentService"
 
-import {
-  normalizeText,
-} from "../../../utils/userValidation"
+import { normalizeMetodoPago } from "../../../utils/textNormalization"
 
 {/*import logoUmari from "../../../assets/icons/logo-umari.svg"*/}
 
@@ -170,14 +167,14 @@ export default function EstablishmentPage() {
   }
 
   async function handleAddMetodo() {
-    const nombre = normalizeText(nuevoMetodo)
+    const nombre = normalizeMetodoPago(nuevoMetodo)
 
     if (!nombre) {
       setMetodoError("Ingresa un nombre para el método de pago.")
       return
     }
 
-    if (metodosPago.some((m) => m.nombre.toLowerCase() === nombre.toLowerCase())) {
+    if (metodosPago.some((m) => normalizeMetodoPago(m.nombre) === nombre)) {
       setMetodoError("Ya existe un método de pago con ese nombre.")
       return
     }
@@ -212,26 +209,6 @@ export default function EstablishmentPage() {
       showToast({
         type: "error",
         title: "No se pudo actualizar",
-        message: error.message || "Intenta nuevamente.",
-      })
-    }
-  }
-
-  async function handleDeleteMetodo(metodo) {
-    try {
-      await deleteMetodoPago(metodo.id_metodo_pago)
-      setMetodosPago((current) =>
-        current.filter((m) => m.id_metodo_pago !== metodo.id_metodo_pago)
-      )
-      showToast({
-        type: "success",
-        title: "Método eliminado",
-        message: `"${metodo.nombre}" fue eliminado.`,
-      })
-    } catch (error) {
-      showToast({
-        type: "error",
-        title: "No se pudo eliminar",
         message: error.message || "Intenta nuevamente.",
       })
     }
@@ -425,6 +402,77 @@ export default function EstablishmentPage() {
                     <span>Sin logo</span>
                   )}
                 </div>
+              </div>
+            </article>
+
+            <article className="establishment-page__panel">
+              <div className="establishment-page__panel-header">
+                <span>04</span>
+                <div>
+                  <h3>Métodos de pago</h3>
+                  <p>Configura los métodos disponibles en caja.</p>
+                </div>
+              </div>
+              <ul className="establishment-page__metodos-list">
+                {metodosPago.length === 0 ? (
+                  <li className="establishment-page__metodos-empty">
+                    No hay métodos de pago registrados.
+                  </li>
+                ) : (
+                  metodosPago.map((metodo) => (
+                    <li
+                      key={metodo.id_metodo_pago}
+                      className="establishment-page__metodo-item"
+                    >
+                      <span className="establishment-page__metodo-nombre">
+                        {metodo.nombre}
+                      </span>
+
+                      <div className="establishment-page__metodo-actions">
+                        {/* Toggle activo/inactivo */}
+                        <button
+                          type="button"
+                          className={
+                            metodo.estado
+                              ? "establishment-page__metodo-toggle establishment-page__metodo-toggle--active"
+                              : "establishment-page__metodo-toggle"
+                          }
+                          onClick={() => handleToggleMetodo(metodo)}
+                        >
+                          {metodo.estado ? "Activo" : "Inactivo"}
+                        </button>                        
+                      </div>
+                    </li>
+                  ))
+                )}
+              </ul>
+
+              <div className="establishment-page__metodos-add">
+                <input
+                  type="text"
+                  placeholder="Ej. Yape, Transferencia, Plin ..."
+                  value={nuevoMetodo}
+                  onChange={(e) => {
+                    setNuevoMetodo(e.target.value)
+                    setMetodoError("")
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      handleAddMetodo()
+                    }
+                  }}
+                  maxLength={80}
+                />
+
+                <button
+                  type="button"
+                  className="establishment-page__metodos-add-btn"
+                  onClick={handleAddMetodo}
+                  disabled={isAddingMetodo}
+                >
+                  {isAddingMetodo ? "Agregando..." : "+ Agregar"}
+                </button>
               </div>
             </article>
           </section>
