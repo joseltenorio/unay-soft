@@ -5,6 +5,10 @@ import { useEffect, useMemo, useState } from "react"
 import {
   getEstablishment,
   updateEstablishment,
+  getMetodosPago,
+  createMetodoPago,
+  toggleMetodoPago,
+  deleteMetodoPago
 } from "../../../services/establishmentService"
 
 {/*import logoUmari from "../../../assets/icons/logo-umari.svg"*/}
@@ -52,6 +56,10 @@ export default function EstablishmentPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
+  const [metodosPago, setMetodosPago]       = useState([])
+  const [nuevoMetodo, setNuevoMetodo]       = useState("")
+  const [isAddingMetodo, setIsAddingMetodo] = useState(false)
+  const [metodoError, setMetodoError]       = useState("")
 
   const { showToast } = useToast()
 
@@ -63,36 +71,35 @@ export default function EstablishmentPage() {
   useEffect(() => {
     let isMounted = true
 
-    async function loadEstablishment() {
+    async function loadData() {
       try {
         setIsLoading(true)
         setErrorMessage("")
 
-        const establishment = await getEstablishment()
-        const normalizedData = normalizeEstablishment(establishment)
+        const [establishment, metodos] = await Promise.all([
+          getEstablishment(),
+          getMetodosPago(),
+        ])
 
-        if (isMounted) {
-          setFormData(normalizedData)
-          setOriginalData(normalizedData)
-        }
+        if (!isMounted) return
+
+        setFormData(normalizeEstablishment(establishment))
+        setOriginalData(normalizeEstablishment(establishment))
+        setMetodosPago(metodos)
       } catch (error) {
         if (isMounted) {
           setErrorMessage(
-            error.message || "No se pudo cargar la configuración del establecimiento.",
+            error.message || "No se pudo cargar la configuración.",
           )
         }
       } finally {
-        if (isMounted) {
-          setIsLoading(false)
-        }
+        if (isMounted) setIsLoading(false)
       }
     }
 
-    loadEstablishment()
+    loadData()
 
-    return () => {
-      isMounted = false
-    }
+    return () => { isMounted = false }
   }, [])
 
   function handleChange(event) {
