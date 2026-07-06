@@ -7,6 +7,7 @@ const {
   getMetodosPagoByEstablishment,
   createMetodoPago,
   toggleMetodoPago,
+  deleteMetodoPago,
 } = require("../services/establishment.service")
 
 async function getEstablishment(req, res) {
@@ -206,6 +207,23 @@ async function toggleMetodoPagoController(req, res) {
   }
 }
 
+async function deleteMetodoPagoController(req, res) {
+  try {
+    await deleteMetodoPago(
+      req.user.id_establecimiento,
+      req.params.idMetodoPago,
+    )
+
+    return res.status(200).json({
+      message: "Método de pago eliminado correctamente.",
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al eliminar el método de pago.",
+    })
+  }
+}
+
 module.exports = {
   getEstablishment,
   editEstablishment,
@@ -213,4 +231,5 @@ module.exports = {
   getMetodosPago,
   createMetodoPagoController,
   toggleMetodoPagoController,
+  deleteMetodoPagoController
 }
