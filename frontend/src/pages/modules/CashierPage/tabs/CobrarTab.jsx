@@ -308,7 +308,7 @@ function PayPanel({ order, clearOrder, showToast }) {
     // Validación extra: monto insuficiente en efectivo
     if (
       method === "EFECTIVO" &&
-      (received === "" || receivedAmount <= 0 || parseFloat(received) < total)
+      (received === "" || parseFloat(received) <= 0 || parseFloat(received) < total)
     ) {
       showToast({
         type: "warning",
