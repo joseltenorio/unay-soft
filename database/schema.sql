@@ -17,6 +17,8 @@ drop table if exists codigo_qr cascade;
 drop table if exists cierre_caja cascade;
 drop table if exists apertura_caja cascade;
 drop table if exists caja cascade;
+drop table if exists comprobante cascade;
+drop table if exists tipo_comprobante cascade;
 drop table if exists pago cascade;
 drop table if exists item_orden_adicional cascade;
 drop table if exists orden_notificacion_servicio cascade;
@@ -430,6 +432,7 @@ create table orden (
   preparacion_inicio_at timestamptz,
   lista_at timestamptz,
   entregada_at timestamptz,
+  enviada_caja_at timestamptz,
   cerrada_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -449,7 +452,7 @@ create table orden (
   constraint uq_orden_numero unique (numero_orden),
 
   constraint chk_orden_estado
-    check (estado in ('ABIERTA', 'EN_PREPARACION', 'LISTA', 'ENTREGADA', 'PAGADA', 'ANULADA')),
+    check (estado in ('ABIERTA', 'EN_PREPARACION', 'LISTA', 'ENTREGADA', 'ENVIADA_A_CAJA','PAGADA', 'ANULADA')),
 
   constraint chk_orden_tipo_servicio
     check (tipo_servicio in ('SALON', 'PARA_LLEVAR', 'DELIVERY')),
@@ -604,6 +607,86 @@ create table metodo_pago (
   constraint uq_metodo_pago_nombre unique (id_establecimiento, nombre)
 );
 
+create table tipo_comprobante (
+  id_tipo_comprobante smallserial primary key,
+  codigo varchar(2) not null,
+  nombre varchar(50) not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+
+  constraint uq_tipo_comprobante_codigo
+    unique (codigo),
+
+  constraint uq_tipo_comprobante_nombre
+    unique (nombre)
+);
+
+insert into tipo_comprobante (codigo, nombre)
+values
+  ('01', 'Factura'),
+  ('03', 'Boleta');
+
+create table comprobante (
+  id_comprobante uuid primary key default uuid_generate_v4(),
+  id_comprobante uuid not null,
+  id_apertura uuid not null,
+  id_tipo_comprobante smallint not null,
+
+  serie varchar(10) not null,
+  numero varchar(20) not null,
+
+  estado varchar(20) not null default 'EMITIDO',
+
+  subtotal numeric(10,2) not null default 0,
+  igv numeric(10,2) not null default 0,
+  total numeric(10,2) not null default 0,
+
+  numero_documento varchar(20),
+  razon_social varchar(160),
+  direccion_fiscal text,
+
+  fecha_emision timestamptz not null default now(),
+
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+
+  constraint fk_comprobante_orden
+    foreign key (id_orden)
+    references orden(id_orden)
+    on update cascade
+    on delete restrict,
+
+  constraint fk_comprobante_apertura
+    foreign key (id_apertura)
+    references apertura_caja(id_apertura)
+    on update cascade
+    on delete restrict,
+tipo_comprobante
+  constraint fk_comprobante_tipo
+    foreign key (id_tipo_comprobante)
+    references tipo_comprobante(id_tipo_comprobante)
+    on update cascade
+    on delete restrict,
+
+  constraint uq_comprobante_serie_numero
+    unique (serie, numero),
+
+  constraint chk_comprobante_estado
+    check (estado in ('EMITIDO', 'ANULADO')),
+
+  constraint chk_comprobante_montos
+    check (subtotal >= 0 and igv >= 0 and total >= 0)
+);
+
+create index idx_comprobante_orden
+  on comprobante(id_orden);
+
+create index idx_comprobante_apertura
+  on comprobante(id_apertura);
+
+create index idx_comprobante_tipo
+  on comprobante(id_tipo_comprobante);
+
 create table pago (
   id_pago uuid primary key default uuid_generate_v4(),
   id_orden uuid not null,
@@ -616,9 +699,9 @@ create table pago (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
 
-  constraint fk_pago_orden
+  constraint fk_pago_comprobante
     foreign key (id_orden)
-    references orden(id_orden)
+    references comprobante(id_comprobante)
     on update cascade
     on delete restrict,
 
@@ -697,12 +780,6 @@ create table cierre_caja (
   id_cierre_caja uuid primary key default uuid_generate_v4(),
   id_apertura uuid not null,
   id_usuario uuid not null,
-  total_efectivo numeric(10,2) not null default 0,
-  total_tarjeta numeric(10,2) not null default 0,
-  total_yape numeric(10,2) not null default 0,
-  total_plin numeric(10,2) not null default 0,
-  total_transferencia numeric(10,2) not null default 0,
-  total_otros numeric(10,2) not null default 0,
   total_sistema numeric(10,2) not null default 0,
   total_declarado numeric(10,2) not null default 0,
   diferencia numeric(10,2) not null default 0,
@@ -857,10 +934,11 @@ create index idx_orden_estado on orden(estado);
 create index idx_orden_enviada_cocina_at on orden(enviada_cocina_at);
 create index idx_orden_preparacion_inicio_at on orden(preparacion_inicio_at);
 create index idx_orden_lista_at on orden(lista_at);
+create index idx_orden_enviada_caja_at on orden(enviada_caja_at);
 
 create index idx_item_orden_orden on item_orden(id_orden);
 create index idx_item_orden_estado_cocina on item_orden(estado_cocina);
-create index idx_pago_orden on pago(id_orden);
+create index idx_pago_comprobante on pago(id_comprobante);
 create index idx_pago_apertura on pago(id_apertura);
 create index idx_pago_metodo_pago on pago(id_metodo_pago);
 
@@ -935,6 +1013,10 @@ for each row execute function set_updated_at();
 
 create trigger trg_item_orden_updated_at
 before update on item_orden
+for each row execute function set_updated_at();
+
+create trigger trg_comprobante_updated_at
+before update on comprobante
 for each row execute function set_updated_at();
 
 create trigger trg_pago_updated_at
