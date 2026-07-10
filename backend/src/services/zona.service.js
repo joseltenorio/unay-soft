@@ -64,7 +64,7 @@ async function updateZona(idEstablecimiento, idZona, data) {
   const { nombre, descripcion, capacidad, estado } = data
 
   const exist = await pool.query(
-    `SELECT id_zona FROM zona WHERE id_zona = $1 AND id_establecimiento = $2 LIMIT 1;`,
+    `SELECT id_zona, estado FROM zona WHERE id_zona = $1 AND id_establecimiento = $2 LIMIT 1;`,
     [idZona, idEstablecimiento]
   )
   if (exist.rows.length === 0) {
@@ -72,6 +72,7 @@ async function updateZona(idEstablecimiento, idZona, data) {
     error.statusCode = 404
     throw error
   }
+  const estadoActual = exist.rows[0].estado
 
   const dup = await pool.query(
     `SELECT id_zona FROM zona
@@ -84,16 +85,17 @@ async function updateZona(idEstablecimiento, idZona, data) {
     throw error
   }
 
+  const estadoFinal = typeof estado === "boolean" ? estado : estadoActual
+
   const { rows } = await pool.query(
     `UPDATE zona
      SET nombre = $1, descripcion = $2, capacidad = $3, estado = $4
      WHERE id_zona = $5 AND id_establecimiento = $6
      RETURNING *;`,
-    [nombre.trim(), descripcion?.trim() || null, capacidad || null, Boolean(estado), idZona, idEstablecimiento]
+    [nombre.trim(), descripcion?.trim() || null, capacidad || null, estadoFinal, idZona, idEstablecimiento]
   )
   return rows[0]
 }
-
 async function updateZonaStatus(idEstablecimiento, idZona, estado) {
   const exist = await pool.query(
     `SELECT id_zona FROM zona WHERE id_zona = $1 AND id_establecimiento = $2 LIMIT 1;`,
