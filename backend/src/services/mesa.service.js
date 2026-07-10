@@ -1,4 +1,4 @@
-// backend/src/services/salon.service.js
+// backend/src/services/mesa.service.js
 
 const { pool } = require("../config/database")
 const ACTIVE_ORDER_STATES = ["ABIERTA", "EN_PREPARACION", "LISTA", "ENTREGADA"]
