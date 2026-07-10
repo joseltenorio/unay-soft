@@ -213,10 +213,10 @@ async function createMesa(idEstablecimiento, data) {
 }
  
   async function updateMesa(idEstablecimiento, idMesa, data) {
-    const { numero, nombre, capacidad, id_zona, estado } = data
+  const { numero, nombre, capacidad, id_zona, estado } = data
 
     const exist = await pool.query(
-      `SELECT id_mesa FROM mesa WHERE id_mesa = $1 AND id_establecimiento = $2 LIMIT 1;`,
+      `SELECT id_mesa, estado FROM mesa WHERE id_mesa = $1 AND id_establecimiento = $2 LIMIT 1;`,
       [idMesa, idEstablecimiento]
     )
     if (exist.rows.length === 0) {
@@ -224,6 +224,8 @@ async function createMesa(idEstablecimiento, data) {
       error.statusCode = 404
       throw error
     }
+    const estadoActual = exist.rows[0].estado
+    const estadoFinal = typeof estado === "boolean" ? estado : estadoActual
 
     const dup = await pool.query(
       `SELECT id_mesa FROM mesa WHERE id_establecimiento = $1 AND numero = $2 AND id_mesa != $3 LIMIT 1;`,
@@ -248,14 +250,14 @@ async function createMesa(idEstablecimiento, data) {
     }
 
     try {
-      const { rows } = await pool.query(
-        `UPDATE mesa
-        SET numero = $1, nombre = $2, capacidad = $3, id_zona = $4, estado = $5
-        WHERE id_mesa = $6 AND id_establecimiento = $7
-        RETURNING *;`,
-        [numero, nombre?.trim() || null, Number(capacidad), id_zona || null, Boolean(estado), idMesa, idEstablecimiento]
-      )
-      return rows[0]
+        const { rows } = await pool.query(
+          `UPDATE mesa
+          SET numero = $1, nombre = $2, capacidad = $3, id_zona = $4, estado = $5
+          WHERE id_mesa = $6 AND id_establecimiento = $7
+          RETURNING *;`,
+          [numero, nombre?.trim() || null, Number(capacidad), id_zona || null, estadoFinal, idMesa, idEstablecimiento]
+        )
+        return rows[0]
     } catch (error) {
       if (error.code === "23505") {
         const err = new Error(`Ya existe otra mesa con el número ${numero} en el establecimiento.`)
