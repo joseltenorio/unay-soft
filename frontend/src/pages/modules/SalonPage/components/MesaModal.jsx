@@ -45,15 +45,18 @@ export default function MesaModal({ data, zonas, defaultZonaId, mesasExistentes 
       .sort((a, b) => a - b),
     [mesasExistentes, data]
   )
+  const zonaInicial = zonas.find(z => z.id_zona === (data?.id_zona || defaultZonaId))
+  const esBarraInicial = zonaInicial?.nombre?.toLowerCase().includes("barra")
 
   const [form, setForm] = useState({
     numero: data?.numero || getNextAvailableNumber(mesasExistentes, data?.id_mesa),
     nombre: data?.nombre || "",
-    capacidad: data?.capacidad || 4,
+    capacidad: data?.capacidad || (esBarraInicial ? 1 : 4),
     id_zona: data?.id_zona || defaultZonaId || "",
     disponibilidad: data?.disponibilidad || "LIBRE",
     estado: data?.estado ?? true,
   })
+
   const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
 
@@ -169,13 +172,22 @@ const runValidation = (updatedForm) => {
 
           {/* ZONA */}
           <div className="salon-modal__field">
-            <label>Zona <span className="salon-modal__opt">opcional</span></label>
+            <label>Zona <span className="salon-modal__opt">(opcional)</span></label>
             <select
               value={form.id_zona}
-              onChange={e => setForm(p => ({ ...p, id_zona: e.target.value }))}
+                onChange={e => {
+                  const nuevaZonaId = e.target.value
+                  const nuevaZona = zonas.find(z => z.id_zona === nuevaZonaId)
+                  const nuevaEsBarra = nuevaZona?.nombre?.toLowerCase().includes("barra")
+                  setForm(p => ({
+                    ...p,
+                    id_zona: nuevaZonaId,
+                    capacidad: nuevaEsBarra ? 1 : (p.capacidad === 1 ? 4 : p.capacidad),
+                  }))
+                }}
             >
-              {zonas.filter(z => z.estado).map(z => (
-                <option key={z.id_zona} value={z.id_zona}>{z.nombre}</option>
+                {zonas.filter(z => z.estado).map(z => (
+                  <option key={z.id_zona} value={z.id_zona}>{z.nombre}</option>
               ))}
             </select>
           </div>
