@@ -409,25 +409,42 @@
 .salon__stat {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  padding: 14px 12px;
+  gap: 10px;
+  padding: 18px 24px;
   border-right: 1px solid var(--salon-border-soft);
-  gap: 2px;
 }
 
 .salon__stat:last-child {
   border-right: none;
 }
+
+.salon__stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.salon__stat-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
 .salon__stat-value {
-  font-size: 36px;
+  font-size: 22px;
   font-weight: 800;
-  letter-spacing: -0.5px;
-  line-height: 1;
+  letter-spacing: -0.3px;
+  line-height: 1.1;
 }
 
 .salon__stat-label {
-  font-size: 15px;
+  font-size: 12px;
   color: var(--salon-text-2);
   font-weight: 500;
   white-space: nowrap;
@@ -1233,9 +1250,7 @@
   .salon__stats {
     gap: 0;
   }
-  .salon__stat {
-    padding: 10px 6px;
-  }
+  
   .salon__stat-value {
     font-size: 18px;
   }
