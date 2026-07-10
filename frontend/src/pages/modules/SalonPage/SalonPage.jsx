@@ -93,6 +93,39 @@ const IconChair = () => (
     <path d="M6 13v6M18 13v6" />
   </svg>
 )
+const IconTotalMesas = () => (
+  <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+    <path d="M4 9V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4" />
+    <path d="M2 9h20v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9z" />
+    <path d="M6 13v6M18 13v6" />
+  </svg>
+)
+const IconDisponible = () => (
+  <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+)
+const IconOcupada = () => (
+  <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+    <circle cx="12" cy="8" r="5" />
+    <path d="M20 21a8 8 0 1 0-16 0" />
+  </svg>
+)
+const IconReservada = () => (
+  <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+    <rect x="3" y="4" width="18" height="18" rx="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
+  </svg>
+)
+const IconFuera = () => (
+  <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+  </svg>
+)
 
 const DISP = {
   LIBRE: {
@@ -516,17 +549,25 @@ export default function SalonPage() {
 
       <div className="salon__stats">
         {[
-          { label: "Total mesas", value: total, color: "#111827" },
-          { label: "Disponibles", value: disponibles, color: "#16a34a" },
-          { label: "Ocupadas", value: ocupadas, color: "#dc2626" },
-          { label: "Reservadas", value: reservadas, color: "#d97706" },
-          { label: "Fuera de servicio", value: fuera, color: "#6b7280" },
+          { label: "Total mesas", value: total, color: "#0b3ba5", icon: <IconTotalMesas /> },
+          { label: "Disponibles", value: disponibles, color: "#16a34a", icon: <IconDisponible /> },
+          { label: "Ocupadas", value: ocupadas, color: "#dc2626", icon: <IconOcupada /> },
+          { label: "Reservadas", value: reservadas, color: "#d97706", icon: <IconReservada /> },
+          { label: "Fuera de servicio", value: fuera, color: "#6b7280", icon: <IconFuera /> },
         ].map((stat) => (
           <div key={stat.label} className="salon__stat">
-            <span className="salon__stat-value" style={{ color: stat.color }}>
-              {stat.value}
+            <span
+              className="salon__stat-icon"
+              style={{ color: stat.color, background: `${stat.color}1a` }}
+            >
+              {stat.icon}
             </span>
-            <span className="salon__stat-label">{stat.label}</span>
+            <div className="salon__stat-text">
+              <span className="salon__stat-value">
+                {stat.value}
+              </span>
+              <span className="salon__stat-label">{stat.label}</span>
+            </div>
           </div>
         ))}
       </div>
