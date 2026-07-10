@@ -7,11 +7,22 @@ import {
 } from "../../../../utils/salonValidation"
 
 const IconX = () => (
-  <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+  <svg width="18" 
+      height="18" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2.5" 
+      viewBox="0 0 24 24">
+    <line x1="18" 
+        y1="6" 
+        x2="6" 
+        y2="18" />
+    <line x1="6"
+      y1="6" 
+      x2="18" 
+      y2="18" />
   </svg>
 )
-
 function getNextAvailableNumber(mesas, excludeId = null) {
   const usados = mesas
     .filter(m => m.id_mesa !== excludeId)
@@ -135,9 +146,9 @@ const runValidation = (updatedForm) => {
             </div>
           </div>
 
-          {/* NOMBRE OPCIONAL */}
+          {/* NOMBRE */}
           <div className="salon-modal__field">
-            <label>Nombre / Código <span className="salon-modal__opt">opcional</span></label>
+            <label>Nombre <span className="salon-modal__opt">(opcional)</span></label>
             <input
               value={form.nombre}
               onChange={e => {
@@ -146,7 +157,7 @@ const runValidation = (updatedForm) => {
                 if (errors.nombre) runValidation(newForm)
               }}
               onBlur={() => runValidation(form)}
-              placeholder="ej. P01, Mesa VIP"
+              placeholder="ej. P01, Mesa 5"
               style={errors.nombre ? { borderColor: "#e63946" } : {}}
             />
             {errors.nombre && (
