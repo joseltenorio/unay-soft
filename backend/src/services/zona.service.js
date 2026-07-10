@@ -107,6 +107,14 @@ async function updateZonaStatus(idEstablecimiento, idZona, estado) {
     throw error
   }
 
+  if (estado === false) {
+    await ensureZonaHasNoActiveMesas(
+      idEstablecimiento,
+      idZona,
+      "No se puede desactivar una zona con mesas que tienen cuenta activa."
+    )
+  }
+
   const { rows } = await pool.query(
     `UPDATE zona SET estado = $1 WHERE id_zona = $2 AND id_establecimiento = $3 RETURNING *;`,
     [Boolean(estado), idZona, idEstablecimiento]
@@ -115,22 +123,60 @@ async function updateZonaStatus(idEstablecimiento, idZona, estado) {
 }
 
 async function deleteZona(idEstablecimiento, idZona) {
-  // Desvincular mesas antes de eliminar (SET NULL por FK, pero lo hacemos explícito)
-  await pool.query(
-    `UPDATE mesa SET id_zona = NULL WHERE id_zona = $1 AND id_establecimiento = $2;`,
-    [idZona, idEstablecimiento]
+  await ensureZonaHasNoActiveMesas(
+    idEstablecimiento,
+    idZona,
+    "No se puede eliminar una zona con mesas que tienen cuenta activa."
   )
 
+  const client = await pool.connect()
+  try {
+    await client.query("BEGIN")
+    await client.query(
+      `UPDATE mesa SET id_zona = NULL WHERE id_zona = $1 AND id_establecimiento = $2;`,
+      [idZona, idEstablecimiento]
+    )
+    const { rows } = await client.query(
+      `DELETE FROM zona WHERE id_zona = $1 AND id_establecimiento = $2 RETURNING id_zona, nombre;`,
+      [idZona, idEstablecimiento]
+    )
+    if (rows.length === 0) {
+      const error = new Error("La zona no existe o no pertenece al establecimiento.")
+      error.statusCode = 404
+      throw error
+    }
+    await client.query("COMMIT")
+    return rows[0]
+  } catch (error) {
+    await client.query("ROLLBACK")
+    throw error
+  } finally {
+    client.release()
+  }
+}
+
+const ACTIVE_ORDER_STATES = ["ABIERTA", "EN_PREPARACION", "LISTA", "ENTREGADA"]
+
+async function ensureZonaHasNoActiveMesas(idEstablecimiento, idZona, message) {
   const { rows } = await pool.query(
-    `DELETE FROM zona WHERE id_zona = $1 AND id_establecimiento = $2 RETURNING id_zona, nombre;`,
-    [idZona, idEstablecimiento]
+    `
+      SELECT COUNT(*)::int AS active_count
+      FROM mesa m
+      JOIN orden o ON o.id_mesa = m.id_mesa
+      JOIN usuario u ON u.id_usuario = o.id_usuario
+      WHERE m.id_zona = $1
+        AND m.id_establecimiento = $2
+        AND u.id_establecimiento = $2
+        AND o.estado = ANY($3::varchar[]);
+    `,
+    [idZona, idEstablecimiento, ACTIVE_ORDER_STATES]
   )
-  if (rows.length === 0) {
-    const error = new Error("La zona no existe o no pertenece al establecimiento.")
-    error.statusCode = 404
+
+  if (rows[0].active_count > 0) {
+    const error = new Error(message)
+    error.statusCode = 409
     throw error
   }
-  return rows[0]
 }
 
 module.exports = {
