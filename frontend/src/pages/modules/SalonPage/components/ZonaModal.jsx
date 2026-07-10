@@ -6,8 +6,22 @@ import {
 } from "../../../../utils/salonValidation"
 
 const IconX = () => (
-  <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+  <svg width="18"
+    height="18" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2.5" 
+    viewBox="0 0 24 24">
+    <line x1="18"
+      y1="6" 
+      x2="6" 
+      y2="18" 
+    />
+    <line x1="6" 
+      y1="6" 
+      x2="18" 
+      y2="18" 
+    />
   </svg>
 )
 
@@ -79,7 +93,7 @@ export default function ZonaModal({ data, onSave, onClose }) {
 
           {/* DESCRIPCIÓN */}
           <div className="salon-modal__field">
-            <label>Descripción <span className="salon-modal__opt">opcional</span></label>
+            <label>Descripción <span className="salon-modal__opt">(opcional)</span></label>
             <input
               value={form.descripcion}
               onChange={e => setForm(p => ({ ...p, descripcion: e.target.value }))}
@@ -89,7 +103,7 @@ export default function ZonaModal({ data, onSave, onClose }) {
 
           {/* CAPACIDAD */}
           <div className="salon-modal__field">
-            <label>Capacidad total <span className="salon-modal__opt">opcional</span></label>
+            <label>Capacidad total <span className="salon-modal__opt">(opcional)</span></label>
             <input
               type="number"
               value={form.capacidad}
