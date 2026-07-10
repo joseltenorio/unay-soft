@@ -215,6 +215,10 @@ export default function SalonPage() {
   }, [])
 
   useEffect(() => {
+    setMesaSeleccionada(null)
+  }, [zonaActiva])  
+
+  useEffect(() => {
     let cancelled = false
 
     Promise.all([getZonas(), getMesas()])
