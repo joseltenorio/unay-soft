@@ -1275,6 +1275,16 @@
   background: var(--salon-border);
   border-radius: 4px;
 }
+.salon-detail__section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--salon-text-3);
+  border-top: 1.5px solid var(--salon-border-soft);
+  padding-top: 12px;
+  margin-top: 2px;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .salon-mesa-card,
