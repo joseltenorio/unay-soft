@@ -1,4 +1,4 @@
-// backend/src/services/salon.service.js
+// backend/src/services/zona.service.js
 
 const { pool } = require("../config/database")
 
