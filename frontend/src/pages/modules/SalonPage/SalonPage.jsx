@@ -154,20 +154,20 @@ const DISP = {
   },
 }
 
-function MesaCard({ mesa, onSelect, selected }) {
+function MesaCard({ mesa, zona, onSelect, selected }) {
   const disp = DISP[mesa.disponibilidad] || DISP.LIBRE
-
+  const esBarra = zona?.nombre?.toLowerCase().includes("barra")
+  const label = esBarra ? "Asiento" : "Mesa"
   return (
-    <button
+     <button
       className={`salon-mesa-card ${selected ? "salon-mesa-card--selected" : ""}`}
       style={{ "--disp-bg": disp.bg, "--disp-color": disp.color }}
       onClick={() => onSelect(mesa)}
-      title={`Mesa ${mesa.numero}${mesa.nombre ? ` · ${mesa.nombre}` : ""}`}
+      title={`${label} ${mesa.numero}${mesa.nombre ? ` · ${mesa.nombre}` : ""}`}
     >
       <span className="salon-mesa-card__code">
-        {mesa.nombre || `M${mesa.numero}`}
+        {mesa.nombre || `${esBarra ? "A" : "M"}${mesa.numero}`}
       </span>
-
       <span className="salon-mesa-card__cap">
         <IconChair /> {mesa.capacidad}
       </span>
@@ -273,6 +273,14 @@ export default function SalonPage() {
     : mesas.filter((mesa) => mesa.estado)
 
   const zonaActivaData = zonas.find((zona) => zona.id_zona === zonaActiva)
+
+  const totalZona = mesasDeZona.length
+  const libresZona = mesasDeZona.filter(m => m.disponibilidad === "LIBRE").length
+  const ocupadasZona = mesasDeZona.filter(m => m.disponibilidad === "OCUPADA").length
+  const reservadasZona = mesasDeZona.filter(m => m.disponibilidad === "RESERVADA").length
+  const fueraZona = mesasDeZona.filter(m => m.disponibilidad === "MANTENIMIENTO").length
+  const pctDisponibleZona = totalZona > 0 ? Math.round((libresZona / totalZona) * 100) : 0
+  const esBarraActiva = zonaActivaData?.nombre?.toLowerCase().includes("barra")
 
   async function handleSaveZona(payload, id) {
     try {
@@ -620,7 +628,7 @@ export default function SalonPage() {
                           mesa.id_zona === zona.id_zona && mesa.estado,
                       ).length
                     }{" "}
-                    mesas
+                    {zona.nombre?.toLowerCase().includes("barra") ? "asientos" : "mesas"}
                   </span>
                 </div>
 
@@ -688,6 +696,37 @@ export default function SalonPage() {
                 </RequirePermission>
               </div>
             ))
+          )}
+          {!loading && zonaActivaData && totalZona > 0 && (
+            <div className="salon__zone-summary">
+              <div className="salon__zone-summary-hdr">
+                <strong>Resumen</strong>
+              </div>
+
+              <div className="salon__zone-summary-badges">
+                <span className="salon__zone-badge" style={{ background: DISP.LIBRE.bg, color: DISP.LIBRE.color }}>
+                  {libresZona}
+                </span>
+                <span className="salon__zone-badge" style={{ background: DISP.OCUPADA.bg, color: DISP.OCUPADA.color }}>
+                  {ocupadasZona}
+                </span>
+                <span className="salon__zone-badge" style={{ background: DISP.RESERVADA.bg, color: DISP.RESERVADA.color }}>
+                  {reservadasZona}
+                </span>
+                <span className="salon__zone-badge" style={{ background: DISP.MANTENIMIENTO.bg, color: DISP.MANTENIMIENTO.color }}>
+                  {fueraZona}
+                </span>
+              </div>
+
+              <div className="salon__zone-summary-bar">
+                {libresZona > 0 && <span style={{ width: `${(libresZona/totalZona)*100}%`, background: DISP.LIBRE.dot }} />}
+                {ocupadasZona > 0 && <span style={{ width: `${(ocupadasZona/totalZona)*100}%`, background: DISP.OCUPADA.dot }} />}
+                {reservadasZona > 0 && <span style={{ width: `${(reservadasZona/totalZona)*100}%`, background: DISP.RESERVADA.dot }} />}
+                {fueraZona > 0 && <span style={{ width: `${(fueraZona/totalZona)*100}%`, background: DISP.MANTENIMIENTO.dot }} />}
+              </div>
+
+              <p className="salon__zone-summary-pct">{pctDisponibleZona}% disponibles</p>
+            </div>
           )}
         </aside>
 
@@ -759,6 +798,7 @@ export default function SalonPage() {
                     <MesaCard
                       key={mesa.id_mesa}
                       mesa={mesa}
+                      zona={zonaActivaData}
                       selected={mesaSeleccionada?.id_mesa === mesa.id_mesa}
                       onSelect={setMesaSeleccionada}
                     />
@@ -789,7 +829,8 @@ export default function SalonPage() {
                   <tbody>
                     {mesasDeZona.map((mesa) => {
                       const disp = DISP[mesa.disponibilidad] || DISP.LIBRE
-
+                      const esBarra = zonaActivaData?.nombre?.toLowerCase().includes("barra")
+                      const label = esBarra ? "A" : "M"
                       return (
                         <tr
                           key={mesa.id_mesa}
@@ -801,7 +842,7 @@ export default function SalonPage() {
                           }
                         >
                           <td>
-                            <strong>{mesa.nombre || `M${mesa.numero}`}</strong>
+                            <strong>{mesa.nombre || `${label}${mesa.numero}`}</strong>
                           </td>
                           <td>{mesa.capacidad}</td>
                           <td>
