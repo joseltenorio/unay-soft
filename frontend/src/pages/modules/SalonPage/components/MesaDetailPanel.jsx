@@ -57,6 +57,8 @@ function getUserDisplayName(user) {
 }
 
 export default function MesaDetailPanel({ mesa, zona, onEdit, onChangeDispo, onDelete, onClose }) {
+  const esBarra = zona?.nombre?.toLowerCase().includes("barra")
+  const label = esBarra ? "Asiento" : "Mesa"
   const [dispOpen, setDispOpen] = useState(false)
   const disp = DISP[mesa.disponibilidad] || DISP.LIBRE
   const activeOrderCount = Number(mesa.active_order_count || 0)
@@ -69,7 +71,7 @@ export default function MesaDetailPanel({ mesa, zona, onEdit, onChangeDispo, onD
   return (
     <div className="salon-detail">
       <div className="salon-detail__header">
-        <h3 className="salon-detail__title">{mesa.nombre || mesa.numero}</h3>
+          <h3 className="salon-detail__title">{mesa.nombre || `${label} ${mesa.numero}`}</h3>
         <button className="salon-modal__close" onClick={onClose}><IconX /></button>
       </div>
 
@@ -125,21 +127,22 @@ export default function MesaDetailPanel({ mesa, zona, onEdit, onChangeDispo, onD
           </div>
 
           <p>
-            Esta mesa tiene {activeOrderCount} comanda(s) activa(s). La mesa se
+            Esta mesa tiene comanda(s) activa(s). La mesa se
             libera desde caja cuando se cierre la cuenta.
           </p>
         </section>
       )}
 
+      <div className="salon-detail__section-label">Acciones</div>
+
       <button className="salon-detail__btn-edit" onClick={onEdit}>
-        <IconEdit /> Editar mesa
+        <IconEdit /> Editar {label.toLowerCase()}
       </button>
 
       {hasActiveOrders ? (
         <div className="salon-detail__locked">
           <p>
-            No se puede cambiar disponibilidad, desactivar ni eliminar una mesa
-            con cuenta activa.
+            No se puede cambiar disponibilidad, ni eliminar con cuenta activa.
           </p>
         </div>
       ) : (
@@ -149,7 +152,7 @@ export default function MesaDetailPanel({ mesa, zona, onEdit, onChangeDispo, onD
               className="salon-detail__btn-dispo"
               onClick={() => setDispOpen(o => !o)}
             >
-              Cambiar estado
+              Cambiar disponibilidad
               <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <polyline points="6 9 12 15 18 9" />
               </svg>
