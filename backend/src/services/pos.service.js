@@ -175,6 +175,7 @@ async function getPosTables(idEstablecimiento) {
           on u.id_usuario = o.id_usuario
         where o.estado = any($2::varchar[])
           and u.id_establecimiento = $1
+          and io.estado_cocina <> 'ANULADO'
       ),
       active_orders as (
         select

@@ -227,6 +227,7 @@ async function getKitchenOrders(idEstablecimiento) {
       table_service.first_order_at,
       table_service.last_order_at
 
+    having count(io.id_item_orden) > 0
     order by
       coalesce(o.enviada_cocina_at, o.abierta_at, o.created_at) asc;
   `

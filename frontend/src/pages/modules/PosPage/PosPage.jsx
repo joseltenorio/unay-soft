@@ -17,6 +17,7 @@ import {
 } from "../../../services/authService"
 
 import {
+  cancelPosOrderItem,
   createPosOrder,
   getPosMenu,
   getPosTables,
@@ -114,17 +115,31 @@ function getUserDisplayName(user) {
     "Usuario"
 }
 
+// Cada producto puede tener varios envíos a cocina (varias filas item_orden
+// vivas simultáneamente). Guardamos un lote (sentBatch) por cada uno para no
+// perder la trazabilidad de idItemOrden al cancelar.
 function buildOrderItemsFromCurrentItems(currentItems = []) {
   const grouped = new Map()
 
   currentItems.forEach((item) => {
     const key = item.id_producto
     const cantidad = Number(item.cantidad || 0)
+    const isReady =
+      item.estado_cocina === "LISTO" || item.estado_cocina === "ENTREGADO"
+
+    const batch = {
+      idItemOrden: item.id_item_orden,
+      quantity: cantidad,
+      kitchenReady: isReady,
+    }
+
     const existing = grouped.get(key)
 
     if (existing) {
       existing.quantity += cantidad
       existing.sentQuantity += cantidad
+      existing.sentBatches.push(batch)
+      existing.kitchenReady = existing.kitchenReady && isReady
       return
     }
 
@@ -137,7 +152,8 @@ function buildOrderItemsFromCurrentItems(currentItems = []) {
       emoji: item.emoji || "🍽️",
       quantity: cantidad,
       sentQuantity: cantidad,
-      kitchenReady: item.estado_cocina === "LISTO" || item.estado_cocina === "ENTREGADO",
+      sentBatches: [batch],
+      kitchenReady: isReady,
       kitchenNotes: item.notas_cocina || "",
     })
   })
@@ -404,7 +420,29 @@ export default function PosPage() {
           SERVICE_NOTIFICATION_STATUS.PENDING,
         )
 
-        setNotifications(data)
+        // Red de seguridad: si por cualquier motivo llega un aviso de
+        // "pedido listo" sin items (todo fue cancelado), no tiene sentido
+        // mostrarlo al mesero. Lo auto-atendemos y lo ocultamos.
+        const emptyReadyOrders = data.filter(
+          (notification) =>
+            notification.tipo === SERVICE_NOTIFICATION_TYPES.READY_ORDER &&
+            Array.isArray(notification.items) &&
+            notification.items.length === 0,
+        )
+
+        if (emptyReadyOrders.length > 0 && canAttendKitchenNotices) {
+          emptyReadyOrders.forEach((notification) => {
+            attendKitchenServiceCall(notification.id_notificacion).catch(() => {})
+          })
+        }
+
+        const emptyIds = new Set(
+          emptyReadyOrders.map((notification) => notification.id_notificacion),
+        )
+
+        setNotifications(
+          data.filter((notification) => !emptyIds.has(notification.id_notificacion)),
+        )
         setLastUpdatedAt(new Date())
       } catch (error) {
         showToast({
@@ -417,7 +455,7 @@ export default function PosPage() {
         setIsRefreshingNotices(false)
       }
     },
-    [canViewKitchenNotices, showToast],
+    [canViewKitchenNotices, canAttendKitchenNotices, showToast],
   )
 
   useEffect(() => {
@@ -550,6 +588,36 @@ export default function PosPage() {
     }))
   }
 
+  // Ante cualquier desincronización crítica (error de cancelación, envío sin
+  // confirmación de id_item_orden, etc.) reconstruimos el carrito local
+  // desde la fuente de verdad del backend en vez de adivinar.
+  async function resyncTableOrder(table) {
+    try {
+      const refreshedTables = await getPosTables()
+      setTablesState(refreshedTables)
+
+      const refreshedTable = refreshedTables.find((t) => t.id === table.id)
+      if (!refreshedTable) return
+
+      const seededItems = buildOrderItemsFromCurrentItems(
+        refreshedTable.current_items,
+      )
+
+      setTableOrders((prev) => ({ ...prev, [table.id]: seededItems }))
+      setSavedOrders((prev) => ({ ...prev, [table.id]: seededItems }))
+
+      setSelectedTable((current) =>
+        current && current.id === table.id ? refreshedTable : current,
+      )
+    } catch (error) {
+      showToast({
+        type: "error",
+        title: "No se pudo sincronizar la mesa",
+        message: "Recarga la página para evitar inconsistencias.",
+      })
+    }
+  }
+
   function handleAddProduct(product, quantityToAdd = 1) {
     if (!selectedTable || quantityToAdd < 1) {
       return
@@ -589,6 +657,7 @@ export default function PosPage() {
             emoji: product.emoji || "🍽️",
             quantity: quantityToAdd,
             sentQuantity: 0,
+            sentBatches: [],
             kitchenReady: false,
             kitchenNotes: "",
           },
@@ -619,71 +688,148 @@ export default function PosPage() {
     })
   }
 
-  function handleDecreaseQuantity(productId) {
+  async function handleDecreaseQuantity(productId) {
     if (!selectedTable) {
       return
     }
 
-    setTableOrders((prev) => {
-      const currentOrder = prev[selectedTable.id] || []
+    const currentOrder = tableOrders[selectedTable.id] || []
+    const item = currentOrder.find((orderItem) => orderItem.id === productId)
 
-      const updatedItems = currentOrder
-        .map((item) => {
-          if (item.id !== productId) {
-            return item
-          }
+    if (!item) {
+      return
+    }
 
-          const pendingQuantity = item.quantity - item.sentQuantity
+    const pendingQuantity = item.quantity - item.sentQuantity
 
-          if (pendingQuantity > 0) {
-            return {
-              ...item,
-              quantity: item.quantity - 1,
-            }
-          }
+    if (pendingQuantity > 0) {
+      setTableOrders((prev) => {
+        const updatedItems = (prev[selectedTable.id] || [])
+          .map((orderItem) =>
+            orderItem.id === productId
+              ? { ...orderItem, quantity: orderItem.quantity - 1 }
+              : orderItem,
+          )
+          .filter((orderItem) => orderItem.quantity > 0)
 
-          if (item.sentQuantity > 0) {
-            if (item.kitchenReady) {
-              showToast({
-                type: "warning",
-                title: "Producto ya preparado",
-                message: `${item.name} ya fue preparado por cocina.`,
-              })
+        setSavedOrders((currentSavedOrders) => ({
+          ...currentSavedOrders,
+          [selectedTable.id]: updatedItems,
+        }))
 
-              return item
-            }
+        return { ...prev, [selectedTable.id]: updatedItems }
+      })
 
-            const confirmCancel = window.confirm(
-              `¿Deseas cancelar 1 ${item.name} enviado a cocina?`,
-            )
+      return
+    }
 
-            if (!confirmCancel) {
-              return item
-            }
+    if (item.sentQuantity > 0) {
+      const sentBatches = item.sentBatches || []
 
-            return {
-              ...item,
-              quantity: item.quantity - 1,
-              sentQuantity: item.sentQuantity - 1,
-            }
-          }
-
-          return {
-            ...item,
-            quantity: item.quantity - 1,
-          }
-        })
-        .filter((item) => item.quantity > 0)
-
-      setSavedOrders((currentSavedOrders) => ({
-        ...currentSavedOrders,
-        [selectedTable.id]: updatedItems,
-      }))
-
-      return {
-        ...prev,
-        [selectedTable.id]: updatedItems,
+      // Buscamos el lote más reciente que aún se pueda cancelar (pendiente
+      // en cocina, no ya listo/entregado).
+      let targetIndex = -1
+      for (let i = sentBatches.length - 1; i >= 0; i--) {
+        if (sentBatches[i].quantity > 0 && !sentBatches[i].kitchenReady) {
+          targetIndex = i
+          break
+        }
       }
+
+      if (targetIndex === -1) {
+        showToast({
+          type: "warning",
+          title: "Producto ya preparado",
+          message: `${item.name} ya fue preparado por cocina y no se puede cancelar.`,
+        })
+
+        return
+      }
+
+      const targetBatch = sentBatches[targetIndex]
+
+      if (!targetBatch.idItemOrden) {
+        showToast({
+          type: "error",
+          title: "No se pudo identificar el producto enviado",
+          message: "Se sincronizará la mesa con el servidor para corregirlo.",
+        })
+
+        await resyncTableOrder(selectedTable)
+        return
+      }
+
+      const confirmCancel = window.confirm(
+        `¿Deseas cancelar 1 ${item.name} enviado a cocina?`,
+      )
+
+      if (!confirmCancel) {
+        return
+      }
+
+      try {
+        await cancelPosOrderItem(targetBatch.idItemOrden, 1)
+
+        setTableOrders((prev) => {
+          const updatedItems = (prev[selectedTable.id] || [])
+            .map((orderItem) => {
+              if (orderItem.id !== productId) return orderItem
+
+              const newBatches = (orderItem.sentBatches || [])
+                .map((batch, index) =>
+                  index === targetIndex
+                    ? { ...batch, quantity: batch.quantity - 1 }
+                    : batch,
+                )
+                .filter((batch) => batch.quantity > 0)
+
+              return {
+                ...orderItem,
+                quantity: orderItem.quantity - 1,
+                sentQuantity: orderItem.sentQuantity - 1,
+                sentBatches: newBatches,
+              }
+            })
+            .filter((orderItem) => orderItem.quantity > 0)
+
+          setSavedOrders((currentSavedOrders) => ({
+            ...currentSavedOrders,
+            [selectedTable.id]: updatedItems,
+          }))
+
+          return { ...prev, [selectedTable.id]: updatedItems }
+        })
+
+        showToast({
+          type: "success",
+          title: "Producto cancelado",
+          message: `${item.name} fue cancelado correctamente.`,
+        })
+      } catch (error) {
+        // Error crítico: no confiamos en el estado local tras un fallo de
+        // cancelación — resincronizamos con la fuente de verdad del backend.
+        showToast({
+          type: "error",
+          title: "No se pudo cancelar — sincronizando mesa",
+          message: error.message || "Verifica si cocina ya empezó a prepararlo.",
+        })
+
+        await resyncTableOrder(selectedTable)
+      }
+
+      return
+    }
+
+    setTableOrders((prev) => {
+      const updatedItems = (prev[selectedTable.id] || [])
+        .map((orderItem) =>
+          orderItem.id === productId
+            ? { ...orderItem, quantity: orderItem.quantity - 1 }
+            : orderItem,
+        )
+        .filter((orderItem) => orderItem.quantity > 0)
+
+      return { ...prev, [selectedTable.id]: updatedItems }
     })
   }
 
@@ -744,33 +890,55 @@ export default function PosPage() {
         items: newItems,
       })
 
+      let missingTracking = false
+
+      const updatedItems = itemsSnapshot.map((item) => {
+        const quantityToSend = item.quantity - item.sentQuantity
+
+        if (quantityToSend <= 0) {
+          return item
+        }
+
+        const matchingOrderItem = createdOrder?.items?.find(
+          (orderItem) =>
+            orderItem.id_producto === (item.id_producto || item.id),
+        )
+
+        if (!matchingOrderItem) {
+          missingTracking = true
+
+          return {
+            ...item,
+            sentQuantity: item.quantity,
+          }
+        }
+
+        const newBatch = {
+          idItemOrden: matchingOrderItem.id_item_orden,
+          quantity: quantityToSend,
+          kitchenReady: false,
+        }
+
+        return {
+          ...item,
+          sentQuantity: item.quantity,
+          sentBatches: [...(item.sentBatches || []), newBatch],
+        }
+      })
+
       const refreshedTables = await getPosTables()
 
       setTablesState(refreshedTables)
+
+      const refreshedTable = refreshedTables.find((table) => table.id === tableId)
 
       setSelectedTable((currentTable) => {
         if (!currentTable || currentTable.id !== tableId) {
           return currentTable
         }
 
-        return (
-          refreshedTables.find((table) => table.id === tableId) ||
-          currentTable
-        )
+        return refreshedTable || currentTable
       })
-
-      const updatedItems = itemsSnapshot.map((item) => {
-      const matchingOrderItem = createdOrder?.items?.find(
-        (orderItem) =>
-          orderItem.id_producto === (item.id_producto || item.id),
-      )
-
-      return {
-        ...item,
-        sentQuantity: item.quantity,
-        idItemOrden: matchingOrderItem?.id_item_orden || item.idItemOrden,
-      }
-    })
 
       setTableOrders((prev) => ({
         ...prev,
@@ -792,6 +960,24 @@ export default function PosPage() {
         title: "Comanda enviada a cocina",
         message: `Orden ${createdOrder?.numero_orden || ""} registrada para la mesa ${tableNumber}.`,
       })
+
+      // Error crítico silencioso: si el backend no devolvió el id_item_orden
+      // esperado para algún producto, no confiamos en el tracking local —
+      // resincronizamos de inmediato con la mesa ya refrescada.
+      if (missingTracking && refreshedTable) {
+        showToast({
+          type: "warning",
+          title: "Revisa esta mesa",
+          message: "No se pudo confirmar el tracking de algún producto. Se sincronizó con el servidor.",
+        })
+
+        const seededItems = buildOrderItemsFromCurrentItems(
+          refreshedTable.current_items,
+        )
+
+        setTableOrders((prev) => ({ ...prev, [tableId]: seededItems }))
+        setSavedOrders((prev) => ({ ...prev, [tableId]: seededItems }))
+      }
     } catch (error) {
       showToast({
         type: "error",
