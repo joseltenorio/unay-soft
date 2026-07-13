@@ -154,6 +154,28 @@ async function getPosTables(idEstablecimiento) {
         where o.estado = any($2::varchar[])
           and u.id_establecimiento = $1
       ),
+      current_order_items as (
+        select
+          o.id_mesa,
+          io.id_orden,
+          io.id_item_orden,
+          io.id_producto,
+          p.nombre as producto_nombre,
+          io.cantidad,
+          io.precio_unitario,
+          io.subtotal,
+          io.notas_cocina,
+          io.estado_cocina
+        from orden o
+        inner join item_orden io
+          on io.id_orden = o.id_orden
+        inner join producto p
+          on p.id_producto = io.id_producto
+        inner join usuario u
+          on u.id_usuario = o.id_usuario
+        where o.estado = any($2::varchar[])
+          and u.id_establecimiento = $1
+      ),
       active_orders as (
         select
           id_mesa,
@@ -214,6 +236,7 @@ async function getPosTables(idEstablecimiento) {
         ao.first_order_at,
         ao.last_order_at,
         coalesce(ao.orders, '[]'::json) as active_orders,
+        coalesce(coi.current_items, '[]'::json) as current_items,
         tr.responsible_order_id,
         tr.responsible_order_number,
         tr.assigned_at as responsible_assigned_at,
@@ -225,7 +248,30 @@ async function getPosTables(idEstablecimiento) {
       left join zona z
         on z.id_zona = m.id_zona
       left join active_orders ao
-        on ao.id_mesa = m.id_mesa
+        on ao.id_mesa = m.id_mesa  
+
+        left join (
+          select
+            id_mesa,
+            json_agg(
+              json_build_object(
+                'id_item_orden', id_item_orden,
+                'id_orden', id_orden,
+                'id_producto', id_producto,
+                'producto_nombre', producto_nombre,
+                'cantidad', cantidad,
+                'precio_unitario', precio_unitario,
+                'subtotal', subtotal,
+                'notas_cocina', notas_cocina,
+                'estado_cocina', estado_cocina
+              )
+              order by id_item_orden
+            ) as current_items
+          from current_order_items
+          group by id_mesa
+        ) coi
+          on coi.id_mesa = m.id_mesa
+
       left join table_responsible tr
         on tr.id_mesa = m.id_mesa
       where m.id_establecimiento = $1
@@ -268,6 +314,7 @@ async function getPosTables(idEstablecimiento) {
       first_order_at: table.first_order_at,
       last_order_at: table.last_order_at,
       active_orders: table.active_orders || [],
+      current_items: table.current_items || [],
       table_service: {
         responsible_user: responsibleUser,
         responsible_order: table.responsible_order_id
