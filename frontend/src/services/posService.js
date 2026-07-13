@@ -97,3 +97,15 @@ export async function createPosOrder(payload) {
 
   return data.order
 }
+
+export async function cancelPosOrderItem(idItemOrden, cantidad) {
+  const data = await apiPrivateRequest(
+    `/pos/orders/items/${idItemOrden}`,
+    {
+      method: "DELETE",
+      body: JSON.stringify({ cantidad }),
+    },
+  )
+
+  return data.result
+}
