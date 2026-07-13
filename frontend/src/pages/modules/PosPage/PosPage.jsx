@@ -759,10 +759,18 @@ export default function PosPage() {
         )
       })
 
-      const updatedItems = itemsSnapshot.map((item) => ({
+      const updatedItems = itemsSnapshot.map((item) => {
+      const matchingOrderItem = createdOrder?.items?.find(
+        (orderItem) =>
+          orderItem.id_producto === (item.id_producto || item.id),
+      )
+
+      return {
         ...item,
         sentQuantity: item.quantity,
-      }))
+        idItemOrden: matchingOrderItem?.id_item_orden || item.idItemOrden,
+      }
+    })
 
       setTableOrders((prev) => ({
         ...prev,
