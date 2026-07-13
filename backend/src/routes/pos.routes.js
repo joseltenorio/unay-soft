@@ -6,6 +6,7 @@ const {
   listPosMenu,
   listPosTables,
   registerPosOrder,
+  cancelPosOrderItem,
 } = require("../controllers/pos.controller")
 const { authenticateToken } = require("../middlewares/auth.middleware")
 const { authorizePermission } = require("../middlewares/permission.middleware")
@@ -31,6 +32,13 @@ router.post(
   authenticateToken,
   authorizePermission("pos.actualizar_orden"),
   registerPosOrder,
+)
+
+router.delete(
+  "/orders/items/:id_item_orden",
+  authenticateToken,
+  authorizePermission("pos.actualizar_orden"),
+  cancelPosOrderItem,
 )
 
 module.exports = router
