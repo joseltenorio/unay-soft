@@ -349,13 +349,9 @@ async function updateKitchenOrderStatus({
         `
           update item_orden
           set
-            estado_cocina = case
-              when estado_cocina = 'PENDIENTE' then 'EN_PREPARACION'
-              else estado_cocina
-            end,
             preparacion_inicio_at = case
               when preparacion_inicio_at is null
-               and estado_cocina = 'PENDIENTE'
+              and estado_cocina = 'PENDIENTE'
                 then now()
               else preparacion_inicio_at
             end,
