@@ -613,9 +613,136 @@ async function createPosOrder({
   }
 }
 
+async function cancelOrderItem({ idItemOrden, idEstablecimiento, cantidadACancelar }) {
+  const client = await pool.connect()
+
+  try {
+    await client.query("begin")
+
+    const { rows: itemRows } = await client.query(
+      `
+        select
+          io.id_item_orden,
+          io.id_orden,
+          io.cantidad,
+          io.precio_unitario,
+          io.estado_cocina,
+          o.estado as estado_orden
+        from item_orden io
+        inner join orden o on o.id_orden = io.id_orden
+        inner join usuario u on u.id_usuario = o.id_usuario
+        where io.id_item_orden = $1
+          and u.id_establecimiento = $2
+        for update of io;
+      `,
+      [idItemOrden, idEstablecimiento],
+    )
+
+    if (itemRows.length === 0) {
+      throw createHttpError("Ítem de comanda no encontrado.", 404)
+    }
+
+    const item = itemRows[0]
+
+    if (item.estado_cocina !== "PENDIENTE") {
+      throw createHttpError(
+        "Solo se pueden cancelar productos que cocina aún no ha empezado a preparar.",
+        409,
+      )
+    }
+
+    const cantidadOriginal = Number(item.cantidad)
+    const cantidadCancelar = Math.min(
+      Number(cantidadACancelar) || cantidadOriginal,
+      cantidadOriginal,
+    )
+
+    if (cantidadCancelar <= 0) {
+      throw createHttpError("La cantidad a cancelar debe ser mayor a cero.", 400)
+    }
+
+    if (cantidadCancelar >= cantidadOriginal) {
+      await client.query(
+        `
+          update item_orden
+          set estado_cocina = 'ANULADO',
+              updated_at = now()
+          where id_item_orden = $1;
+        `,
+        [idItemOrden],
+      )
+    } else {
+      const nuevaCantidad = cantidadOriginal - cantidadCancelar
+      const nuevoSubtotal = Number(item.precio_unitario) * nuevaCantidad
+
+      await client.query(
+        `
+          update item_orden
+          set cantidad = $2,
+              subtotal = $3,
+              updated_at = now()
+          where id_item_orden = $1;
+        `,
+        [idItemOrden, nuevaCantidad, nuevoSubtotal],
+      )
+    }
+
+    const { rows: establishmentRows } = await client.query(
+      `
+        select igv_porcentaje
+        from establecimiento e
+        inner join usuario u on u.id_establecimiento = e.id_establecimiento
+        inner join orden o on o.id_usuario = u.id_usuario
+        where o.id_orden = $1
+        limit 1;
+      `,
+      [item.id_orden],
+    )
+
+    const igvPorcentaje = Number(establishmentRows[0]?.igv_porcentaje || 0)
+
+    const { rows: totalsRows } = await client.query(
+      `
+        select coalesce(sum(subtotal), 0) as total_con_igv
+        from item_orden
+        where id_orden = $1
+          and estado_cocina <> 'ANULADO';
+      `,
+      [item.id_orden],
+    )
+
+    const totalConIgv = Number(totalsRows[0].total_con_igv)
+    const total = Number(totalConIgv.toFixed(2))
+    const subtotal = Number((total / (1 + igvPorcentaje / 100)).toFixed(2))
+    const igv = Number((total - subtotal).toFixed(2))
+
+    await client.query(
+      `
+        update orden
+        set subtotal = $2,
+            igv = $3,
+            total = $4,
+            updated_at = now()
+        where id_orden = $1;
+      `,
+      [item.id_orden, subtotal, igv, total],
+    )
+
+    await client.query("commit")
+
+    return { id_orden: item.id_orden, id_item_orden: idItemOrden }
+  } catch (error) {
+    await client.query("rollback")
+    throw error
+  } finally {
+    client.release()
+  }
+}
+
 module.exports = {
   ACTIVE_ORDER_STATES,
   createPosOrder,
   getPosMenu,
   getPosTables,
+  cancelOrderItem,
 }
