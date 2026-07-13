@@ -4,6 +4,7 @@ const {
   createPosOrder,
   getPosMenu,
   getPosTables,
+  cancelOrderItem,
 } = require("../services/pos.service")
 
 async function listPosTables(req, res) {
@@ -68,8 +69,37 @@ async function registerPosOrder(req, res) {
   }
 }
 
+async function cancelPosOrderItem(req, res) {
+  try {
+    const { id_item_orden } = req.params
+    const { cantidad } = req.body
+
+    if (!id_item_orden) {
+      return res.status(400).json({
+        message: "Debe indicar el ítem de la comanda a cancelar.",
+      })
+    }
+
+    const result = await cancelOrderItem({
+      idItemOrden: id_item_orden,
+      idEstablecimiento: req.user.id_establecimiento,
+      cantidadACancelar: cantidad,
+    })
+
+    return res.status(200).json({
+      message: "Producto cancelado correctamente.",
+      result,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al cancelar el producto de la comanda.",
+    })
+  }
+}
+
 module.exports = {
   listPosTables,
   listPosMenu,
   registerPosOrder,
+  cancelPosOrderItem,
 }
