@@ -534,7 +534,20 @@ export default function PosPage() {
         ...prev,
         [table.id]: savedOrders[table.id],
       }))
+      return
     }
+
+    const seededItems = buildOrderItemsFromCurrentItems(table.current_items)
+
+    setTableOrders((prev) => ({
+      ...prev,
+      [table.id]: seededItems,
+    }))
+
+    setSavedOrders((prev) => ({
+      ...prev,
+      [table.id]: seededItems,
+    }))
   }
 
   function handleAddProduct(product, quantityToAdd = 1) {
