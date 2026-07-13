@@ -499,9 +499,9 @@ async function createPosOrder({
     )
 
     const calculatedItems = normalizedItems.map((item) => {
-      const product = productMap.get(item.id_producto)
-      const precioUnitario = Number(product.precio_base)
-      const subtotal = precioUnitario * item.cantidad
+    const product = productMap.get(item.id_producto)
+    const precioUnitario = Number(product.precio_base)
+    const subtotal = precioUnitario * item.cantidad
 
       return {
         ...item,
@@ -510,13 +510,14 @@ async function createPosOrder({
       }
     })
 
-    const subtotal = calculatedItems.reduce(
+    const totalConIgv = calculatedItems.reduce(
       (accumulator, item) => accumulator + item.subtotal,
       0,
     )
 
-    const igv = Number(((subtotal * igvPorcentaje) / 100).toFixed(2))
-    const total = Number((subtotal + igv).toFixed(2))
+    const total = Number(totalConIgv.toFixed(2))
+    const subtotal = Number((total / (1 + igvPorcentaje / 100)).toFixed(2))
+    const igv = Number((total - subtotal).toFixed(2))
 
     const numeroOrden = await getNextOrderNumber(client, idEstablecimiento)
 
