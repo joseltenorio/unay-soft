@@ -114,6 +114,37 @@ function getUserDisplayName(user) {
     "Usuario"
 }
 
+function buildOrderItemsFromCurrentItems(currentItems = []) {
+  const grouped = new Map()
+
+  currentItems.forEach((item) => {
+    const key = item.id_producto
+    const cantidad = Number(item.cantidad || 0)
+    const existing = grouped.get(key)
+
+    if (existing) {
+      existing.quantity += cantidad
+      existing.sentQuantity += cantidad
+      return
+    }
+
+    grouped.set(key, {
+      id: key,
+      id_producto: key,
+      category: item.categoria || item.category || "",
+      name: item.producto_nombre,
+      price: Number(item.precio_unitario || 0),
+      emoji: item.emoji || "🍽️",
+      quantity: cantidad,
+      sentQuantity: cantidad,
+      kitchenReady: item.estado_cocina === "LISTO" || item.estado_cocina === "ENTREGADO",
+      kitchenNotes: item.notas_cocina || "",
+    })
+  })
+
+  return Array.from(grouped.values())
+}
+
 function KitchenNoticeCard({
   notification,
   canAttendNotices,
