@@ -96,6 +96,11 @@ export default function AperturaGate({ onAperturaExitosa }) {
             placeholder="S/ 0.00"
             value={montoInicial}
             onChange={(e) => setMontoInicial(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "-" || e.key === "+" || e.key === "e" || e.key === "E") {
+                e.preventDefault()
+              }
+            }}
           />
         </div>
 
