@@ -17,7 +17,7 @@ const TIPO_COMPROBANTE_MAP = {
 
 // ── CobrarTab ─────────────────────────────────────────────────────
 
-export default function CobrarTab({ apertura }) {
+export default function CobrarTab({ apertura, onCobroRegistrado  }) {
   const { showToast } = useToast()
 
   const [cuentas, setCuentas] = useState([])
@@ -57,6 +57,7 @@ export default function CobrarTab({ apertura }) {
 
     // Refresca desde el backend por si hay más cuentas nuevas en paralelo.
     loadData()
+    onCobroRegistrado?.()
   }
 
   return (
