@@ -3,6 +3,7 @@
 import { useState } from "react"
 import "./CashierPage.css"
 
+import AperturaGate from "./AperturaGate"
 import CobrarTab from "./tabs/CobrarTab"
 import HistorialTab from "./tabs/HistorialTab"
 import CierreTab from "./tabs/CierreTab"
@@ -16,6 +17,15 @@ const TABS = [
 export default function CashierPage() {
   const [activeTab, setActiveTab] = useState("cobrar")
 
+  // Apertura de caja activa del turno actual.
+  // null = no hay turno abierto todavía → se bloquea el módulo.
+  const [apertura, setApertura] = useState(null)
+
+  // Si no hay apertura activa, muestra el gate y bloquea todo lo demás
+  if (!apertura) {
+    return <AperturaGate onAperturaExitosa={setApertura} />
+  }
+
   return (
     <div className="cashier-page">
       <div className="cashier-page__shell">
@@ -24,7 +34,9 @@ export default function CashierPage() {
           <div className="cashier-page__heading">
             <p className="cashier-page__eyebrow">Caja y pagos</p>
             <h1>Gestión de Caja</h1>
-            <p>Turno activo · Cajero: Nombre</p>
+            <p>
+              Turno activo · {apertura.caja_nombre} · Cajero: Nombre
+            </p>
           </div>
 
           <div className="cashier-page__summary">
@@ -52,9 +64,9 @@ export default function CashierPage() {
           ))}
         </div>
 
-        {activeTab === "cobrar"    && <CobrarTab />}
-        {activeTab === "historial" && <HistorialTab />}
-        {activeTab === "cierre"    && <CierreTab />}
+        {activeTab === "cobrar"    && <CobrarTab apertura={apertura} />}
+        {activeTab === "historial" && <HistorialTab apertura={apertura} />}
+        {activeTab === "cierre"    && <CierreTab apertura={apertura} />}
 
       </div>
     </div>
