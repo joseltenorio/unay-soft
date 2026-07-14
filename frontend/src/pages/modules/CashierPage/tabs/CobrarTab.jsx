@@ -94,6 +94,7 @@ const PAYMENTS_MOCK = [
     id_pago:     "pag-001",
     id_orden:    "ord-000",
     id_usuario:  "user-001",
+    id_apertura: "apertura-mock",
     metodo_pago: "YAPE",
     monto:       48.5,
     referencia:  "YAPE-123456",
@@ -111,7 +112,9 @@ const PAYMENT_METHODS = ["EFECTIVO", "TARJETA", "YAPE", "PLIN", "TRANSFERENCIA"]
 
 // ── CobrarTab ─────────────────────────────────────────────────────
 
-export default function CobrarTab() {
+// Recibe la apertura de caja activa (viene de CashierPage → AperturaGate).
+// Se necesita id_apertura para poder registrar comprobante + pago.
+export default function CobrarTab({ apertura }) {
   const { showToast } = useToast()
 
   // Orden seleccionada actualmente en la lista
@@ -134,6 +137,7 @@ export default function CobrarTab() {
       {/* Panel de cobro a la derecha */}
       <PayPanel
         order={selectedOrder}
+        apertura={apertura}
         clearOrder={() => setSelectedOrder(null)}
         showToast={showToast}
       />
@@ -190,7 +194,7 @@ function OrderList({ orders, selectedOrder, onSelect }) {
 
 // ── PayPanel ──────────────────────────────────────────────────────
 
-function PayPanel({ order, clearOrder, showToast }) {
+function PayPanel({ order, apertura, clearOrder, showToast }) {
   // Método de pago seleccionado
   const [method, setMethod] = useState("EFECTIVO")
 
@@ -318,11 +322,14 @@ function PayPanel({ order, clearOrder, showToast }) {
       return
     }
 
-    // Construye el objeto de pago con todos los datos
+    // Construye el objeto de pago con todos los datos.
+    // id_apertura viene de la apertura de caja activa del turno
+    // (luego será el id_apertura real que devuelva el backend).
     const paymentData = {
       id_pago:      crypto.randomUUID(),
       id_orden:     order.id_orden,
       id_usuario:   "usuario-mock",
+      id_apertura:  apertura?.id_apertura ?? null,
       tipo_doc:     tipoDoc,
       // RUC y razón social solo si es factura
       ruc:          tipoDoc === "FACTURA" ? ruc : null,
