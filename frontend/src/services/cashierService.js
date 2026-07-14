@@ -72,3 +72,9 @@ export async function cerrarCaja(idApertura, { total_declarado, observaciones })
 
   return data.cierre
 }
+
+export async function getHistorialPagos(idApertura) {
+  const data = await apiPrivateRequest(`/cashier/apertura/${idApertura}/pagos`)
+
+  return data.pagos || []
+}
