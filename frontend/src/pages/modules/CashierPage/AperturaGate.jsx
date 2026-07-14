@@ -1,42 +1,71 @@
 // src/pages/modules/CashierPage/AperturaGate.jsx
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import "./AperturaGate.css"
 
-// ── Mocks ─────────────────────────────────────────────────────────
-
-// Cajas disponibles del establecimiento — vendrá del backend (tabla `caja`)
-const CAJAS_MOCK = [
-  { id_caja: "caja-01", nombre: "Caja Principal" },
-  { id_caja: "caja-02", nombre: "Caja Barra" },
-]
+import { getCajasDisponibles, abrirCaja } from "../../../services/cashierService"
+import useToast from "../../../components/common/Toast/useToast"
 
 // ── AperturaGate ──────────────────────────────────────────────────
 // Pantalla que bloquea el acceso al módulo de Caja hasta que el
 // cajero abre un turno (apertura_caja). Al confirmar, dispara
-// onAperturaExitosa con los datos de la apertura creada.
+// onAperturaExitosa con los datos reales de la apertura creada.
 
 export default function AperturaGate({ onAperturaExitosa }) {
-  // Caja seleccionada para abrir turno
-  const [idCaja, setIdCaja] = useState(CAJAS_MOCK[0]?.id_caja || "")
+  const { showToast } = useToast()
 
-  // Monto inicial declarado por el cajero
+  const [cajas, setCajas] = useState([])
+  const [isLoadingCajas, setIsLoadingCajas] = useState(true)
+  const [loadError, setLoadError] = useState("")
+
+  const [idCaja, setIdCaja] = useState("")
   const [montoInicial, setMontoInicial] = useState("")
-
-  // Observaciones opcionales de apertura
   const [observaciones, setObservaciones] = useState("")
-
-  // Mensaje de error de validación
   const [error, setError] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Habilita el botón solo si hay caja seleccionada y monto válido
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadCajas() {
+      try {
+        const data = await getCajasDisponibles()
+
+        if (!isMounted) return
+
+        setCajas(data)
+
+        if (data.length > 0) {
+          setIdCaja(data[0].id_caja)
+        }
+
+        setLoadError("")
+      } catch (err) {
+        if (!isMounted) return
+
+        setLoadError(err.message || "No se pudieron cargar las cajas disponibles.")
+      } finally {
+        if (isMounted) {
+          setIsLoadingCajas(false)
+        }
+      }
+    }
+
+    loadCajas()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   const canSubmit =
     idCaja !== "" &&
     montoInicial !== "" &&
     !Number.isNaN(parseFloat(montoInicial)) &&
-    parseFloat(montoInicial) >= 0
+    parseFloat(montoInicial) >= 0 &&
+    !isSubmitting
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
 
     if (!canSubmit) {
@@ -46,20 +75,57 @@ export default function AperturaGate({ onAperturaExitosa }) {
 
     setError("")
 
-    // Construye el objeto de apertura — luego esto vendrá del backend
-    // (insert en apertura_caja, retorna id_apertura real)
-    const aperturaData = {
-      id_apertura: crypto.randomUUID(),
-      id_caja: idCaja,
-      caja_nombre: CAJAS_MOCK.find((c) => c.id_caja === idCaja)?.nombre || "",
-      id_usuario: "usuario-mock",
-      monto_inicial: parseFloat(montoInicial),
-      observaciones: observaciones.trim() || null,
-      hora_apertura: new Date().toISOString(),
-      estado: "ABIERTA",
-    }
+    try {
+      setIsSubmitting(true)
 
-    onAperturaExitosa(aperturaData)
+      const apertura = await abrirCaja({
+        id_caja: idCaja,
+        monto_inicial: parseFloat(montoInicial),
+        observaciones: observaciones.trim() || null,
+      })
+
+      showToast({
+        type: "success",
+        title: "Caja abierta",
+        message: `Turno abierto en ${apertura.caja_nombre}.`,
+      })
+
+      onAperturaExitosa(apertura)
+    } catch (err) {
+      const message = err.message || "No se pudo abrir el turno de caja."
+
+      setError(message)
+
+      showToast({
+        type: "error",
+        title: "No se pudo abrir la caja",
+        message,
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (isLoadingCajas) {
+    return (
+      <div className="apertura-gate">
+        <div className="apertura-gate__card">
+          <p>Cargando cajas disponibles...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (loadError || cajas.length === 0) {
+    return (
+      <div className="apertura-gate">
+        <div className="apertura-gate__card">
+          <p className="apertura-gate__error">
+            {loadError || "No hay cajas disponibles para este establecimiento."}
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -78,7 +144,7 @@ export default function AperturaGate({ onAperturaExitosa }) {
             value={idCaja}
             onChange={(e) => setIdCaja(e.target.value)}
           >
-            {CAJAS_MOCK.map((caja) => (
+            {cajas.map((caja) => (
               <option key={caja.id_caja} value={caja.id_caja}>
                 {caja.nombre}
               </option>
@@ -118,7 +184,7 @@ export default function AperturaGate({ onAperturaExitosa }) {
         {error && <p className="apertura-gate__error">{error}</p>}
 
         <button type="submit" className="apertura-gate__submit" disabled={!canSubmit}>
-          Abrir caja
+          {isSubmitting ? "Abriendo..." : "Abrir caja"}
         </button>
       </form>
     </div>
