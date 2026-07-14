@@ -1,144 +1,80 @@
 // src/pages/modules/CashierPage/tabs/CobrarTab.jsx
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import "./CobrarTab.css"
 import useToast from "../../../../components/common/Toast/useToast"
 import { consultarRuc } from "../../../../services/sunatService"
+import {
+  getCuentasPorCobrar,
+  getMetodosPago,
+  registrarPago,
+} from "../../../../services/cashierService"
 
-// ── Mocks ─────────────────────────────────────────────────────────
-
-// Órdenes de prueba hasta conectar el backend
-const ORDERS_MOCK = [
-  {
-    id_orden: "ord-001",
-    numero_orden: "ORD-0001",
-    id_mesa: "mesa-01",
-    mesa_nombre: "Mesa 1",
-    estado: "ENVIADA_A_CAJA",
-    tipo_servicio: "SALON",
-    subtotal: 41.10,
-    igv: 7.40,
-    total: 48.50,
-    detalle: [
-      { nombre: "Lomo Saltado",   cantidad: 1, precio_unitario: 28.50 },
-      { nombre: "Chicha Morada",  cantidad: 2, precio_unitario: 5.00  },
-      { nombre: "Pie de Limón",   cantidad: 1, precio_unitario: 10.00 },
-    ],
-  },
-  {
-    id_orden: "ord-002",
-    numero_orden: "ORD-0002",
-    id_mesa: "mesa-05",
-    mesa_nombre: "Mesa 5",
-    estado: "ENVIADA_A_CAJA",
-    tipo_servicio: "SALON",
-    subtotal: 81.36,
-    igv: 14.64,
-    total: 96.00,
-    detalle: [
-      { nombre: "Parrilla Familiar", cantidad: 1, precio_unitario: 78.00 },
-      { nombre: "Inca Kola",         cantidad: 2, precio_unitario: 9.00  },
-    ],
-  },
-  {
-    id_orden: "ord-003",
-    numero_orden: "ORD-0003",
-    id_mesa: "mesa-08",
-    mesa_nombre: "Mesa 8",
-    estado: "ENVIADA_A_CAJA",
-    tipo_servicio: "SALON",
-    subtotal: 27.12,
-    igv: 4.88,
-    total: 32.00,
-    detalle: [
-      { nombre: "Hamburguesa Clásica", cantidad: 2, precio_unitario: 16.00 },
-    ],
-  },
-  {
-    id_orden: "ord-004",
-    numero_orden: "ORD-0004",
-    id_mesa: "mesa-12",
-    mesa_nombre: "Mesa 12",
-    estado: "ENVIADA_A_CAJA",
-    tipo_servicio: "SALON",
-    subtotal: 96.61,
-    igv: 17.39,
-    total: 114.00,
-    detalle: [
-      { nombre: "Ceviche Mixto", cantidad: 2, precio_unitario: 42.00 },
-      { nombre: "Limonada",      cantidad: 2, precio_unitario: 8.00  },
-      { nombre: "Tres Leches",   cantidad: 1, precio_unitario: 14.00 },
-    ],
-  },
-  {
-    id_orden: "ord-005",
-    numero_orden: "ORD-0005",
-    id_mesa: "mesa-03",
-    mesa_nombre: "Mesa 3",
-    estado: "PAGADA",
-    tipo_servicio: "SALON",
-    subtotal: 58.47,
-    igv: 10.53,
-    total: 69.00,
-    detalle: [
-      { nombre: "Arroz Chaufa Especial", cantidad: 2, precio_unitario: 22.00 },
-      { nombre: "Maracuyá Frozen",       cantidad: 1, precio_unitario: 10.00 },
-      { nombre: "Brownie",               cantidad: 1, precio_unitario: 15.00 },
-    ],
-  },
-]
-
-// Pagos registrados en memoria hasta conectar el backend
-const PAYMENTS_MOCK = [
-  {
-    id_pago:     "pag-001",
-    id_orden:    "ord-000",
-    id_usuario:  "user-001",
-    id_apertura: "apertura-mock",
-    metodo_pago: "YAPE",
-    monto:       48.5,
-    referencia:  "YAPE-123456",
-    estado:      "CONFIRMADO",
-    created_at:  "2026-06-22T18:00:00Z",
-    updated_at:  "2026-06-22T18:00:00Z",
-  },
-]
-
-// Tasa IGV — vendrá del backend en el futuro
-const IGV_RATE = 0.18
-
-// Métodos de pago disponibles
-const PAYMENT_METHODS = ["EFECTIVO", "TARJETA", "YAPE", "PLIN", "TRANSFERENCIA"]
+const TIPO_COMPROBANTE_MAP = {
+  BOLETA: "BOL",
+  FACTURA: "FAC",
+}
 
 // ── CobrarTab ─────────────────────────────────────────────────────
 
-// Recibe la apertura de caja activa (viene de CashierPage → AperturaGate).
-// Se necesita id_apertura para poder registrar comprobante + pago.
 export default function CobrarTab({ apertura }) {
   const { showToast } = useToast()
 
-  // Orden seleccionada actualmente en la lista
-  const [selectedOrder, setSelectedOrder] = useState(null)
+  const [cuentas, setCuentas] = useState([])
+  const [metodosPago, setMetodosPago] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState("")
 
-  // Solo muestra órdenes que están listas para cobrar
-  const pendingOrders = ORDERS_MOCK.filter(
-    (order) => order.estado === "ENVIADA_A_CAJA"
-  )
+  const [selectedCuenta, setSelectedCuenta] = useState(null)
+
+  const loadData = useCallback(async () => {
+    try {
+      setIsLoading(true)
+
+      const [cuentasData, metodosData] = await Promise.all([
+        getCuentasPorCobrar(),
+        getMetodosPago(),
+      ])
+
+      setCuentas(cuentasData)
+      setMetodosPago(metodosData)
+      setLoadError("")
+    } catch (error) {
+      setLoadError(error.message || "No se pudieron cargar las cuentas por cobrar.")
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
+  function handlePagoRegistrado(idMesaCobrada) {
+    setSelectedCuenta(null)
+
+    setCuentas((prev) => prev.filter((cuenta) => cuenta.id_mesa !== idMesaCobrada))
+
+    // Refresca desde el backend por si hay más cuentas nuevas en paralelo.
+    loadData()
+  }
 
   return (
     <div className="cobrar-tab">
-      {/* Lista de órdenes a la izquierda */}
       <OrderList
-        orders={pendingOrders}
-        selectedOrder={selectedOrder}
-        onSelect={setSelectedOrder}
+        cuentas={cuentas}
+        isLoading={isLoading}
+        loadError={loadError}
+        selectedCuenta={selectedCuenta}
+        onSelect={setSelectedCuenta}
       />
 
-      {/* Panel de cobro a la derecha */}
       <PayPanel
-        order={selectedOrder}
+        cuenta={selectedCuenta}
         apertura={apertura}
-        clearOrder={() => setSelectedOrder(null)}
+        metodosPago={metodosPago}
+        clearCuenta={() => setSelectedCuenta(null)}
+        onPagoRegistrado={handlePagoRegistrado}
         showToast={showToast}
       />
     </div>
@@ -147,7 +83,7 @@ export default function CobrarTab({ apertura }) {
 
 // ── OrderList ─────────────────────────────────────────────────────
 
-function OrderList({ orders, selectedOrder, onSelect }) {
+function OrderList({ cuentas, isLoading, loadError, selectedCuenta, onSelect }) {
   return (
     <div className="cobrar-orders">
       <div className="cobrar-orders__header">
@@ -155,37 +91,57 @@ function OrderList({ orders, selectedOrder, onSelect }) {
         <p>Listas para cobrar</p>
       </div>
 
-      {/* Si no hay órdenes muestra mensaje vacío */}
-      {orders.length === 0 ? (
+      {isLoading ? (
+        <div className="cobrar-orders__empty">
+          <p>Cargando cuentas...</p>
+        </div>
+      ) : loadError ? (
+        <div className="cobrar-orders__empty">
+          <p>{loadError}</p>
+        </div>
+      ) : cuentas.length === 0 ? (
         <div className="cobrar-orders__empty">
           <p>No hay órdenes pendientes de cobro 💵</p>
         </div>
       ) : (
         <ul className="cobrar-orders__list">
-          {orders.map((order) => (
-            <li
-              key={order.id_orden}
-              // Agrega clase --selected si es la orden activa
-              className={
-                selectedOrder?.id_orden === order.id_orden
-                  ? "cobrar-order-card cobrar-order-card--selected"
-                  : "cobrar-order-card"
-              }
-              onClick={() => onSelect(order)}
-            >
-              <div className="cobrar-order-card__info">
-                <strong>
-                  {order.mesa_nombre} · {order.detalle.length} items
-                </strong>
-                {/* Lista los nombres de los platos separados por coma */}
-                <span>{order.detalle.map((item) => item.nombre).join(", ")}</span>
-              </div>
+          {cuentas.map((cuenta) => {
+            const itemCount = cuenta.ordenes.reduce(
+              (sum, orden) => sum + (orden.items?.length || 0),
+              0,
+            )
 
-              <div className="cobrar-order-card__total">
-                S/ {order.total.toFixed(2)}
-              </div>
-            </li>
-          ))}
+            const itemNames = cuenta.ordenes
+              .flatMap((orden) => orden.items || [])
+              .map((item) => item.producto_nombre)
+              .join(", ")
+
+            const mesaLabel =
+              cuenta.mesa_nombre || `Mesa ${cuenta.mesa_numero ?? "—"}`
+
+            return (
+              <li
+                key={cuenta.id_mesa || cuenta.id_ordenes.join("-")}
+                className={
+                  selectedCuenta?.id_mesa === cuenta.id_mesa
+                    ? "cobrar-order-card cobrar-order-card--selected"
+                    : "cobrar-order-card"
+                }
+                onClick={() => onSelect(cuenta)}
+              >
+                <div className="cobrar-order-card__info">
+                  <strong>
+                    {mesaLabel} · {itemCount} items
+                  </strong>
+                  <span>{itemNames}</span>
+                </div>
+
+                <div className="cobrar-order-card__total">
+                  S/ {cuenta.total.toFixed(2)}
+                </div>
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>
@@ -194,51 +150,43 @@ function OrderList({ orders, selectedOrder, onSelect }) {
 
 // ── PayPanel ──────────────────────────────────────────────────────
 
-function PayPanel({ order, apertura, clearOrder, showToast }) {
-  // Método de pago seleccionado
-  const [method, setMethod] = useState("EFECTIVO")
-
-  // Monto en efectivo ingresado por el cajero
+function PayPanel({ cuenta, apertura, metodosPago, clearCuenta, onPagoRegistrado, showToast }) {
+  const [idMetodoPago, setIdMetodoPago] = useState("")
   const [received, setReceived] = useState("")
+  const [referencia, setReferencia] = useState("")
 
-  // Tipo de comprobante: BOLETA o FACTURA
   const [tipoDoc, setTipoDoc] = useState("BOLETA")
-
-  // RUC ingresado (solo para FACTURA)
   const [ruc, setRuc] = useState("")
-
-  // Razón social encontrada en SUNAT
   const [razonSocial, setRazonSocial] = useState("")
-
-  // Mensaje de error si el RUC no existe
   const [rucError, setRucError] = useState("")
-
-  // Indicador de carga mientras consulta SUNAT
   const [rucLoading, setRucLoading] = useState(false)
 
-  // Resetea todos los campos cuando cambia la orden seleccionada
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Resetea todos los campos cuando cambia la cuenta seleccionada
   useEffect(() => {
     setReceived("")
-    setMethod("EFECTIVO")
+    setReferencia("")
     setTipoDoc("BOLETA")
     setRuc("")
     setRazonSocial("")
     setRucError("")
-  }, [order])
+
+    if (metodosPago.length > 0) {
+      setIdMetodoPago(metodosPago[0].id_metodo_pago)
+    }
+  }, [cuenta, metodosPago])
 
   // Consulta SUNAT automáticamente cuando el RUC llega a 11 dígitos
   useEffect(() => {
-    // Solo actúa si el tipo de doc es FACTURA
     if (tipoDoc !== "FACTURA") return
 
-    // Si el RUC no tiene 11 dígitos aún, limpia resultados anteriores
     if (ruc.length !== 11) {
       setRazonSocial("")
       setRucError("")
       return
     }
 
-    // Flag para evitar que una consulta anterior pise una nueva
     let cancelled = false
 
     async function buscarRuc() {
@@ -246,53 +194,50 @@ function PayPanel({ order, apertura, clearOrder, showToast }) {
       setRazonSocial("")
       setRucError("")
 
-      try{
+      try {
         const response = await consultarRuc(ruc)
 
         if (cancelled) return
         setRazonSocial(response.data.razonSocial)
-      } catch(error){
-        if(cancelled) return
-
+      } catch (error) {
+        if (cancelled) return
         setRucError(error.message)
-      } finally{
-        if(!cancelled) 
-          setRucLoading(false)
+      } finally {
+        if (!cancelled) setRucLoading(false)
       }
     }
-      buscarRuc()
-      // Cleanup: marca como cancelada si el RUC cambia antes de que responda
-      return () => {
-        cancelled = true
-      }
+
+    buscarRuc()
+
+    return () => {
+      cancelled = true
+    }
   }, [ruc, tipoDoc])
 
-  // ── Cálculos ───────────────────────────────────────────────────
+  const selectedMetodo = metodosPago.find(
+    (metodo) => metodo.id_metodo_pago === idMetodoPago,
+  )
+  const isEfectivo = selectedMetodo?.nombre === "EFECTIVO"
 
-  // Subtotal sin IGV (viene del mock, luego del backend)
-  const subtotal = order ? order.subtotal : 0
+  const subtotal = cuenta ? cuenta.subtotal : 0
+  const igv = cuenta ? cuenta.igv : 0
+  const total = cuenta ? cuenta.total : 0
 
-  // IGV calculado sobre el subtotal
-  const igv = order ? parseFloat((subtotal * IGV_RATE).toFixed(2)) : 0
-
-  // Total final que el cliente debe pagar
-  const total = order ? parseFloat((subtotal + igv).toFixed(2)) : 0
-
-  // Vuelto: diferencia entre lo recibido y el total (mínimo 0)
   const change = received
     ? Math.max(0, parseFloat(received) - total)
     : null
 
-  // ── Validación para habilitar el botón ─────────────────────────
+  const detalle = cuenta
+    ? cuenta.ordenes.flatMap((orden) => orden.items || [])
+    : []
 
   const canSubmit =
-    // Si es efectivo, debe haber ingresado un monto >= total
-    (method !== "EFECTIVO" || (received !== "" && parseFloat(received) >= total)) &&
-    // Si es factura, debe tener RUC completo y razón social encontrada
+    Boolean(idMetodoPago) &&
+    !isSubmitting &&
+    (!isEfectivo || (received !== "" && parseFloat(received) >= total)) &&
     (tipoDoc !== "FACTURA" || (ruc.length === 11 && razonSocial !== ""))
 
-  // Si no hay orden seleccionada, muestra panel vacío
-  if (!order) {
+  if (!cuenta) {
     return (
       <div className="cobrar-pay-panel cobrar-pay-panel--empty">
         <p>Selecciona una orden para cobrar</p>
@@ -300,20 +245,13 @@ function PayPanel({ order, apertura, clearOrder, showToast }) {
     )
   }
 
-  // ── Handlers ───────────────────────────────────────────────────
-
-  // Solo permite dígitos y máximo 11 caracteres en el campo RUC
   function handleRucChange(e) {
     const value = e.target.value.replace(/\D/g, "").slice(0, 11)
     setRuc(value)
   }
 
-  function handleSubmit() {
-    // Validación extra: monto insuficiente en efectivo
-    if (
-      method === "EFECTIVO" &&
-      (received === "" || parseFloat(received) <= 0 || parseFloat(received) < total)
-    ) {
+  async function handleSubmit() {
+    if (isEfectivo && (received === "" || parseFloat(received) < total)) {
       showToast({
         type: "warning",
         title: "Monto insuficiente",
@@ -322,50 +260,47 @@ function PayPanel({ order, apertura, clearOrder, showToast }) {
       return
     }
 
-    // Construye el objeto de pago con todos los datos.
-    // id_apertura viene de la apertura de caja activa del turno
-    // (luego será el id_apertura real que devuelva el backend).
-    const paymentData = {
-      id_pago:      crypto.randomUUID(),
-      id_orden:     order.id_orden,
-      id_usuario:   "usuario-mock",
-      id_apertura:  apertura?.id_apertura ?? null,
-      tipo_doc:     tipoDoc,
-      // RUC y razón social solo si es factura
-      ruc:          tipoDoc === "FACTURA" ? ruc : null,
-      razon_social: tipoDoc === "FACTURA" ? razonSocial : null,
-      metodo_pago:  method,
-      monto:        total,
-      referencia:   null,
-      estado:       "CONFIRMADO",
-      created_at:   new Date().toISOString(),
-      updated_at:   new Date().toISOString(),
+    try {
+      setIsSubmitting(true)
+
+      await registrarPago({
+        id_apertura: apertura?.id_apertura,
+        id_ordenes: cuenta.id_ordenes,
+        id_metodo_pago: idMetodoPago,
+        tipo_comprobante: TIPO_COMPROBANTE_MAP[tipoDoc],
+        referencia: referencia.trim() || null,
+        datos_factura:
+          tipoDoc === "FACTURA"
+            ? {
+                numero_documento: ruc,
+                razon_social: razonSocial,
+                direccion_fiscal: null,
+              }
+            : null,
+      })
+
+      showToast({
+        type: "success",
+        title: "Cobro registrado",
+        message: `La cuenta de ${cuenta.mesa_nombre || "la mesa"} fue cobrada correctamente.`,
+      })
+
+      onPagoRegistrado(cuenta.id_mesa)
+    } catch (error) {
+      showToast({
+        type: "error",
+        title: "No se pudo registrar el cobro",
+        message: error.message || "Verifica los datos e intenta nuevamente.",
+      })
+    } finally {
+      setIsSubmitting(false)
     }
-
-    // Guarda el pago en el mock local
-    PAYMENTS_MOCK.push(paymentData)
-
-    // Marca la orden como pagada en el mock
-    order.estado = "PAGADA"
-
-    showToast({
-      type: "success",
-      title: "Cobro registrado",
-      message: `La orden ${order.numero_orden} fue cobrada correctamente.`,
-    })
-
-    // Limpia la orden seleccionada y vuelve al estado inicial
-    clearOrder()
   }
-
-  // ── Render ─────────────────────────────────────────────────────
 
   return (
     <div className="cobrar-pay-panel">
 
-      {/* Tipo de comprobante */}
       <div className="cobrar-pay-panel__payment-section">
-        {/* Boleta / Factura */}
         <div className="cobrar-pay-panel__doc-toggle">
           <button
             type="button"
@@ -376,7 +311,6 @@ function PayPanel({ order, apertura, clearOrder, showToast }) {
             }
             onClick={() => {
               setTipoDoc("BOLETA")
-              // Limpia datos de factura al volver a boleta
               setRuc("")
               setRazonSocial("")
               setRucError("")
@@ -398,7 +332,6 @@ function PayPanel({ order, apertura, clearOrder, showToast }) {
           </button>
         </div>
 
-        {/* Campo RUC — solo visible si seleccionó Factura */}
         {tipoDoc === "FACTURA" && (
           <div className="cobrar-pay-panel__ruc">
             <label htmlFor="cashier-ruc">RUC</label>
@@ -412,21 +345,18 @@ function PayPanel({ order, apertura, clearOrder, showToast }) {
               onChange={handleRucChange}
             />
 
-            {/* Indicador de carga mientras consulta */}
             {rucLoading && (
               <small className="cobrar-pay-panel__ruc-loading">
                 Consultando SUNAT...
               </small>
             )}
 
-            {/* Razón social encontrada — solo lectura, no editable */}
             {razonSocial && !rucLoading && (
               <small className="cobrar-pay-panel__ruc-found">
                 {razonSocial}
               </small>
             )}
 
-            {/* Error si el RUC no existe en SUNAT */}
             {rucError && !rucLoading && (
               <small className="cobrar-pay-panel__ruc-error">
                 {rucError}
@@ -436,59 +366,54 @@ function PayPanel({ order, apertura, clearOrder, showToast }) {
         )}
       </div>
 
-      {/* Detalle de consumo */}
       <div className="cobrar-pay-panel__detail">
         <h3>Detalle de consumo</h3>
 
-        {/* Una línea por cada ítem del pedido */}
-        {order.detalle.map((item, index) => (
-          <div key={index} className="cobrar-pay-panel__line">
-            <span>{item.cantidad}× {item.nombre}</span>
-            <span>S/ {(item.precio_unitario * item.cantidad).toFixed(2)}</span>
+        {detalle.map((item) => (
+          <div key={item.id_item_orden} className="cobrar-pay-panel__line">
+            <span>{item.cantidad}× {item.producto_nombre}</span>
+            <span>S/ {Number(item.subtotal).toFixed(2)}</span>
           </div>
         ))}
 
-        {/* Subtotal e IGV antes del total */}
         <div className="cobrar-pay-panel__subtotals">
           <div className="cobrar-pay-panel__line cobrar-pay-panel__line--muted">
             <span>Subtotal</span>
             <span>S/ {subtotal.toFixed(2)}</span>
           </div>
           <div className="cobrar-pay-panel__line cobrar-pay-panel__line--muted">
-            {/* El porcentaje se calcula dinámicamente desde IGV_RATE */}
-            <span>IGV ({IGV_RATE * 100}%)</span>
+            <span>IGV</span>
             <span>S/ {igv.toFixed(2)}</span>
           </div>
         </div>
 
-        {/* Total final destacado */}
         <div className="cobrar-pay-panel__total">
           <strong>Total</strong>
           <strong>S/ {total.toFixed(2)}</strong>
         </div>
       </div>
 
-      {/* Método de pago */}
       <div className="cobrar-pay-panel__payment-section">
         <h3>Método de pago</h3>
 
         <select
           className="cobrar-pay-panel__select"
-          value={method}
+          value={idMetodoPago}
           onChange={(e) => {
-            setMethod(e.target.value)
-            // Limpia el monto recibido al cambiar método
+            setIdMetodoPago(e.target.value)
             setReceived("")
+            setReferencia("")
           }}
         >
-          {PAYMENT_METHODS.map((pm) => (
-            <option key={pm} value={pm}>{pm}</option>
+          {metodosPago.map((metodo) => (
+            <option key={metodo.id_metodo_pago} value={metodo.id_metodo_pago}>
+              {metodo.nombre}
+            </option>
           ))}
         </select>
       </div>
 
-      {/* Campo de monto — solo visible si el método es EFECTIVO */}
-      {method === "EFECTIVO" ? (
+      {isEfectivo ? (
         <div className="cobrar-pay-panel__received">
           <label htmlFor="cashier-received">Monto recibido</label>
           <input
@@ -506,7 +431,6 @@ function PayPanel({ order, apertura, clearOrder, showToast }) {
             }}
           />
 
-          {/* Vuelto — aparece solo si ya ingresó un monto */}
           {change !== null && (
             <div className="cobrar-pay-panel__change">
               <span>Vuelto</span>
@@ -515,20 +439,29 @@ function PayPanel({ order, apertura, clearOrder, showToast }) {
           )}
         </div>
       ) : (
-        // Para otros métodos solo muestra un mensaje informativo
         <div className="cobrar-pay-panel__info">
-          <p>El pago se registrará mediante <strong>{method}</strong>.</p>
+          <p>
+            El pago se registrará mediante <strong>{selectedMetodo?.nombre}</strong>.
+          </p>
+
+          <label htmlFor="cashier-referencia">Referencia (opcional)</label>
+          <input
+            id="cashier-referencia"
+            type="text"
+            placeholder="Ej. N° de operación"
+            value={referencia}
+            onChange={(e) => setReferencia(e.target.value)}
+          />
         </div>
       )}
 
-      {/* Botón principal — deshabilitado si canSubmit es false */}
       <button
         type="button"
         className="cobrar-pay-panel__submit"
         disabled={!canSubmit}
         onClick={handleSubmit}
       >
-        Registrar cobro
+        {isSubmitting ? "Registrando..." : "Registrar cobro"}
       </button>
     </div>
   )

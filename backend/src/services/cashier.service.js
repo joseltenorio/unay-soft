@@ -728,6 +728,108 @@ async function getMetodosPagoDisponibles(idEstablecimiento) {
   return rows
 }
 
+// ── Historial de pagos del turno (para HistorialTab) ────────────────
+// Un pago puede cubrir varias órdenes consolidadas de una misma mesa
+// (mismo comprobante), así que se agrupa por pago/comprobante y se
+// agregan los items de todas sus órdenes en un solo detalle.
+
+async function getHistorialPagos(idApertura, idEstablecimiento) {
+  const { rows: aperturaRows } = await pool.query(
+    `
+      select ac.id_apertura
+      from apertura_caja ac
+      inner join caja c
+        on c.id_caja = ac.id_caja
+      where ac.id_apertura = $1
+        and c.id_establecimiento = $2
+      limit 1;
+    `,
+    [idApertura, idEstablecimiento],
+  )
+
+  if (aperturaRows.length === 0) {
+    throw createHttpError("La apertura de caja no existe o no pertenece al establecimiento.", 404)
+  }
+
+  const { rows } = await pool.query(
+    `
+      select
+        p.id_pago,
+        p.monto,
+        p.referencia,
+        p.created_at,
+        mp.nombre as metodo_pago,
+        c.id_comprobante,
+        c.serie,
+        c.numero,
+        tc.codigo as tipo_comprobante,
+        c.numero_documento,
+        c.razon_social,
+        c.subtotal,
+        c.igv,
+        c.total,
+        m.numero as mesa_numero,
+        m.nombre as mesa_nombre,
+        array_agg(distinct o.numero_orden) as numeros_orden,
+        json_agg(
+          json_build_object(
+            'id_item_orden', io.id_item_orden,
+            'producto_nombre', pr.nombre,
+            'cantidad', io.cantidad,
+            'precio_unitario', io.precio_unitario,
+            'subtotal', io.subtotal
+          )
+          order by io.created_at asc
+        ) filter (where io.id_item_orden is not null) as items
+      from pago p
+      inner join comprobante c
+        on c.id_comprobante = p.id_comprobante
+      inner join tipo_comprobante tc
+        on tc.id_tipo_comprobante = c.id_tipo_comprobante
+      inner join metodo_pago mp
+        on mp.id_metodo_pago = p.id_metodo_pago
+      inner join orden o
+        on o.id_comprobante = c.id_comprobante
+      left join mesa m
+        on m.id_mesa = o.id_mesa
+      left join item_orden io
+        on io.id_orden = o.id_orden
+        and io.estado_cocina <> 'ANULADO'
+      left join producto pr
+        on pr.id_producto = io.id_producto
+      where p.id_apertura = $1
+        and p.estado = 'CONFIRMADO'
+      group by
+        p.id_pago, p.monto, p.referencia, p.created_at, mp.nombre,
+        c.id_comprobante, c.serie, c.numero, tc.codigo,
+        c.numero_documento, c.razon_social, c.subtotal, c.igv, c.total,
+        m.numero, m.nombre
+      order by p.created_at desc;
+    `,
+    [idApertura],
+  )
+
+  return rows.map((row) => ({
+    id_pago: row.id_pago,
+    id_comprobante: row.id_comprobante,
+    comprobante: `${row.serie}-${row.numero}`,
+    tipo_comprobante: row.tipo_comprobante,
+    numero_documento: row.numero_documento,
+    razon_social: row.razon_social,
+    metodo_pago: row.metodo_pago,
+    referencia: row.referencia,
+    mesa_numero: row.mesa_numero,
+    mesa_nombre: row.mesa_nombre,
+    numeros_orden: row.numeros_orden || [],
+    subtotal: Number(row.subtotal),
+    igv: Number(row.igv),
+    total: Number(row.total),
+    monto: Number(row.monto),
+    items: row.items || [],
+    created_at: row.created_at,
+  }))
+}
+
 module.exports = {
   getCajasDisponibles,
   getAperturaActivaPorUsuario,
@@ -735,6 +837,7 @@ module.exports = {
   getMetodosPagoDisponibles,
   getCuentasPorCobrar,
   registrarPago,
+  getHistorialPagos,
   getResumenTurno,
   cerrarCaja,
 }

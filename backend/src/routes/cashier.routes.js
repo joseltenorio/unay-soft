@@ -60,6 +60,13 @@ router.get(
   getResumen,
 )
 
+router.get(
+  "/apertura/:id_apertura/pagos",
+  authenticateToken,
+  authorizePermission("cashier.ver"),
+  listHistorialPagos,
+)
+
 router.post(
   "/apertura/:id_apertura/cierre",
   authenticateToken,

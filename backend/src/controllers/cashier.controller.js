@@ -7,6 +7,7 @@ const {
   getMetodosPagoDisponibles,
   getCuentasPorCobrar,
   registrarPago,
+  getHistorialPagos,
   getResumenTurno,
   cerrarCaja,
 } = require("../services/cashier.service")
@@ -230,6 +231,30 @@ async function listMetodosPago(req, res) {
   }
 }
 
+async function listHistorialPagos(req, res) {
+  try {
+    const { id_apertura } = req.params
+
+    if (!id_apertura) {
+      return res.status(400).json({
+        message: "Debe indicar el turno de caja a consultar.",
+      })
+    }
+
+    const pagos = await getHistorialPagos(id_apertura, req.user.id_establecimiento)
+
+    return res.status(200).json({
+      message: "Historial de pagos obtenido correctamente.",
+      total: pagos.length,
+      pagos,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al obtener el historial de pagos.",
+    })
+  }
+}
+
 module.exports = {
   listCajasDisponibles,
   getAperturaActiva,
@@ -238,5 +263,6 @@ module.exports = {
   listCuentasPorCobrar,
   registrarPagoHandler,
   getResumen,
+  listHistorialPagos,
   closeCaja,
 }
