@@ -6,6 +6,8 @@ const {
   listCajasDisponibles,
   getAperturaActiva,
   openCaja,
+  listCuentasPorCobrar,
+  registrarPagoHandler,
   getResumen,
   closeCaja,
 } = require("../controllers/cashier.controller")
@@ -33,6 +35,20 @@ router.post(
   authenticateToken,
   authorizePermission("cashier.abrir_caja"),
   openCaja,
+)
+
+router.get(
+  "/cuentas-por-cobrar",
+  authenticateToken,
+  authorizePermission("cashier.ver"),
+  listCuentasPorCobrar,
+)
+
+router.post(
+  "/pagos",
+  authenticateToken,
+  authorizePermission("cashier.registrar_pago"),
+  registrarPagoHandler,
 )
 
 router.get(

@@ -140,10 +140,85 @@ async function closeCaja(req, res) {
   }
 }
 
+async function listCuentasPorCobrar(req, res) {
+  try {
+    const cuentas = await getCuentasPorCobrar(req.user.id_establecimiento)
+
+    return res.status(200).json({
+      message: "Cuentas por cobrar obtenidas correctamente.",
+      total: cuentas.length,
+      cuentas,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al obtener las cuentas por cobrar.",
+    })
+  }
+}
+
+async function registrarPagoHandler(req, res) {
+  try {
+    const {
+      id_apertura,
+      id_ordenes,
+      id_metodo_pago,
+      tipo_comprobante,
+      referencia,
+      datos_factura,
+    } = req.body
+
+    if (!id_apertura) {
+      return res.status(400).json({
+        message: "Debe indicar el turno de caja activo.",
+      })
+    }
+
+    if (!Array.isArray(id_ordenes) || id_ordenes.length === 0) {
+      return res.status(400).json({
+        message: "Debe indicar al menos una orden a cobrar.",
+      })
+    }
+
+    if (!id_metodo_pago) {
+      return res.status(400).json({
+        message: "Debe indicar el método de pago.",
+      })
+    }
+
+    if (!tipo_comprobante) {
+      return res.status(400).json({
+        message: "Debe indicar el tipo de comprobante (BOL o FAC).",
+      })
+    }
+
+    const resultado = await registrarPago({
+      idEstablecimiento: req.user.id_establecimiento,
+      idUsuario: req.user.id_usuario,
+      idApertura: id_apertura,
+      idOrdenes: id_ordenes,
+      idMetodoPago: id_metodo_pago,
+      tipoComprobante: tipo_comprobante,
+      referencia,
+      datosFactura: datos_factura,
+    })
+
+    return res.status(201).json({
+      message: "Pago registrado correctamente.",
+      resultado,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al registrar el pago.",
+    })
+  }
+}
+
 module.exports = {
   listCajasDisponibles,
   getAperturaActiva,
   openCaja,
+  listCuentasPorCobrar,
+  registrarPagoHandler,
   getResumen,
   closeCaja,
 }
