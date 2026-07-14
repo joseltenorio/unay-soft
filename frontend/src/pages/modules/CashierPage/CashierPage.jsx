@@ -1,6 +1,6 @@
 // src/pages/modules/CashierPage/CashierPage.jsx
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import "./CashierPage.css"
 
 import AperturaGate from "./AperturaGate"
@@ -8,7 +8,7 @@ import CobrarTab from "./tabs/CobrarTab"
 import HistorialTab from "./tabs/HistorialTab"
 import CierreTab from "./tabs/CierreTab"
 
-import { getAperturaActiva } from "../../../services/cashierService"
+import { getAperturaActiva, getResumenTurno } from "../../../services/cashierService"
 import { getCurrentUser } from "../../../services/authService"
 
 const TABS = [
@@ -17,10 +17,16 @@ const TABS = [
   { id: "cierre", label: "Cierre" },
 ]
 
+function formatCurrency(amount) {
+  return `S/ ${Number(amount || 0).toFixed(2)}`
+}
+
 export default function CashierPage() {
   const [activeTab, setActiveTab] = useState("cobrar")
   const [apertura, setApertura] = useState(null)
   const [isCheckingApertura, setIsCheckingApertura] = useState(true)
+
+  const [resumen, setResumen] = useState(null)
 
   const currentUser = getCurrentUser()
   const cajeroName =
@@ -28,8 +34,6 @@ export default function CashierPage() {
     currentUser?.username ||
     "—"
 
-  // Al montar, verifica si el usuario ya tiene un turno ABIERTA en curso
-  // (por ejemplo si recargó la página) para no forzarlo a abrir otro.
   useEffect(() => {
     let isMounted = true
 
@@ -56,10 +60,26 @@ export default function CashierPage() {
     }
   }, [])
 
-  // Se llama cuando CierreTab confirma el cierre del turno.
-  // Vuelve apertura a null → CashierPage muestra el AperturaGate otra vez.
+  const loadResumen = useCallback(async () => {
+    if (!apertura?.id_apertura) {
+      return
+    }
+
+    try {
+      const data = await getResumenTurno(apertura.id_apertura)
+      setResumen(data)
+    } catch (error) {
+      // Silencioso: el header de resumen no debe bloquear el uso del módulo.
+    }
+  }, [apertura?.id_apertura])
+
+  useEffect(() => {
+    loadResumen()
+  }, [loadResumen])
+
   function handleCierreExitoso() {
     setApertura(null)
+    setResumen(null)
     setActiveTab("cobrar")
   }
 
@@ -77,6 +97,15 @@ export default function CashierPage() {
     return <AperturaGate onAperturaExitosa={setApertura} />
   }
 
+  const totalVentas = resumen?.total_ventas_turno || 0
+
+  const totalEfectivoTurno =
+    resumen?.desglose_por_metodo?.find((item) => item.metodo_pago === "EFECTIVO")
+      ?.total || 0
+
+  const totalTransacciones =
+    resumen?.desglose_por_metodo?.reduce((sum, item) => sum + item.cantidad, 0) || 0
+
   return (
     <div className="cashier-page">
       <div className="cashier-page__shell">
@@ -91,10 +120,18 @@ export default function CashierPage() {
           </div>
 
           <div className="cashier-page__summary">
-            <div><span>Ventas del día</span><strong>S/ 0.00</strong></div>
-            <div><span>Efectivo</span><strong>S/ 0.00</strong></div>
-            <div><span>Diferencia</span><strong>S/ 0.00</strong></div>
-            <div><span>Transacciones</span><strong>0</strong></div>
+            <div>
+              <span>Ventas del día</span>
+              <strong>{formatCurrency(totalVentas)}</strong>
+            </div>
+            <div>
+              <span>Efectivo</span>
+              <strong>{formatCurrency(totalEfectivoTurno)}</strong>
+            </div>
+            <div>
+              <span>Transacciones</span>
+              <strong>{totalTransacciones}</strong>
+            </div>
           </div>
         </div>
 
@@ -115,7 +152,9 @@ export default function CashierPage() {
           ))}
         </div>
 
-        {activeTab === "cobrar" && <CobrarTab apertura={apertura} />}
+        {activeTab === "cobrar" && (
+          <CobrarTab apertura={apertura} onCobroRegistrado={loadResumen} />
+        )}
         {activeTab === "historial" && <HistorialTab apertura={apertura} />}
         {activeTab === "cierre" && (
           <CierreTab apertura={apertura} onCierreExitoso={handleCierreExitoso} />
