@@ -104,7 +104,7 @@ function formatCurrency(amount) {
 
 // ── HistorialTab ──────────────────────────────────────────────────
 
-export default function HistorialTab() {
+export default function HistorialTab({ apertura }) {
   const [selectedPago, setSelectedPago] = useState(null)
   const [filtroMetodo, setFiltroMetodo] = useState("TODOS")
   const [filtroDoc,    setFiltroDoc]    = useState("TODOS")
@@ -130,6 +130,7 @@ export default function HistorialTab() {
         filtroMetodo={filtroMetodo}
         filtroDoc={filtroDoc}
         totalDia={totalDia}
+        apertura={apertura}
         onSelect={setSelectedPago}
         onFiltroMetodo={setFiltroMetodo}
         onFiltroDoc={setFiltroDoc}
@@ -151,6 +152,7 @@ function PagoList({
   filtroMetodo,
   filtroDoc,
   totalDia,
+  apertura,
   onSelect,
   onFiltroMetodo,
   onFiltroDoc,
@@ -160,7 +162,10 @@ function PagoList({
       <div className="historial-list__header">
         <div>
           <h2>Historial del día</h2>
-          <p>{pagos.length} cobros · {formatCurrency(totalDia)}</p>
+          <p>
+            {pagos.length} cobros · {formatCurrency(totalDia)}
+            {apertura?.caja_nombre ? ` · ${apertura.caja_nombre}` : ""}
+          </p>
         </div>
       </div>
 
