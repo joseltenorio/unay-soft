@@ -1,21 +1,9 @@
 // src/pages/modules/CashierPage/tabs/CierreTab.jsx
 
-import { useState, useMemo } from "react"
+import { useState, useEffect, useCallback } from "react"
 import "./CierreTab.css"
 import useToast from "../../../../components/common/Toast/useToast"
-
-// ── Mocks ─────────────────────────────────────────────────────────
-
-// Pagos del turno actual — luego será un fetch filtrado por id_apertura.
-// Reutilizamos montos parecidos a los de HistorialTab para que el
-// total_sistema tenga sentido visualmente.
-const PAGOS_TURNO_MOCK = [
-  { metodo_pago: "EFECTIVO",     monto: 96.00  },
-  { metodo_pago: "YAPE",         monto: 48.50  },
-  { metodo_pago: "TARJETA",      monto: 32.00  },
-  { metodo_pago: "EFECTIVO",     monto: 114.00 },
-  { metodo_pago: "PLIN",         monto: 69.00  },
-]
+import { getResumenTurno, cerrarCaja } from "../../../../services/cashierService"
 
 // ── Helpers ───────────────────────────────────────────────────────
 
@@ -25,55 +13,55 @@ function formatCurrency(amount) {
 
 // ── CierreTab ─────────────────────────────────────────────────────
 
-// Recibe la apertura activa (id_apertura, monto_inicial, caja_nombre)
-// y un callback para notificar al padre que el turno se cerró,
-// así CashierPage puede volver a mostrar el AperturaGate.
 export default function CierreTab({ apertura, onCierreExitoso }) {
   const { showToast } = useToast()
 
-  // Monto que el cajero cuenta físicamente en caja
+  const [resumen, setResumen] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState("")
+
   const [totalDeclarado, setTotalDeclarado] = useState("")
-
-  // Observaciones opcionales del cierre
   const [observaciones, setObservaciones] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Total esperado en efectivo según el sistema:
-  // monto inicial de apertura + pagos en efectivo del turno.
-  // (Tarjeta/Yape/Plin/Transferencia no se cuentan en efectivo físico,
-  // pero sí forman parte del total de ventas del turno.)
-  const totalEfectivoSistema = useMemo(() => {
-    const montoInicial = Number(apertura?.monto_inicial || 0)
-    const efectivoTurno = PAGOS_TURNO_MOCK
-      .filter((pago) => pago.metodo_pago === "EFECTIVO")
-      .reduce((sum, pago) => sum + pago.monto, 0)
+  const loadResumen = useCallback(async () => {
+    if (!apertura?.id_apertura) {
+      return
+    }
 
-    return montoInicial + efectivoTurno
-  }, [apertura])
+    try {
+      setIsLoading(true)
 
-  // Total de ventas del turno (todos los métodos), solo informativo
-  const totalVentasTurno = useMemo(() => {
-    return PAGOS_TURNO_MOCK.reduce((sum, pago) => sum + pago.monto, 0)
-  }, [])
+      const data = await getResumenTurno(apertura.id_apertura)
 
-  // Desglose por método de pago
-  const desglosePorMetodo = useMemo(() => {
-    const grupos = {}
+      setResumen(data)
+      setLoadError("")
+    } catch (error) {
+      setLoadError(error.message || "No se pudo cargar el resumen del turno.")
+    } finally {
+      setIsLoading(false)
+    }
+  }, [apertura?.id_apertura])
 
-    PAGOS_TURNO_MOCK.forEach((pago) => {
-      grupos[pago.metodo_pago] = (grupos[pago.metodo_pago] || 0) + pago.monto
-    })
+  useEffect(() => {
+    loadResumen()
+  }, [loadResumen])
 
-    return Object.entries(grupos)
-  }, [])
+  const totalEfectivoSistema = Number(resumen?.total_efectivo_sistema || 0)
+  const totalVentasTurno = Number(resumen?.total_ventas_turno || 0)
+  const desglosePorMetodo = resumen?.desglose_por_metodo || []
 
-  // Diferencia entre lo declarado y lo que el sistema espera en efectivo
   const diferencia = totalDeclarado !== ""
     ? parseFloat((parseFloat(totalDeclarado) - totalEfectivoSistema).toFixed(2))
     : null
 
-  const canSubmit = totalDeclarado !== "" && !Number.isNaN(parseFloat(totalDeclarado))
+  const canSubmit =
+    totalDeclarado !== "" &&
+    !Number.isNaN(parseFloat(totalDeclarado)) &&
+    !isSubmitting &&
+    Boolean(resumen)
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!canSubmit) {
       showToast({
         type: "warning",
@@ -83,31 +71,49 @@ export default function CierreTab({ apertura, onCierreExitoso }) {
       return
     }
 
-    // Construye el objeto de cierre — luego será un insert real en
-    // cierre_caja + update de apertura_caja.estado = 'CERRADA'
-    const cierreData = {
-      id_cierre_caja:   crypto.randomUUID(),
-      id_apertura:      apertura?.id_apertura ?? null,
-      id_usuario:       "usuario-mock",
-      total_sistema:    totalEfectivoSistema,
-      total_declarado:  parseFloat(totalDeclarado),
-      diferencia,
-      hora_cierre:      new Date().toISOString(),
-      observaciones:    observaciones.trim() || null,
+    try {
+      setIsSubmitting(true)
+
+      const cierre = await cerrarCaja(apertura.id_apertura, {
+        total_declarado: parseFloat(totalDeclarado),
+        observaciones: observaciones.trim() || null,
+      })
+
+      showToast({
+        type: cierre.diferencia === 0 ? "success" : "warning",
+        title: "Turno cerrado",
+        message:
+          Number(cierre.diferencia) === 0
+            ? "El conteo cuadra exactamente con el sistema."
+            : `Hay una diferencia de ${formatCurrency(Math.abs(Number(cierre.diferencia)))}.`,
+      })
+
+      onCierreExitoso?.(cierre)
+    } catch (error) {
+      showToast({
+        type: "error",
+        title: "No se pudo cerrar el turno",
+        message: error.message || "Intenta nuevamente.",
+      })
+    } finally {
+      setIsSubmitting(false)
     }
+  }
 
-    showToast({
-      type: diferencia === 0 ? "success" : "warning",
-      title: "Turno cerrado",
-      message:
-        diferencia === 0
-          ? "El conteo cuadra exactamente con el sistema."
-          : `Hay una diferencia de ${formatCurrency(Math.abs(diferencia))}.`,
-    })
+  if (isLoading) {
+    return (
+      <div className="cierre-tab">
+        <p>Cargando resumen del turno...</p>
+      </div>
+    )
+  }
 
-    // Notifica al padre (CashierPage) que el turno terminó,
-    // para que vuelva a mostrar el AperturaGate.
-    onCierreExitoso?.(cierreData)
+  if (loadError) {
+    return (
+      <div className="cierre-tab">
+        <p>{loadError}</p>
+      </div>
+    )
   }
 
   return (
@@ -135,12 +141,16 @@ export default function CierreTab({ apertura, onCierreExitoso }) {
 
         <div className="cierre-tab__desglose">
           <h3>Desglose por método</h3>
-          {desglosePorMetodo.map(([metodo, monto]) => (
-            <div key={metodo} className="cierre-tab__desglose-line">
-              <span>{metodo}</span>
-              <span>{formatCurrency(monto)}</span>
-            </div>
-          ))}
+          {desglosePorMetodo.length === 0 ? (
+            <p>Sin pagos registrados en este turno.</p>
+          ) : (
+            desglosePorMetodo.map((item) => (
+              <div key={item.metodo_pago} className="cierre-tab__desglose-line">
+                <span>{item.metodo_pago}</span>
+                <span>{formatCurrency(item.total)}</span>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -166,7 +176,6 @@ export default function CierreTab({ apertura, onCierreExitoso }) {
           />
         </div>
 
-        {/* Diferencia — aparece solo si ya ingresó un monto */}
         {diferencia !== null && (
           <div
             className={
@@ -197,7 +206,7 @@ export default function CierreTab({ apertura, onCierreExitoso }) {
           disabled={!canSubmit}
           onClick={handleSubmit}
         >
-          Cerrar turno
+          {isSubmitting ? "Cerrando..." : "Cerrar turno"}
         </button>
       </div>
     </div>
