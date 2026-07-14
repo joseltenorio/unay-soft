@@ -124,13 +124,12 @@ function buildOrderItemsFromCurrentItems(currentItems = []) {
   currentItems.forEach((item) => {
     const key = item.id_producto
     const cantidad = Number(item.cantidad || 0)
-    const isReady =
-      item.estado_cocina === "LISTO" || item.estado_cocina === "ENTREGADO"
+    const estadoCocina = item.estado_cocina || "PENDIENTE"
 
     const batch = {
       idItemOrden: item.id_item_orden,
       quantity: cantidad,
-      kitchenReady: isReady,
+      estadoCocina,
     }
 
     const existing = grouped.get(key)
@@ -139,7 +138,6 @@ function buildOrderItemsFromCurrentItems(currentItems = []) {
       existing.quantity += cantidad
       existing.sentQuantity += cantidad
       existing.sentBatches.push(batch)
-      existing.kitchenReady = existing.kitchenReady && isReady
       return
     }
 
@@ -153,7 +151,6 @@ function buildOrderItemsFromCurrentItems(currentItems = []) {
       quantity: cantidad,
       sentQuantity: cantidad,
       sentBatches: [batch],
-      kitchenReady: isReady,
       kitchenNotes: item.notas_cocina || "",
     })
   })
@@ -477,6 +474,57 @@ export default function PosPage() {
     }
   }, [canViewKitchenNotices, loadKitchenNotifications])
 
+  useEffect(() => {
+    if (!selectedTable) {
+      return undefined
+    }
+
+    const tableId = selectedTable.id
+
+    async function syncKitchenStatuses() {
+      try {
+        const refreshedTables = await getPosTables()
+        const refreshedTable = refreshedTables.find((t) => t.id === tableId)
+
+        if (!refreshedTable) return
+
+        setTablesState(refreshedTables)
+
+        setTableOrders((prev) => {
+          const currentItems = prev[tableId]
+          if (!currentItems) return prev
+
+          return {
+            ...prev,
+            [tableId]: mergeKitchenStatuses(currentItems, refreshedTable.current_items),
+          }
+        })
+
+        setSavedOrders((prev) => {
+          const currentItems = prev[tableId]
+          if (!currentItems) return prev
+
+          return {
+            ...prev,
+            [tableId]: mergeKitchenStatuses(currentItems, refreshedTable.current_items),
+          }
+        })
+
+        setSelectedTable((current) =>
+          current && current.id === tableId ? refreshedTable : current,
+        )
+      } catch (error) {
+        // Polling silencioso: no interrumpir al mesero por un fallo de red puntual.
+      }
+    }
+
+    const intervalId = window.setInterval(syncKitchenStatuses, 8000)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [selectedTable?.id])
+
   async function handleAttendNotice(idNotification) {
     if (!canAttendKitchenNotices || attendingId) {
       return
@@ -541,6 +589,28 @@ export default function PosPage() {
     }
   }
 
+  // Actualiza solo el estado de cocina (estadoCocina) de los lotes ya
+  // enviados, sin tocar cantidades pendientes que el mesero esté editando.
+  function mergeKitchenStatuses(items, currentItems) {
+    const statusByItemOrden = new Map(
+      (currentItems || []).map((ci) => [ci.id_item_orden, ci.estado_cocina]),
+    )
+
+    return items.map((item) => {
+      const sentBatches = (item.sentBatches || []).map((batch) => {
+        const freshStatus = statusByItemOrden.get(batch.idItemOrden)
+
+        if (!freshStatus || freshStatus === batch.estadoCocina) {
+          return batch
+        }
+
+        return { ...batch, estadoCocina: freshStatus }
+      })
+
+      return { ...item, sentBatches }
+    })
+  }
+
   function handleTableClick(table) {
     if (
       table.disponibilidad === "RESERVADA" ||
@@ -588,9 +658,6 @@ export default function PosPage() {
     }))
   }
 
-  // Ante cualquier desincronización crítica (error de cancelación, envío sin
-  // confirmación de id_item_orden, etc.) reconstruimos el carrito local
-  // desde la fuente de verdad del backend en vez de adivinar.
   async function resyncTableOrder(table) {
     try {
       const refreshedTables = await getPosTables()
@@ -726,11 +793,9 @@ export default function PosPage() {
     if (item.sentQuantity > 0) {
       const sentBatches = item.sentBatches || []
 
-      // Buscamos el lote más reciente que aún se pueda cancelar (pendiente
-      // en cocina, no ya listo/entregado).
       let targetIndex = -1
       for (let i = sentBatches.length - 1; i >= 0; i--) {
-        if (sentBatches[i].quantity > 0 && !sentBatches[i].kitchenReady) {
+        if (sentBatches[i].quantity > 0 && sentBatches[i].estadoCocina === "PENDIENTE") {
           targetIndex = i
           break
         }
@@ -916,7 +981,7 @@ export default function PosPage() {
         const newBatch = {
           idItemOrden: matchingOrderItem.id_item_orden,
           quantity: quantityToSend,
-          kitchenReady: false,
+          estadoCocina: "PENDIENTE",
         }
 
         return {
