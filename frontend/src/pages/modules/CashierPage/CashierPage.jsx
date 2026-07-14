@@ -20,6 +20,15 @@ export default function CashierPage() {
   // Apertura de caja activa del turno actual.
   // null = no hay turno abierto todavía → se bloquea el módulo.
   const [apertura, setApertura] = useState(null)
+  
+  // Se llama cuando CierreTab confirma el cierre del turno.
+  // Vuelve apertura a null → CashierPage muestra el AperturaGate otra vez,
+  // y de paso resetea el tab activo a "cobrar" para el próximo turno.
+  function handleCierreExitoso() {
+    setApertura(null)
+    setActiveTab("cobrar")
+  }
+
 
   // Si no hay apertura activa, muestra el gate y bloquea todo lo demás
   if (!apertura) {
