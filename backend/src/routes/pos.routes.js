@@ -41,4 +41,11 @@ router.delete(
   cancelPosOrderItem,
 )
 
+router.post(
+  "/orders/send-to-cashier",
+  authenticateToken,
+  authorizePermission("pos.actualizar_orden"),
+  sendOrderToCashier,
+)
+
 module.exports = router
