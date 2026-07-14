@@ -21,6 +21,7 @@ import {
   createPosOrder,
   getPosMenu,
   getPosTables,
+  sendOrderToCashier,
 } from "../../../services/posService"
 
 import PosPageTables from "./components/PosPageTables"
@@ -300,6 +301,10 @@ export default function PosPage() {
     : []
 
   const isSelectedSupportOrder = isTableSupportOrder(selectedTable, currentUser)
+
+  const isTableSentToCashier = (selectedTable?.active_orders || []).some(
+    (order) => order.estado === "ENVIADA_A_CAJA",
+  )
 
   const selectedResponsibleName = getUserDisplayName(
     getTableResponsibleUser(selectedTable),
@@ -1055,7 +1060,7 @@ export default function PosPage() {
     }
   }
   
-  function handleSendToCashier() {
+  async function handleSendToCashier() {
     if (!selectedTable) {
       return
     }
@@ -1092,11 +1097,41 @@ export default function PosPage() {
       return
     }
 
-    showToast({
-      type: "info",
-      title: "Caja pendiente",
-      message: "La cuenta se cobrará y la mesa se liberará desde el módulo de caja.",
-    })
+    const confirmSend = window.confirm(
+      `¿Estás seguro de enviar a caja la cuenta de la mesa ${selectedTable.number}? Ya no podrás agregar más productos a este pedido.`,
+    )
+
+    if (!confirmSend) {
+      return
+    }
+
+    const tableToSend = selectedTable
+    const tableId = tableToSend.id
+
+    try {
+      await sendOrderToCashier(tableToSend.id_mesa || tableToSend.id)
+
+      showToast({
+        type: "success",
+        title: "Pedido enviado a caja",
+        message: `La cuenta de la mesa ${tableToSend.number} fue enviada a caja correctamente.`,
+      })
+
+      const refreshedTables = await getPosTables()
+      setTablesState(refreshedTables)
+
+      const refreshedTable = refreshedTables.find((table) => table.id === tableId)
+
+      setSelectedTable((current) =>
+        current && current.id === tableId ? refreshedTable || current : current,
+      )
+    } catch (error) {
+      showToast({
+        type: "error",
+        title: "No se pudo enviar a caja",
+        message: error.message || "Verifica que todos los pedidos estén entregados.",
+      })
+    }
   }
 
   function handleUpdateOrderNotes(notes) {
@@ -1251,6 +1286,7 @@ export default function PosPage() {
                 activeTotal={selectedTable.active_total || 0}
                 isSupportOrder={isSelectedSupportOrder}
                 supportOrderMessage={supportOrderMessage}
+                isAccountLocked={isTableSentToCashier}
               />
             )}
           </section>
