@@ -1,0 +1,81 @@
+/* src/pages/modules/CashierPage/AperturaGate.css */
+
+.apertura-gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 24px;
+}
+
+.apertura-gate__card {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px;
+  border-radius: 16px;
+  background: var(--surface, #fff);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.apertura-gate__eyebrow {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted, #888);
+  margin: 0;
+}
+
+.apertura-gate__heading h1 {
+  margin: 4px 0;
+  font-size: 22px;
+}
+
+.apertura-gate__heading p:last-child {
+  margin: 0;
+  color: var(--text-muted, #888);
+  font-size: 14px;
+}
+
+.apertura-gate__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.apertura-gate__field label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.apertura-gate__field input,
+.apertura-gate__field select,
+.apertura-gate__field textarea {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border, #ddd);
+  font-size: 14px;
+}
+
+.apertura-gate__error {
+  margin: 0;
+  color: var(--danger, #c0392b);
+  font-size: 13px;
+}
+
+.apertura-gate__submit {
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: var(--primary, #2f6f4f);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.apertura-gate__submit:disabled {
+  background: var(--disabled, #ccc);
+  cursor: not-allowed;
+}
