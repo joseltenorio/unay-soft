@@ -5,6 +5,7 @@ const {
   getPosMenu,
   getPosTables,
   cancelOrderItem,
+  enviarOrdenACaja,
 } = require("../services/pos.service")
 
 async function listPosTables(req, res) {
@@ -97,9 +98,37 @@ async function cancelPosOrderItem(req, res) {
   }
 }
 
+async function sendOrderToCashier(req, res) {
+  try {
+    const { id_mesa } = req.body
+
+    if (!id_mesa) {
+      return res.status(400).json({
+        message: "Debe indicar la mesa a enviar a caja.",
+      })
+    }
+
+    const result = await enviarOrdenACaja({
+      idEstablecimiento: req.user.id_establecimiento,
+      idUsuario: req.user.id_usuario,
+      idMesa: id_mesa,
+    })
+
+    return res.status(200).json({
+      message: "Pedido enviado a caja correctamente.",
+      result,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al enviar el pedido a caja.",
+    })
+  }
+}
+
 module.exports = {
   listPosTables,
   listPosMenu,
   registerPosOrder,
   cancelPosOrderItem,
+  sendOrderToCashier,
 }

@@ -740,10 +740,93 @@ async function cancelOrderItem({ idItemOrden, idEstablecimiento, cantidadACancel
   }
 }
 
+// ── Enviar a caja ────────────────────────────────────────────────
+// Envía TODAS las órdenes activas de la mesa a caja de una vez.
+// Regla: todas deben estar ENTREGADA (si alguna sigue en un estado
+// previo, se rechaza). La mesa NO se libera aquí — se libera recién
+// cuando se registra el pago desde el módulo de Caja.
+
+async function enviarOrdenACaja({ idEstablecimiento, idUsuario, idMesa }) {
+  const client = await pool.connect()
+
+  try {
+    await client.query("begin")
+
+    const { rows: tableRows } = await client.query(
+      `
+        select id_mesa, numero
+        from mesa
+        where id_mesa = $1
+          and id_establecimiento = $2
+          and estado = true
+        for update;
+      `,
+      [idMesa, idEstablecimiento],
+    )
+
+    if (tableRows.length === 0) {
+      throw createHttpError("La mesa no existe o no pertenece al establecimiento.", 404)
+    }
+
+    const { rows: orderRows } = await client.query(
+      `
+        select o.id_orden, o.estado
+        from orden o
+        inner join usuario u
+          on u.id_usuario = o.id_usuario
+        where o.id_mesa = $1
+          and u.id_establecimiento = $2
+          and o.estado = any($3::varchar[])
+        for update;
+      `,
+      [idMesa, idEstablecimiento, ACTIVE_ORDER_STATES],
+    )
+
+    if (orderRows.length === 0) {
+      throw createHttpError("Esta mesa no tiene órdenes activas para enviar a caja.", 409)
+    }
+
+    const ordenesNoEntregadas = orderRows.filter((order) => order.estado !== "ENTREGADA")
+
+    if (ordenesNoEntregadas.length > 0) {
+      throw createHttpError(
+        "Todos los pedidos de la mesa deben estar entregados antes de enviarlos a caja.",
+        409,
+      )
+    }
+
+    const idOrdenes = orderRows.map((order) => order.id_orden)
+
+    await client.query(
+      `
+        update orden
+        set estado = 'ENVIADA_A_CAJA',
+            enviada_caja_at = now(),
+            updated_at = now()
+        where id_orden = any($1::uuid[]);
+      `,
+      [idOrdenes],
+    )
+
+    await client.query("commit")
+
+    return {
+      id_mesa: idMesa,
+      ordenes_enviadas: idOrdenes,
+    }
+  } catch (error) {
+    await client.query("rollback")
+    throw error
+  } finally {
+    client.release()
+  }
+}
+
 module.exports = {
   ACTIVE_ORDER_STATES,
   createPosOrder,
   getPosMenu,
   getPosTables,
   cancelOrderItem,
+  enviarOrdenACaja,
 }
