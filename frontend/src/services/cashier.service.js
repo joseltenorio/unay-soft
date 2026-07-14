@@ -1,4 +1,4 @@
-// backend/src/services/cashier.service.js
+// backend/src/services/payment.service.js
 
 const { pool } = require("../config/database")
 
@@ -26,7 +26,9 @@ function padNumero(numero) {
 // - Solo se puede cobrar una orden en estado ENVIADA_A_CAJA.
 // - tipo_comprobante: "BOL" (Boleta) o "FAC" (Factura). FAC requiere
 //   numero_documento (RUC) y razon_social.
-// - Al confirmar el pago, la orden pasa a estado 'PAGADA'.
+// - Al confirmar el pago: la orden pasa a 'PAGADA' y la mesa se libera
+//   (disponibilidad = 'LIBRE'). La mesa NO se libera al enviar a caja,
+//   solo aquí, al cobrar.
 
 async function registrarPago({
   idEstablecimiento,
@@ -95,10 +97,10 @@ async function registrarPago({
       throw createHttpError("Este turno de caja pertenece a otro usuario.", 403)
     }
 
-    // Bloquea y valida la orden
+    // Bloquea y valida la orden (incluyendo su mesa, para liberarla al cobrar)
     const { rows: ordenRows } = await client.query(
       `
-        select id_orden, estado, subtotal, igv, total
+        select id_orden, id_mesa, estado, subtotal, igv, total
         from orden
         where id_orden = $1
         for update;
@@ -268,6 +270,20 @@ async function registrarPago({
       `,
       [idOrden],
     )
+
+    // Libera la mesa (si la orden tenía una asociada, ej. pedidos para llevar
+    // podrían no tener id_mesa)
+    if (orden.id_mesa) {
+      await client.query(
+        `
+          update mesa
+          set disponibilidad = 'LIBRE',
+              updated_at = now()
+          where id_mesa = $1;
+        `,
+        [orden.id_mesa],
+      )
+    }
 
     await client.query("commit")
 
