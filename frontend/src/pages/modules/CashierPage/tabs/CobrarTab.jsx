@@ -444,14 +444,16 @@ function PayPanel({ cuenta, apertura, metodosPago, clearCuenta, onPagoRegistrado
             El pago se registrará mediante <strong>{selectedMetodo?.nombre}</strong>.
           </p>
 
-          <label htmlFor="cashier-referencia">Referencia (opcional)</label>
-          <input
-            id="cashier-referencia"
-            type="text"
-            placeholder="Ej. N° de operación"
-            value={referencia}
-            onChange={(e) => setReferencia(e.target.value)}
-          />
+          <div className="cobrar-pay-panel__referencia">
+            <label htmlFor="cashier-referencia">Referencia (opcional)</label>
+            <input
+              id="cashier-referencia"
+              type="text"
+              placeholder="Ej. N° de operación"
+              value={referencia}
+              onChange={(e) => setReferencia(e.target.value)}
+            />
+          </div>
         </div>
       )}
 
