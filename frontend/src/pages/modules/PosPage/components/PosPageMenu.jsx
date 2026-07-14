@@ -61,6 +61,7 @@ export default function PosPageMenu({
   activeTotal = 0,
   isSupportOrder = false,
   supportOrderMessage = "",
+  isAccountLocked = false,
 }) {
   const [productQuantities, setProductQuantities] = useState({})
 
@@ -181,6 +182,7 @@ export default function PosPageMenu({
                   <button
                     type="button"
                     onClick={() => decreaseTempQuantity(product.id)}
+                    disabled={isAccountLocked}
                   >
                     −
                   </button>
@@ -192,6 +194,7 @@ export default function PosPageMenu({
                   <button
                     type="button"
                     onClick={() => increaseTempQuantity(product.id)}
+                    disabled={isAccountLocked}
                   >
                     +
                   </button>
@@ -201,6 +204,7 @@ export default function PosPageMenu({
                   className="pos-product-button"
                   type="button"
                   onClick={() => handleProductAdd(product)}
+                  disabled={isAccountLocked}
                 >
                   Agregar
                 </button>
@@ -220,6 +224,12 @@ export default function PosPageMenu({
             <h3>
               Mesa {selectedTable.number}
             </h3>
+
+            {isAccountLocked && (
+              <span className="pos-account-locked-badge">
+                En caja — no editable
+              </span>
+            )}
           </div>
 
           <div>
@@ -323,6 +333,7 @@ export default function PosPageMenu({
                       <button
                         type="button"
                         onClick={() => handleDecreaseQuantity(item.id)}
+                        disabled={isAccountLocked}
                       >
                         −
                       </button>
@@ -334,6 +345,7 @@ export default function PosPageMenu({
                       <button
                         type="button"
                         onClick={() => handleIncreaseQuantity(item.id)}
+                        disabled={isAccountLocked}
                       >
                         +
                       </button>
@@ -377,7 +389,7 @@ export default function PosPageMenu({
             className="pos-send-button"
             type="button"
             onClick={handleSendToKitchen}
-            disabled={isSendingToKitchen || !hasPendingItems}
+            disabled={isSendingToKitchen || !hasPendingItems || isAccountLocked}
           >
             {isSendingToKitchen ? "Enviando..." : "Enviar a cocina"}
           </button>
@@ -386,10 +398,11 @@ export default function PosPageMenu({
             className="pos-payment-button"
             type="button"
             onClick={handleSendToCashier}
+            disabled={isAccountLocked}
           >
-            Enviar a caja
+            {isAccountLocked ? "Ya enviado a caja" : "Enviar a caja"}
           </button>
-        </div>        
+        </div>      
       </aside>
     </section>
   )

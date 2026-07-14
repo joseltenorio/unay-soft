@@ -2,7 +2,8 @@
 
 const { pool } = require("../config/database")
 
-const ACTIVE_ORDER_STATES = ["ABIERTA", "EN_PREPARACION", "LISTA", "ENTREGADA"]
+const ACTIVE_ORDER_STATES = ["ABIERTA", "EN_PREPARACION", "LISTA", "ENTREGADA", "ENVIADA_A_CAJA"]
+const SENDABLE_ORDER_STATES = ["ABIERTA", "EN_PREPARACION", "LISTA", "ENTREGADA"]
 const BLOCKED_TABLE_STATES = ["RESERVADA", "MANTENIMIENTO"]
 
 function createHttpError(message, statusCode = 500) {
@@ -468,6 +469,27 @@ async function createPosOrder({
       )
     }
 
+    const { rows: cuentaPendienteRows } = await client.query(
+      `
+        select o.id_orden
+        from orden o
+        inner join usuario u
+          on u.id_usuario = o.id_usuario
+        where o.id_mesa = $1
+          and u.id_establecimiento = $2
+          and o.estado = 'ENVIADA_A_CAJA'
+        limit 1;
+      `,
+      [idMesa, idEstablecimiento],
+    )
+
+    if (cuentaPendienteRows.length > 0) {
+      throw createHttpError(
+        `La mesa ${table.numero} tiene una cuenta pendiente de cobro en caja. Debe cobrarse antes de iniciar un nuevo pedido.`,
+        409,
+      )
+    }
+
     const productIds = [...new Set(normalizedItems.map((item) => item.id_producto))]
 
     const { rows: productRows } = await client.query(
@@ -779,7 +801,7 @@ async function enviarOrdenACaja({ idEstablecimiento, idUsuario, idMesa }) {
           and o.estado = any($3::varchar[])
         for update;
       `,
-      [idMesa, idEstablecimiento, ACTIVE_ORDER_STATES],
+      [idMesa, idEstablecimiento, SENDABLE_ORDER_STATES],
     )
 
     if (orderRows.length === 0) {

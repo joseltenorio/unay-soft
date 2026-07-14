@@ -109,3 +109,12 @@ export async function cancelPosOrderItem(idItemOrden, cantidad) {
 
   return data.result
 }
+
+export async function sendOrderToCashier(idMesa) {
+  const data = await apiPrivateRequest("/pos/orders/send-to-cashier", {
+    method: "POST",
+    body: JSON.stringify({ id_mesa: idMesa }),
+  })
+
+  return data.result
+}

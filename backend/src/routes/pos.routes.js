@@ -7,7 +7,9 @@ const {
   listPosTables,
   registerPosOrder,
   cancelPosOrderItem,
+  sendOrderToCashier,
 } = require("../controllers/pos.controller")
+
 const { authenticateToken } = require("../middlewares/auth.middleware")
 const { authorizePermission } = require("../middlewares/permission.middleware")
 
