@@ -1,98 +1,22 @@
 // src/pages/modules/CashierPage/tabs/HistorialTab.jsx
 
-import { useState, useMemo } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import "./HistorialTab.css"
 
-// ── Mocks────────────────────────────────
-const HISTORIAL_MOCK = [
-  {
-    id_pago:      "pag-001",
-    id_orden:     "ord-001",
-    numero_orden: "ORD-0001",
-    mesa_nombre:  "Mesa 1",
-    metodo_pago:  "YAPE",
-    tipo_doc:     "BOLETA",
-    monto:        48.50,
-    created_at:   "2026-07-05T18:00:00Z",
-    detalle: [
-      { nombre: "Lomo Saltado",  cantidad: 1, precio_unitario: 28.50 },
-      { nombre: "Chicha Morada", cantidad: 2, precio_unitario: 5.00  },
-      { nombre: "Pie de Limón",  cantidad: 1, precio_unitario: 10.00 },
-    ],
-    subtotal: 41.10,
-    igv:       7.40,
-    total:    48.50,
-    ruc:          null,
-    razon_social: null,
-  },
-  {
-    id_pago:      "pag-002",
-    id_orden:     "ord-002",
-    numero_orden: "ORD-0002",
-    mesa_nombre:  "Mesa 5",
-    metodo_pago:  "EFECTIVO",
-    tipo_doc:     "FACTURA",
-    monto:        96.00,
-    created_at:   "2026-07-05T17:30:00Z",
-    detalle: [
-      { nombre: "Parrilla Familiar", cantidad: 1, precio_unitario: 78.00 },
-      { nombre: "Inca Kola",         cantidad: 2, precio_unitario: 9.00  },
-    ],
-    subtotal: 81.36,
-    igv:      14.64,
-    total:    96.00,
-    ruc:          "20601224745",
-    razon_social: "UMARI RESTAURANT S.A.C.",
-  },
-  {
-    id_pago:      "pag-003",
-    id_orden:     "ord-003",
-    numero_orden: "ORD-0003",
-    mesa_nombre:  "Mesa 8",
-    metodo_pago:  "TARJETA",
-    tipo_doc:     "BOLETA",
-    monto:        32.00,
-    created_at:   "2026-07-05T16:45:00Z",
-    detalle: [
-      { nombre: "Hamburguesa Clásica", cantidad: 2, precio_unitario: 16.00 },
-    ],
-    subtotal: 27.12,
-    igv:       4.88,
-    total:    32.00,
-    ruc:          null,
-    razon_social: null,
-  },
-  {
-    id_pago:      "pag-004",
-    id_orden:     "ord-004",
-    numero_orden: "ORD-0004",
-    mesa_nombre:  "Mesa 12",
-    metodo_pago:  "PLIN",
-    tipo_doc:     "BOLETA",
-    monto:       114.00,
-    created_at:   "2026-07-05T15:20:00Z",
-    detalle: [
-      { nombre: "Ceviche Mixto", cantidad: 2, precio_unitario: 42.00 },
-      { nombre: "Limonada",      cantidad: 2, precio_unitario: 8.00  },
-      { nombre: "Tres Leches",   cantidad: 1, precio_unitario: 14.00 },
-    ],
-    subtotal:  96.61,
-    igv:       17.39,
-    total:    114.00,
-    ruc:          null,
-    razon_social: null,
-  },
-]
+import { getHistorialPagos } from "../../../../services/cashierService"
 
-const METODOS_PAGO  = ["TODOS", "EFECTIVO", "TARJETA", "YAPE", "PLIN", "TRANSFERENCIA"]
-const TIPOS_DOC     = ["TODOS", "BOLETA", "FACTURA"]
-const IGV_RATE      = 0.18
+const METODOS_PAGO_BASE = ["TODOS"]
+const TIPOS_DOC = [
+  { value: "TODOS", label: "Todos los comprobantes" },
+  { value: "BOL", label: "Boleta" },
+  { value: "FAC", label: "Factura" },
+]
 
 // ── Helpers ───────────────────────────────────────────────────────
 
 function formatHour(isoString) {
   return new Intl.DateTimeFormat("es-PE", {
-    hour:   "2-digit",
+    hour: "2-digit",
     minute: "2-digit",
     hour12: true,
   }).format(new Date(isoString))
@@ -102,22 +26,57 @@ function formatCurrency(amount) {
   return `S/ ${Number(amount).toFixed(2)}`
 }
 
+function getTipoDocLabel(codigo) {
+  return codigo === "FAC" ? "Factura" : "Boleta"
+}
+
 // ── HistorialTab ──────────────────────────────────────────────────
 
 export default function HistorialTab({ apertura }) {
+  const [pagos, setPagos] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState("")
+
   const [selectedPago, setSelectedPago] = useState(null)
   const [filtroMetodo, setFiltroMetodo] = useState("TODOS")
-  const [filtroDoc,    setFiltroDoc]    = useState("TODOS")
+  const [filtroDoc, setFiltroDoc] = useState("TODOS")
+
+  const loadHistorial = useCallback(async () => {
+    if (!apertura?.id_apertura) {
+      return
+    }
+
+    try {
+      setIsLoading(true)
+
+      const data = await getHistorialPagos(apertura.id_apertura)
+
+      setPagos(data)
+      setLoadError("")
+    } catch (error) {
+      setLoadError(error.message || "No se pudo cargar el historial de pagos.")
+    } finally {
+      setIsLoading(false)
+    }
+  }, [apertura?.id_apertura])
+
+  useEffect(() => {
+    loadHistorial()
+  }, [loadHistorial])
+
+  const metodosDisponibles = useMemo(() => {
+    const unicos = [...new Set(pagos.map((pago) => pago.metodo_pago))]
+    return [...METODOS_PAGO_BASE, ...unicos]
+  }, [pagos])
 
   const pagosFiltrados = useMemo(() => {
-    return HISTORIAL_MOCK.filter((pago) => {
+    return pagos.filter((pago) => {
       const matchMetodo = filtroMetodo === "TODOS" || pago.metodo_pago === filtroMetodo
-      const matchDoc    = filtroDoc    === "TODOS" || pago.tipo_doc    === filtroDoc
+      const matchDoc = filtroDoc === "TODOS" || pago.tipo_comprobante === filtroDoc
       return matchMetodo && matchDoc
     })
-  }, [filtroMetodo, filtroDoc])
+  }, [pagos, filtroMetodo, filtroDoc])
 
-  // Totales del día según filtros aplicados
   const totalDia = useMemo(() => {
     return pagosFiltrados.reduce((sum, pago) => sum + pago.total, 0)
   }, [pagosFiltrados])
@@ -126,9 +85,12 @@ export default function HistorialTab({ apertura }) {
     <div className="historial-tab">
       <PagoList
         pagos={pagosFiltrados}
+        isLoading={isLoading}
+        loadError={loadError}
         selectedPago={selectedPago}
         filtroMetodo={filtroMetodo}
         filtroDoc={filtroDoc}
+        metodosDisponibles={metodosDisponibles}
         totalDia={totalDia}
         apertura={apertura}
         onSelect={setSelectedPago}
@@ -148,9 +110,12 @@ export default function HistorialTab({ apertura }) {
 
 function PagoList({
   pagos,
+  isLoading,
+  loadError,
   selectedPago,
   filtroMetodo,
   filtroDoc,
+  metodosDisponibles,
   totalDia,
   apertura,
   onSelect,
@@ -169,7 +134,6 @@ function PagoList({
         </div>
       </div>
 
-      {/* Filtros */}
       <div className="historial-list__filters">
         <div className="historial-list__filter-group">
           <label>Método</label>
@@ -177,7 +141,7 @@ function PagoList({
             value={filtroMetodo}
             onChange={(e) => onFiltroMetodo(e.target.value)}
           >
-            {METODOS_PAGO.map((m) => (
+            {metodosDisponibles.map((m) => (
               <option key={m} value={m}>
                 {m === "TODOS" ? "Todos los métodos" : m}
               </option>
@@ -192,42 +156,55 @@ function PagoList({
             onChange={(e) => onFiltroDoc(e.target.value)}
           >
             {TIPOS_DOC.map((d) => (
-              <option key={d} value={d}>
-                {d === "TODOS" ? "Todos los comprobantes" : d}
+              <option key={d.value} value={d.value}>
+                {d.label}
               </option>
             ))}
           </select>
         </div>
       </div>
 
-      {/* Lista */}
-      {pagos.length === 0 ? (
+      {isLoading ? (
+        <div className="historial-list__empty">
+          <p>Cargando historial...</p>
+        </div>
+      ) : loadError ? (
+        <div className="historial-list__empty">
+          <p>{loadError}</p>
+        </div>
+      ) : pagos.length === 0 ? (
         <div className="historial-list__empty">
           <p>No hay cobros con los filtros aplicados 🧾</p>
         </div>
       ) : (
         <ul className="historial-list__items">
-          {pagos.map((pago) => (
-            <li
-              key={pago.id_pago}
-              className={
-                selectedPago?.id_pago === pago.id_pago
-                  ? "historial-card historial-card--selected"
-                  : "historial-card"
-              }
-              onClick={() => onSelect(pago)}
-            >
-              <div className="historial-card__left">
-                <strong>{pago.numero_orden} · {pago.mesa_nombre}</strong>
-                <span>{pago.metodo_pago} · {pago.tipo_doc}</span>
-              </div>
+          {pagos.map((pago) => {
+            const mesaLabel =
+              pago.mesa_nombre || (pago.mesa_numero ? `Mesa ${pago.mesa_numero}` : "Sin mesa")
+            const ordenesLabel = pago.numeros_orden.join(", ")
 
-              <div className="historial-card__right">
-                <strong>{formatCurrency(pago.total)}</strong>
-                <span>{formatHour(pago.created_at)}</span>
-              </div>
-            </li>
-          ))}
+            return (
+              <li
+                key={pago.id_pago}
+                className={
+                  selectedPago?.id_pago === pago.id_pago
+                    ? "historial-card historial-card--selected"
+                    : "historial-card"
+                }
+                onClick={() => onSelect(pago)}
+              >
+                <div className="historial-card__left">
+                  <strong>{ordenesLabel} · {mesaLabel}</strong>
+                  <span>{pago.metodo_pago} · {getTipoDocLabel(pago.tipo_comprobante)}</span>
+                </div>
+
+                <div className="historial-card__right">
+                  <strong>{formatCurrency(pago.total)}</strong>
+                  <span>{formatHour(pago.created_at)}</span>
+                </div>
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>
@@ -245,16 +222,16 @@ function PagoDetalle({ pago, onClose }) {
     )
   }
 
-  const subtotal = pago.subtotal
-  const igv      = parseFloat((subtotal * IGV_RATE).toFixed(2))
-  const total    = parseFloat((subtotal + igv).toFixed(2))
+  const mesaLabel =
+    pago.mesa_nombre || (pago.mesa_numero ? `Mesa ${pago.mesa_numero}` : "Sin mesa")
+  const ordenesLabel = pago.numeros_orden.join(", ")
 
   return (
     <div className="historial-detalle">
       <div className="historial-detalle__header">
         <div>
           <p className="historial-detalle__eyebrow">Detalle del cobro</p>
-          <h3>{pago.numero_orden} · {pago.mesa_nombre}</h3>
+          <h3>{ordenesLabel} · {mesaLabel}</h3>
         </div>
 
         <button
@@ -267,11 +244,10 @@ function PagoDetalle({ pago, onClose }) {
         </button>
       </div>
 
-      {/* Info del pago */}
       <div className="historial-detalle__info">
         <div className="historial-detalle__info-row">
           <span>Comprobante</span>
-          <strong>{pago.tipo_doc}</strong>
+          <strong>{getTipoDocLabel(pago.tipo_comprobante)} {pago.comprobante}</strong>
         </div>
 
         <div className="historial-detalle__info-row">
@@ -284,12 +260,18 @@ function PagoDetalle({ pago, onClose }) {
           <strong>{formatHour(pago.created_at)}</strong>
         </div>
 
-        {/* Solo si es factura */}
-        {pago.tipo_doc === "FACTURA" && (
+        {pago.referencia && (
+          <div className="historial-detalle__info-row">
+            <span>Referencia</span>
+            <strong>{pago.referencia}</strong>
+          </div>
+        )}
+
+        {pago.tipo_comprobante === "FAC" && (
           <>
             <div className="historial-detalle__info-row">
               <span>RUC</span>
-              <strong>{pago.ruc}</strong>
+              <strong>{pago.numero_documento}</strong>
             </div>
             <div className="historial-detalle__info-row">
               <span>Razón social</span>
@@ -299,31 +281,30 @@ function PagoDetalle({ pago, onClose }) {
         )}
       </div>
 
-      {/* Detalle de consumo */}
       <div className="historial-detalle__consumo">
         <h4>Detalle de consumo</h4>
 
-        {pago.detalle.map((item, index) => (
-          <div key={index} className="historial-detalle__line">
-            <span>{item.cantidad}× {item.nombre}</span>
-            <span>{formatCurrency(item.precio_unitario * item.cantidad)}</span>
+        {pago.items.map((item) => (
+          <div key={item.id_item_orden} className="historial-detalle__line">
+            <span>{item.cantidad}× {item.producto_nombre}</span>
+            <span>{formatCurrency(item.subtotal)}</span>
           </div>
         ))}
 
         <div className="historial-detalle__subtotals">
           <div className="historial-detalle__line historial-detalle__line--muted">
             <span>Subtotal</span>
-            <span>{formatCurrency(subtotal)}</span>
+            <span>{formatCurrency(pago.subtotal)}</span>
           </div>
           <div className="historial-detalle__line historial-detalle__line--muted">
-            <span>IGV ({IGV_RATE * 100}%)</span>
-            <span>{formatCurrency(igv)}</span>
+            <span>IGV</span>
+            <span>{formatCurrency(pago.igv)}</span>
           </div>
         </div>
 
         <div className="historial-detalle__total">
           <strong>Total</strong>
-          <strong>{formatCurrency(total)}</strong>
+          <strong>{formatCurrency(pago.total)}</strong>
         </div>
       </div>
     </div>

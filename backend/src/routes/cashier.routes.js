@@ -9,6 +9,7 @@ const {
   listMetodosPago,
   listCuentasPorCobrar,
   registrarPagoHandler,
+  listHistorialPagos,
   getResumen,
   closeCaja,
 } = require("../controllers/cashier.controller")
