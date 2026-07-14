@@ -654,3 +654,69 @@ async function cerrarCaja({ idApertura, idEstablecimiento, idUsuario, totalDecla
     )
 
     const totalEfectivoSistema =
+      Number(apertura.monto_inicial) + Number(pagosEfectivoRows[0].total_efectivo)
+
+    const diferencia = Number((declarado - totalEfectivoSistema).toFixed(2))
+
+    const { rows: cierreRows } = await client.query(
+      `
+        insert into cierre_caja (
+          id_apertura,
+          id_usuario,
+          total_sistema,
+          total_declarado,
+          diferencia,
+          observaciones
+        )
+        values ($1, $2, $3, $4, $5, $6)
+        returning
+          id_cierre_caja,
+          id_apertura,
+          id_usuario,
+          total_sistema,
+          total_declarado,
+          diferencia,
+          hora_cierre,
+          observaciones,
+          created_at;
+      `,
+      [
+        idApertura,
+        idUsuario,
+        totalEfectivoSistema,
+        declarado,
+        diferencia,
+        observaciones?.trim() || null,
+      ],
+    )
+
+    await client.query(
+      `
+        update apertura_caja
+        set estado = 'CERRADA',
+            updated_at = now()
+        where id_apertura = $1;
+      `,
+      [idApertura],
+    )
+
+    await client.query("commit")
+
+    return cierreRows[0]
+  } catch (error) {
+    await client.query("rollback")
+    throw error
+  } finally {
+    client.release()
+  }
+}
+
+module.exports = {
+  getCajasDisponibles,
+  getAperturaActivaPorUsuario,
+  abrirCaja,
+  getCuentasPorCobrar,
+  registrarPago,
+  getResumenTurno,
+  cerrarCaja,
+}

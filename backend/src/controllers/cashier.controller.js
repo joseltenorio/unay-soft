@@ -4,6 +4,8 @@ const {
   getCajasDisponibles,
   getAperturaActivaPorUsuario,
   abrirCaja,
+  getCuentasPorCobrar,
+  registrarPago,
   getResumenTurno,
   cerrarCaja,
 } = require("../services/cashier.service")
