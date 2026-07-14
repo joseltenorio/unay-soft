@@ -6,11 +6,13 @@ const {
   listCajasDisponibles,
   getAperturaActiva,
   openCaja,
+  listMetodosPago,
   listCuentasPorCobrar,
   registrarPagoHandler,
   getResumen,
   closeCaja,
 } = require("../controllers/cashier.controller")
+
 const { authenticateToken } = require("../middlewares/auth.middleware")
 const { authorizePermission } = require("../middlewares/permission.middleware")
 
@@ -63,6 +65,13 @@ router.post(
   authenticateToken,
   authorizePermission("cashier.cerrar_caja"),
   closeCaja,
+)
+
+router.get(
+  "/metodos-pago",
+  authenticateToken,
+  authorizePermission("cashier.ver"),
+  listMetodosPago,
 )
 
 module.exports = router
