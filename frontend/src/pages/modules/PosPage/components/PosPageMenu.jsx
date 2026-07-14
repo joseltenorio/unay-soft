@@ -275,8 +275,30 @@ export default function PosPageMenu({
                               </>
                             )}
                           </small>
-                        )}
+                        )}                        
                       </div>
+
+                     {(() => {
+                        const entregado = (item.sentBatches || []).reduce(
+                          (total, batch) =>
+                            batch.estadoCocina === "ENTREGADO"
+                              ? total + batch.quantity
+                              : total,
+                          0,
+                        )
+
+                        if (entregado === 0) {
+                          return null
+                        }
+
+                        return (
+                          <div className="pos-item-kitchen-badges">
+                            <span className="pos-item-badge pos-item-badge--delivered">
+                              Entregado: {entregado}
+                            </span>
+                          </div>
+                        )
+                      })()}
 
                       <label className="pos-order-item-note">
                         <span>Nota para cocina</span>
@@ -367,71 +389,7 @@ export default function PosPageMenu({
           >
             Enviar a caja
           </button>
-        </div>
-
-        <section className="pos-active-orders" aria-label="Órdenes activas de la mesa">
-          <header className="pos-active-orders__header">
-            <div>
-              <span>Cuenta abierta</span>
-              <strong>
-                {activeOrderCount} orden(es)
-              </strong>
-            </div>
-
-            <strong className="pos-active-orders__total">
-              {formatCurrency(activeTotal)}
-            </strong>
-          </header>
-
-          {activeOrders.length === 0 ? (
-            <p className="pos-active-orders__empty">
-              No hay órdenes activas registradas para esta mesa.
-            </p>
-          ) : (
-            <>
-              <div className="pos-active-orders__list">
-                {activeOrders.map((order) => (
-                  <article
-                    className="pos-active-order"
-                    key={order.id_orden}
-                  >
-                    <div>
-                      <strong>
-                        {formatShortOrderNumber(order.numero_orden)}
-                      </strong>
-
-                      <span className={getOrderStatusClass(order.estado)}>
-                        {getOrderStatusLabel(order.estado)}
-                      </span>
-                    </div>
-
-                    <span>
-                      {formatCurrency(order.total)}
-                    </span>
-                  </article>
-                ))}
-              </div>
-
-              <div className="pos-active-orders__summary">
-                <span>
-                  Nuevas: {activeSummary.ABIERTA || 0}
-                </span>
-
-                <span>
-                  En preparación: {activeSummary.EN_PREPARACION || 0}
-                </span>
-
-                <span>
-                  Listas: {activeSummary.LISTA || 0}
-                </span>
-
-                <span>
-                  Entregadas: {activeSummary.ENTREGADA || 0}
-                </span>
-              </div>
-            </>
-          )}
-        </section>
+        </div>        
       </aside>
     </section>
   )
