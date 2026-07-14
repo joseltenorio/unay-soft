@@ -711,10 +711,28 @@ async function cerrarCaja({ idApertura, idEstablecimiento, idUsuario, totalDecla
   }
 }
 
+// ── Métodos de pago disponibles (para el select del PayPanel) ──────
+
+async function getMetodosPagoDisponibles(idEstablecimiento) {
+  const { rows } = await pool.query(
+    `
+      select id_metodo_pago, nombre
+      from metodo_pago
+      where id_establecimiento = $1
+        and estado = true
+      order by nombre asc;
+    `,
+    [idEstablecimiento],
+  )
+
+  return rows
+}
+
 module.exports = {
   getCajasDisponibles,
   getAperturaActivaPorUsuario,
   abrirCaja,
+  getMetodosPagoDisponibles,
   getCuentasPorCobrar,
   registrarPago,
   getResumenTurno,

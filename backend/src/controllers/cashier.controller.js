@@ -4,6 +4,7 @@ const {
   getCajasDisponibles,
   getAperturaActivaPorUsuario,
   abrirCaja,
+  getMetodosPagoDisponibles,
   getCuentasPorCobrar,
   registrarPago,
   getResumenTurno,
@@ -213,10 +214,27 @@ async function registrarPagoHandler(req, res) {
   }
 }
 
+async function listMetodosPago(req, res) {
+  try {
+    const metodos = await getMetodosPagoDisponibles(req.user.id_establecimiento)
+
+    return res.status(200).json({
+      message: "Métodos de pago obtenidos correctamente.",
+      total: metodos.length,
+      metodos,
+    })
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Error al obtener métodos de pago.",
+    })
+  }
+}
+
 module.exports = {
   listCajasDisponibles,
   getAperturaActiva,
   openCaja,
+  listMetodosPago,
   listCuentasPorCobrar,
   registrarPagoHandler,
   getResumen,
