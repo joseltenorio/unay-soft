@@ -61,10 +61,6 @@ export default function PosPageTables({
                         : "Cuenta abierta"}
                     </span>
 
-                    <small className="pos-table-time">
-                      {table.time}
-                    </small>
-
                     <small className="pos-table-total">
                       S/ {activeTotal}
                     </small>

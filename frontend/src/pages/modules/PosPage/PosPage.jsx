@@ -218,7 +218,7 @@ function KitchenNoticeCard({
         )}
 
         <footer className="pos-notice-card__actions">
-          {canAttendNotices && (
+          {canAttendNotices && !isReadyOrder && (
             <button
               className="pos-notice-card__button pos-notice-card__button--secondary"
               type="button"
